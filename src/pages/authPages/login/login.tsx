@@ -1,5 +1,5 @@
 import { ImageBackground, ScrollView, StatusBar, SafeAreaView } from "react-native";
-import bg from '../../../assets/bg.png';
+import bg from '@/assets/bg.png';
 
 export function Login() {
     return (
