@@ -1,17 +1,22 @@
-
 import { StatusBar } from "expo-status-bar";
 import "./global.css";
-import { Login } from "./src/pages/authPages/login/login";
 import { GluestackUIProvider } from "@/components/gluestack-ui-provider";
-import { VerifyCode } from "@/pages/authPages/verifyCode/verifyCode";
-import { Forget } from "@/pages/authPages/forget/forget";
-
+import { NavigationContainer } from '@react-navigation/native';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Routes } from "@/routes";
+import { AuthProvider } from "@/context/authContext";
 export default function App() {
   return (
     <>
       <GluestackUIProvider>
-        <StatusBar backgroundColor="#000" style="light"/>
-        <Forget/>
+        <NavigationContainer>
+          <GestureHandlerRootView>
+            <AuthProvider>
+              <StatusBar backgroundColor="#000" style="light" />
+              <Routes />
+            </AuthProvider>
+          </GestureHandlerRootView>
+        </NavigationContainer>
       </GluestackUIProvider>
     </>
   );

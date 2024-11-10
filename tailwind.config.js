@@ -175,6 +175,7 @@ module.exports = {
           error: 'rgb(var(--color-indicator-error)/<alpha-value>)',
         },
         primaryPrimary: "#FF7100",
+        secondarySecondary: "#ffa35e",
         bg: "#121212"
       },
       fontFamily: {
