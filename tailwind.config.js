@@ -176,7 +176,8 @@ module.exports = {
         },
         primaryPrimary: "#FF7100",
         secondarySecondary: "#ffa35e",
-        bg: "#121212"
+        bg: "#121212",
+        forenground: '#303030'
       },
       fontFamily: {
         heading: undefined,

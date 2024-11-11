@@ -10,7 +10,7 @@ export function RecentSales() {
 
     return (
         <>
-            <View className="px-5 mb-4 flex flex-row items-center justify-between">
+            <View className="px-5 mb-7 mt-2 flex flex-row items-center justify-between">
                 <Text className="text-white font-medium ">
                     Vendas Recentes
                 </Text>
@@ -47,6 +47,7 @@ export function RecentSales() {
                     </TouchableOpacity>
                 ))}
             </View>
+            
         </>
     );
 }

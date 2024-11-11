@@ -9,7 +9,7 @@ import {
 import { Notifications } from "./components/notifications";
 import { Menu } from "./components/menu";
 import Icon from 'react-native-vector-icons/Ionicons'
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native";
 import { ForEveryDayLife } from "./components/forEveryDayLife";
 import { RecentSales } from "./components/recentSales";
 

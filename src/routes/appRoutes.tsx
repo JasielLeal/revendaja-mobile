@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { View } from 'react-native';
+import { Financial } from "@/pages/appPages/financial/financial";
 
 export function AppRoutes() {
 
@@ -14,11 +15,11 @@ export function AppRoutes() {
         <Tab.Navigator
             initialRouteName="Home"
             screenOptions={({ route }) => ({
-                
-                tabBarLabelStyle:{
+
+                tabBarLabelStyle: {
                     marginBottom: 10,
                     color: "#fff"
-                }, 
+                },
                 tabBarActiveTintColor: "#FF7100",
                 tabBarStyle: {
                     backgroundColor: '#202020',
@@ -47,7 +48,32 @@ export function AppRoutes() {
                             }}
                         >
                             <Icon
-                                name="home"
+                                name={focused ? "home" : "home-outline"}
+                                size={size}
+                                color={focused ? '#fff' : color}
+                            />
+                        </View>
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Financial"
+                component={Financial}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <View
+                            className={`items-center justify-center ${focused ? 'bg-primaryPrimary rounded-full' : ''}`}
+                            style={{
+                                width: size + 20,
+                                height: size + 20,
+                                margin: focused ? -5 : 0,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Icon
+                                name={focused ? "stats-chart" : "stats-chart-outline"}
                                 size={size}
                                 color={focused ? '#fff' : color}
                             />
