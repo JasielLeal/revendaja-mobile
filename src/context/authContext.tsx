@@ -15,6 +15,7 @@ interface AuthContextData {
     email: string;
     token: string;
     avatar: string
+    userHasStore: boolean
   } | null
   singInFc(data: FieldValues): Promise<void>
   logoutFc(): Promise<void>
@@ -29,6 +30,7 @@ interface User {
   email: string;
   token: string;
   avatar: string
+  userHasStore: boolean
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -52,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const expirationDate = new Date(Number(decodedToken?.exp) * 1000);
           if (expirationDate < currentDate) {
             // Token expirou
-            
+
             setUser(null);
             await AsyncStorage.clear()
           } else {

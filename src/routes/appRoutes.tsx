@@ -5,11 +5,18 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { View } from 'react-native';
 import { Financial } from "@/pages/appPages/financial/financial";
+import { SaleInitiator } from "@/pages/appPages/saleInitiator/saleInitiator";
+import { Store } from "@/pages/appPages/store/store";
+import { Overview } from "@/pages/appPages/store/components/overview";
+import { Stock } from "@/pages/appPages/store/components/stock";
+import { Report } from "@/pages/appPages/store/components/report";
+import { Promotions } from "@/pages/appPages/store/components/promotions";
 
-export function AppRoutes() {
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
+const StorePages = createStackNavigator()
 
-    const Tab = createBottomTabNavigator();
-    const Stack = createStackNavigator<RootStackParamList>();
+function SubAppRoutes() {
 
     return (
         <Tab.Navigator
@@ -81,6 +88,78 @@ export function AppRoutes() {
                     ),
                 }}
             />
+
+            <Tab.Screen
+                name="saleInitiator"
+                component={SaleInitiator}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <View
+                            className={`items-center justify-center ${focused ? 'bg-primaryPrimary rounded-full' : ''}`}
+                            style={{
+                                width: size + 20,
+                                height: size + 20,
+                                margin: focused ? -5 : 0,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Icon
+                                name={focused ? "add" : "add-outline"}
+                                size={size}
+                                color={focused ? '#fff' : color}
+                            />
+                        </View>
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="Store"
+                component={StoreRoutes}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <View
+                            className={`items-center justify-center ${focused ? 'bg-primaryPrimary rounded-full' : ''}`}
+                            style={{
+                                width: size + 20,
+                                height: size + 20,
+                                margin: focused ? -5 : 0,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Icon
+                                name={focused ? "bag-check" : "bag-check-outline"}
+                                size={size}
+                                color={focused ? '#fff' : color}
+                            />
+                        </View>
+                    ),
+                }}
+            />
         </Tab.Navigator>
     );
+}
+
+function StoreRoutes(){
+    return(
+        <StorePages.Navigator>
+            <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }}/>
+            <StorePages.Screen name="Stock" component={Stock} options={{ headerShown: false }}/>
+            <StorePages.Screen name="Report" component={Report} options={{ headerShown: false }}/>
+            <StorePages.Screen name="Promotions" component={Promotions} options={{ headerShown: false }}/>
+        </StorePages.Navigator>
+    )
+}
+
+
+export default function AppRoutes() {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen name="appRoutes" component={SubAppRoutes} options={{ headerShown: false }} />
+        </Stack.Navigator>
+    )
 }

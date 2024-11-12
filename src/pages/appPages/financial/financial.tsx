@@ -15,7 +15,7 @@ export function Financial() {
         <>
             <View className="bg-bg h-screen w-full px-5">
                 <View>
-                    <Text className="text-white font-medium mt-20 text-lg text-center mb-5">Financeiro</Text>
+                    <Text className="text-white font-medium mt-16 text-lg text-center mb-5">Financeiro</Text>
                 </View>
                 <View className="bg-forenground p-2 rounded-full flex flex-row justify-between">
                     <TouchableOpacity
