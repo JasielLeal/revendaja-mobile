@@ -6,11 +6,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { View } from 'react-native';
 import { Financial } from "@/pages/appPages/financial/financial";
 import { SaleInitiator } from "@/pages/appPages/saleInitiator/saleInitiator";
-import { Store } from "@/pages/appPages/store/store";
-import { Overview } from "@/pages/appPages/store/components/overview";
-import { Stock } from "@/pages/appPages/store/components/stock";
-import { Report } from "@/pages/appPages/store/components/report";
-import { Promotions } from "@/pages/appPages/store/components/promotions";
+import { Overview } from "@/pages/appPages/store/components/overview/overview";
+import { Stock } from "@/pages/appPages/store/components/stock/stock";
+import { Report } from "@/pages/appPages/store/components/report/report";
+import { Promotions } from "@/pages/appPages/store/components/promotions/promotions";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();

@@ -1,12 +1,12 @@
 import { Text } from "react-native";
-import { Store } from "../store";
+import { Store } from "../../store";
 
-export function Overview(){
-    return(
+export function Promotions() {
+    return (
         <>
             <Store>
                 <Text>
-                    Overview
+                    Promotions
                 </Text>
             </Store>
         </>
