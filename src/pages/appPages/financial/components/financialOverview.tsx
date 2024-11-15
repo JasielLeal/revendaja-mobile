@@ -1,29 +1,12 @@
 import Select from "@/components/select";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Text, View } from "react-native";
-import { TouchableOpacity } from "react-native";
-import { FlatList } from "react-native";
+import { Text, View, FlatList, Image } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
+import { GetSales } from "../services/getSales";
 
 export function FinancialOverview() {
-
-    const sales = [
-        { id: 1, name: 'Jasiel Viana', type: 'Pix', amount: '+R$ 1.435,39', purchaseDay: 'Segunda-Feira, 1 de Janeiro' },
-        { id: 2, name: 'Maria Silva', type: 'Cartão de Crédito', amount: '+R$ 750,00', purchaseDay: 'Terça-Feira, 3 de Fevereiro' },
-        { id: 3, name: 'Carlos Pereira', type: 'Dinheiro', amount: '+R$ 220,50', purchaseDay: 'Quarta-Feira, 5 de Março' },
-        { id: 4, name: 'Ana Souza', type: 'Pix', amount: '+R$ 520,00', purchaseDay: 'Sábado, 7 de Abril' },
-        { id: 5, name: 'Lucas Mendes', type: 'Boleto', amount: '+R$ 1.150,75', purchaseDay: 'Segunda-Feira, 9 de Maio' },
-        { id: 6, name: 'Fernanda Oliveira', type: 'Cartão de Débito', amount: '+R$ 330,25', purchaseDay: 'Quinta-Feira, 12 de Junho' },
-        { id: 7, name: 'João Santos', type: 'Pix', amount: '+R$ 430,00', purchaseDay: 'Sábado, 14 de Julho' },
-        { id: 8, name: 'Larissa Costa', type: 'Dinheiro', amount: '+R$ 210,00', purchaseDay: 'Segunda-Feira, 16 de Agosto' },
-        { id: 9, name: 'Ricardo Lima', type: 'Cartão de Crédito', amount: '+R$ 1.980,50', purchaseDay: 'Terça-Feira, 18 de Setembro' },
-        { id: 10, name: 'Patrícia Ferreira', type: 'Cartão de Débito', amount: '+R$ 685,00', purchaseDay: 'Quarta-Feira, 20 de Outubro' },
-        { id: 11, name: 'Renato Almeida', type: 'Pix', amount: '+R$ 840,00', purchaseDay: 'Sexta-Feira, 22 de Novembro' },
-        { id: 12, name: 'Carla Silva', type: 'Boleto', amount: '+R$ 600,00', purchaseDay: 'Domingo, 24 de Dezembro' },
-        { id: 13, name: 'Gabriel Rocha', type: 'Dinheiro', amount: '+R$ 150,00', purchaseDay: 'Sábado, 26 de Janeiro' },
-        { id: 14, name: 'Gabriel Rocha', type: 'Dinheiro', amount: '+R$ 150,00', purchaseDay: 'Sábado, 26 de Janeiro' },
-        { id: 15, name: 'Gabriel Rocha', type: 'Dinheiro', amount: '+R$ 150,00', purchaseDay: 'Sábado, 26 de Janeiro' }
-    ];
+    const [month, setMonth] = useState('1'); // Estado inicial do mês selecionado
 
     const options = [
         { label: 'Jan', value: '1' },
@@ -38,10 +21,38 @@ export function FinancialOverview() {
         { label: 'Oct', value: '10' },
         { label: 'Nov', value: '11' },
         { label: 'Dec', value: '12' },
-    ]
+    ];
 
-    const handleMonthSelect = (value: string) => {
-        console.log('Mês selecionado:', value);
+    const pageSize = 10
+    const page = 1
+
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isError,
+        error
+    } = useInfiniteQuery({
+        queryKey: ['MonthlyExtract', month],
+        queryFn: ({ pageParam = 0 }) => {
+            
+            return GetSales({ month, pageSize, page });
+        },
+        getNextPageParam: (lastPage, allPages) => {
+            // Checa se a página atual alcançou o total de páginas disponíveis
+            const currentPage = allPages.length;
+            if (currentPage < lastPage.totalPages) {
+                return currentPage;
+            } else {
+                return undefined; // Para a paginação quando a última página é atingida
+            }
+        },
+        initialPageParam: 0
+    });
+
+    const handleMonthSelect = (value) => {
+        setMonth(value);
     };
 
     return (
@@ -64,45 +75,60 @@ export function FinancialOverview() {
                 </View>
             </View>
 
-
-
-
             <FlatList
-                data={sales}
-                keyExtractor={(item) => String(item.id)}
+                data={data?.pages?.flatMap(page => page.data) || []}
+                keyExtractor={(item) => String(item.day)}
                 style={{ marginBottom: 50, marginTop: 30 }}
-                renderItem={({ item }) => (
-                    <View key={item.id}>
-                        <View className="flex flex-row items-center justify-between border-b border-b-[#ffffff52] pb-1 mb-5 ">
-                            <Text className="text-[8px] capitalize text-white">{item.purchaseDay}</Text>
-                            <Text className="text-[8px] text-white font-semibold">Saldo do dia R$ 220,00</Text>
+                renderItem={({ item: dayData }) => (
+                    <View key={dayData.day}>
+                        <View className="flex flex-row items-center justify-between border-b border-b-[#ffffff52] pb-1 mb-5">
+                            <Text className="text-[8px] capitalize text-white">
+                                {new Date(dayData.day).toLocaleDateString()}
+                            </Text>
+                            <Text className="text-[8px] text-white font-semibold">
+                                Saldo do dia R$ {(dayData.totalValue / 100).toFixed(2)}
+                            </Text>
                         </View>
-                        <TouchableOpacity key={item.id}>
-                            <View className="flex flex-row justify-between items-start mb-4 mt-4">
-                                <View className="flex flex-row gap-4">
-                                    <View className="bg-primaryPrimary p-3 rounded-xl">
-                                        <Icon name="bag-check-outline" color={'#fff'} size={25} />
+
+                        <FlatList
+                            data={dayData.sales}
+                            keyExtractor={(sale) => sale.id}
+                            renderItem={({ item: sale }) => (
+                                <View className="flex flex-row items-start justify-between mb-3 p-2 bg-[#333] rounded-lg">
+                                    <View>
+                                        <Text className="text-white text-sm font-semibold">{sale.customer}</Text>
+                                        <Text className="text-white text-xs">{sale.transactionType}</Text>
+                                        <Text className="text-white text-xs">Total: R$ {(sale.totalPrice / 100).toFixed(2)}</Text>
                                     </View>
                                     <View>
-                                        <Text className="text-white font-medium text-sm">
-                                            {item.name}
-                                        </Text>
-                                        <Text className="text-gray-400 text-sm">
-                                            {item.type}
-                                        </Text>
+                                        {sale.saleItems.map((item) => (
+                                            <View key={item.id} className="flex flex-row items-center mt-2">
+                                                <Image
+                                                    source={{ uri: item.stock.customProduct?.imgUrl || item.stock.product?.imgUrl }}
+                                                    style={{ width: 40, height: 40, marginRight: 10 }}
+                                                />
+                                                <View>
+                                                    <Text className="text-white text-xs">
+                                                        {item.stock.customProduct?.name || item.stock.product?.name}
+                                                    </Text>
+                                                    <Text className="text-white text-xs">
+                                                        Quantidade: {item.quantity}
+                                                    </Text>
+                                                    <Text className="text-white text-xs">
+                                                        Preço: R$ {(item.price / 100).toFixed(2)}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        ))}
                                     </View>
                                 </View>
-                                <View className="flex flex-row items-center gap-4">
-                                    <Text className="text-white text-sm font-medium">
-                                        {item.amount}
-                                    </Text>
-                                    <Icon name="chevron-forward-outline" color={"#fff"} size={20} />
-                                </View>
-                            </View>
-                        </TouchableOpacity>
+                            )}
+                        />
                     </View>
                 )}
+                onEndReached={() => hasNextPage && fetchNextPage()}
+                onEndReachedThreshold={0.1}
             />
         </>
-    )
+    );
 }

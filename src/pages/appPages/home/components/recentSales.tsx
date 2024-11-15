@@ -1,12 +1,25 @@
+import { useQuery } from "@tanstack/react-query";
 import { Text, TouchableOpacity, View } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
+import { GetLatestThreePurchases } from "../services/getLatestThreePurchases";
+import { formatCurrency } from "@/utils/formatCurrency";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/types/navigation";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+interface Sale {
+    customer: string;
+    transactionType: string;
+    totalPrice: string;
+}
 
 export function RecentSales() {
-    const sales = [
-        { name: 'Jasiel Viana', type: 'Pix', amount: '+R$ 1.435,39' },
-        { name: 'Maria Silva', type: 'Cartão de Crédito', amount: '+R$ 750,00' },
-        { name: 'Carlos Pereira', type: 'Dinheiro', amount: '+R$ 220,50' },
-    ];
+    const { data: LatestSales } = useQuery<Sale[]>({
+        queryKey: ["getLatestThreePurchases"],
+        queryFn: GetLatestThreePurchases
+    });
+
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
         <>
@@ -14,14 +27,14 @@ export function RecentSales() {
                 <Text className="text-white font-medium ">
                     Vendas Recentes
                 </Text>
-                <TouchableOpacity >
+                <TouchableOpacity onPress={() => navigate.navigate("Extract")}>
                     <Text className="text-primaryPrimary font-medium">
                         Ver todas
                     </Text>
                 </TouchableOpacity>
             </View>
             <View className="px-5 mt-5">
-                {sales.map((sale, index) => (
+                {LatestSales?.map((sale, index) => (
                     <TouchableOpacity key={index} className="mb-5">
                         <View className="flex flex-row justify-between items-start mb-4">
                             <View className="flex flex-row gap-4">
@@ -30,16 +43,16 @@ export function RecentSales() {
                                 </View>
                                 <View>
                                     <Text className="text-white font-medium text-sm">
-                                        {sale.name}
+                                        {sale.customer}
                                     </Text>
                                     <Text className="text-gray-400 text-sm">
-                                        {sale.type}
+                                        {sale.transactionType}
                                     </Text>
                                 </View>
                             </View>
                             <View className="flex flex-row items-center gap-4">
                                 <Text className="text-white text-sm font-medium">
-                                    {sale.amount}
+                                    R$ {formatCurrency(sale.totalPrice)}
                                 </Text>
                                 <Icon name="chevron-forward-outline" color={"#fff"} size={20} />
                             </View>
@@ -47,7 +60,6 @@ export function RecentSales() {
                     </TouchableOpacity>
                 ))}
             </View>
-            
         </>
     );
 }

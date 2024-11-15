@@ -4,5 +4,6 @@ export type RootStackParamList = {
   Stock: undefined;
   Report: undefined;
   Promotions: undefined;
+  Extract: undefined
   // Adicione outras rotas aqui se necessário
 };

@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { View } from 'react-native';
-import { Financial } from "@/pages/appPages/financial/financial";
+import { Extract} from "@/pages/appPages/financial/extract";
 import { SaleInitiator } from "@/pages/appPages/saleInitiator/saleInitiator";
 import { Overview } from "@/pages/appPages/store/components/overview/overview";
 import { Stock } from "@/pages/appPages/store/components/stock/stock";
@@ -63,8 +63,8 @@ function SubAppRoutes() {
                 }}
             />
             <Tab.Screen
-                name="Financial"
-                component={Financial}
+                name="Extract"
+                component={Extract}
                 options={{
                     headerShown: false,
                     tabBarIcon: ({ color, size, focused }) => (
