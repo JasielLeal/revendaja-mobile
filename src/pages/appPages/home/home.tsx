@@ -1,11 +1,6 @@
 import AuthContext from "@/context/authContext";
 import { useContext, useState } from "react";
 import { Text, View } from "react-native";
-import {
-    Avatar,
-    AvatarFallbackText,
-    AvatarImage,
-} from '@/components/avatar';
 import { Notifications } from "./components/notifications";
 import { Menu } from "./components/menu";
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -29,16 +24,7 @@ export function Home() {
                 <View className="pt-16 px-7 bg-primaryPrimary pb-5 rounded-b-3xl ">
                     <View className="flex flex-row justify-between items-center w-full">
                         <View className="flex flex-row items-center gap-2">
-                            <Avatar size="md">
-                                <AvatarFallbackText>
-
-                                    {user?.name}
-
-                                </AvatarFallbackText>
-                                <AvatarImage
-                                    source={user?.avatar}
-                                />
-                            </Avatar>
+                            
                             <View>
                                 <Text className="text-white font-semibold">
                                     {user?.name} {user?.secondName}

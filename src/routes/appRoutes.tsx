@@ -4,12 +4,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { View } from 'react-native';
-import { Extract} from "@/pages/appPages/financial/extract";
+import { Extract } from "@/pages/appPages/financial/extract";
 import { SaleInitiator } from "@/pages/appPages/saleInitiator/saleInitiator";
 import { Overview } from "@/pages/appPages/store/components/overview/overview";
 import { Stock } from "@/pages/appPages/store/components/stock/stock";
 import { Report } from "@/pages/appPages/store/components/report/report";
 import { Promotions } from "@/pages/appPages/store/components/promotions/promotions";
+import { SaleDetails } from "@/pages/appPages/saleDetails/saleDetails";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -143,13 +144,13 @@ function SubAppRoutes() {
     );
 }
 
-function StoreRoutes(){
-    return(
+function StoreRoutes() {
+    return (
         <StorePages.Navigator>
-            <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }}/>
-            <StorePages.Screen name="Stock" component={Stock} options={{ headerShown: false }}/>
-            <StorePages.Screen name="Report" component={Report} options={{ headerShown: false }}/>
-            <StorePages.Screen name="Promotions" component={Promotions} options={{ headerShown: false }}/>
+            <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }} />
+            <StorePages.Screen name="Stock" component={Stock} options={{ headerShown: false }} />
+            <StorePages.Screen name="Report" component={Report} options={{ headerShown: false }} />
+            <StorePages.Screen name="Promotions" component={Promotions} options={{ headerShown: false }} />
         </StorePages.Navigator>
     )
 }
@@ -159,6 +160,7 @@ export default function AppRoutes() {
     return (
         <Stack.Navigator>
             <Stack.Screen name="appRoutes" component={SubAppRoutes} options={{ headerShown: false }} />
+            <Stack.Screen name="SaleDetails" component={SaleDetails} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }

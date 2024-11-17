@@ -1,8 +1,7 @@
 import Select from "@/components/select";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Text, View, FlatList, Image } from "react-native";
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Text, View, FlatList } from "react-native";
 import { GetSales } from "../services/getSales";
 
 export function FinancialOverview() {
@@ -103,10 +102,7 @@ export function FinancialOverview() {
                                     <View>
                                         {sale.saleItems.map((item) => (
                                             <View key={item.id} className="flex flex-row items-center mt-2">
-                                                <Image
-                                                    source={{ uri: item.stock.customProduct?.imgUrl || item.stock.product?.imgUrl }}
-                                                    style={{ width: 40, height: 40, marginRight: 10 }}
-                                                />
+                                                
                                                 <View>
                                                     <Text className="text-white text-xs">
                                                         {item.stock.customProduct?.name || item.stock.product?.name}

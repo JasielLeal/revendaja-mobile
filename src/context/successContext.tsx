@@ -28,7 +28,7 @@ export const SuccessProvider = ({ children }: { children: ReactNode }) => {
                 <View className="flex-1 justify-center items-center bg-bg bg-opacity-50">
                     <View className="p-5 rounded-lg">
                         <LottieView
-                            source={require('@/assets/Animation - 1721303251834 (2).json')}
+                            source={require('@/assets/AnimationSuccess.json')}
                             autoPlay
                             loop={false}
                             style={{ width: 200, height: 200 }}

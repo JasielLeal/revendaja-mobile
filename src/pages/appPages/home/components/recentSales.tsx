@@ -21,6 +21,10 @@ export function RecentSales() {
 
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
+    const handlePress = (recent: Sale) => {
+        navigate.navigate('SaleDetails', { sale: recent });
+    }
+
     return (
         <>
             <View className="px-5 mb-7 mt-2 flex flex-row items-center justify-between">
@@ -35,7 +39,7 @@ export function RecentSales() {
             </View>
             <View className="px-5 mt-5">
                 {LatestSales?.map((sale, index) => (
-                    <TouchableOpacity key={index} className="mb-5">
+                    <TouchableOpacity key={index} className="mb-5" onPress={() => handlePress(sale)}>
                         <View className="flex flex-row justify-between items-start mb-4">
                             <View className="flex flex-row gap-4">
                                 <View className="bg-primaryPrimary p-3 rounded-xl">

@@ -32,7 +32,6 @@ export function Login() {
                 className="flex-1"
                 resizeMode="cover"
             >
-
                 <ScrollView>
                     <View className="w-full flex items-center justify-center px-5 h-screen">
                         <Image source={logo} alt="logo do site" className="w-[285px] h-[55px]" />
