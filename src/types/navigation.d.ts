@@ -5,6 +5,7 @@ export type RootStackParamList = {
   Report: undefined;
   Promotions: undefined;
   Extract: undefined;
-  SaleDetails: undefined;
+  SaleDetails: { sale: Sale };
+  tickets: undefined;
   // Adicione outras rotas aqui se necessário
 };

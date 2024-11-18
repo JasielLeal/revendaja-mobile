@@ -1,70 +1,98 @@
 import Select from "@/components/select";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Text, View, FlatList } from "react-native";
 import { GetSales } from "../services/getSales";
+import Icon from 'react-native-vector-icons/Ionicons';
+import { formatCurrency } from "@/utils/formatCurrency";
+import SaleItem from "./saleItem";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { ActivityIndicator } from "react-native";
+import { RootStackParamList } from "@/types/navigation";
+import { formatDate } from "@/utils/formatDate";
 
 export function FinancialOverview() {
-    const [month, setMonth] = useState('1'); // Estado inicial do mês selecionado
+    const currentMonth = (new Date().getMonth() + 1).toString(); // Obtém o mês atual e converte para string
+
+    const [month, setMonth] = useState(currentMonth); // Define o mês atual como estado inicial // Estado inicial do mês selecionado
 
     const options = [
-        { label: 'Jan', value: '1' },
-        { label: 'Feb', value: '2' },
-        { label: 'Mar', value: '3' },
-        { label: 'Apr', value: '4' },
-        { label: 'May', value: '5' },
-        { label: 'Jun', value: '6' },
-        { label: 'Jul', value: '7' },
-        { label: 'Aug', value: '8' },
-        { label: 'Sep', value: '9' },
-        { label: 'Oct', value: '10' },
-        { label: 'Nov', value: '11' },
-        { label: 'Dec', value: '12' },
+        { label: 'Janeiro', value: '01' },
+        { label: 'Fevereiro', value: '02' },
+        { label: 'Março', value: '03' },
+        { label: 'Abril', value: '04' },
+        { label: 'Maio', value: '05' },
+        { label: 'Junho', value: '06' },
+        { label: 'Julho', value: '07' },
+        { label: 'Agosto', value: '08' },
+        { label: 'Setembro', value: '09' },
+        { label: 'Outubro', value: '10' },
+        { label: 'Novembro', value: '11' },
+        { label: 'Dezembro', value: '12' },
     ];
 
     const pageSize = 10
-    const page = 1
 
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        isError,
-        error
-    } = useInfiniteQuery({
-        queryKey: ['MonthlyExtract', month],
+    const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
+        queryKey: ["GetSales", month],
         queryFn: ({ pageParam = 0 }) => {
-            
-            return GetSales({ month, pageSize, page });
+            return GetSales({ month, pageSize, page: pageParam + 1 })
         },
         getNextPageParam: (lastPage, allPages) => {
-            // Checa se a página atual alcançou o total de páginas disponíveis
             const currentPage = allPages.length;
-            if (currentPage < lastPage.totalPages) {
+
+            if (currentPage < lastPage.data.totalPages) {
+
                 return currentPage;
             } else {
-                return undefined; // Para a paginação quando a última página é atingida
+                return undefined; // Para a paginação quando a última página for atingida
             }
         },
         initialPageParam: 0
-    });
+    })
 
-    const handleMonthSelect = (value) => {
+    const handleMonthSelect = (value: string) => {
         setMonth(value);
+    }
+
+    const transformedData = data?.pages.flatMap(page => page.data.sales).reduce((acc: any, current) => {
+        const existingDay = acc.find((item: any) => item.day === current.day);
+        if (existingDay) {
+            existingDay.sales.push(...current.sales); // Adiciona vendas ao dia existente
+        } else {
+            acc.push({ ...current, sales: [...current.sales] }); // Adiciona um novo dia
+        }
+        return acc;
+    }, []);
+
+    const addUniqueIdsToSales = (data: any) => {
+        let itemCounter = 0; // Inicializa um contador para IDs
+
+        return data.map((day: any) => ({
+            ...day,
+            sales: day.sales.map((sale: any) => {
+                return {
+                    ...sale,
+                    uniqueId: `${sale.id}-${itemCounter++}` // Cria um ID único combinando o ID da venda e o contador
+                };
+            })
+        }));
     };
+
+    const uniqueSalesData = transformedData ? addUniqueIdsToSales(transformedData) : [];
+    const navigate = useNavigation<NavigationProp<RootStackParamList>>();
+
+    function handlePress(sale: any) {
+        navigate.navigate('SaleDetails', { sale })
+    }
 
     return (
         <>
             <View className="bg-forenground p-4 rounded-xl mt-5">
                 <View className="flex flex-row items-center justify-between">
                     <View>
-                        <Text className="text-white text-sm">
-                            Saldo
-                        </Text>
-                        <Text className="text-white font-semibold text-xl">
-                            R$ 12.000,00
-                        </Text>
+                        <Text className="text-white text-sm">Saldo</Text>
+                        <Text className="text-white font-semibold text-xl">R$ 12.000,00</Text>
                     </View>
                     <Select
                         label="Selecione o mês"
@@ -75,56 +103,44 @@ export function FinancialOverview() {
             </View>
 
             <FlatList
-                data={data?.pages?.flatMap(page => page.data) || []}
-                keyExtractor={(item) => String(item.day)}
-                style={{ marginBottom: 50, marginTop: 30 }}
-                renderItem={({ item: dayData }) => (
-                    <View key={dayData.day}>
-                        <View className="flex flex-row items-center justify-between border-b border-b-[#ffffff52] pb-1 mb-5">
-                            <Text className="text-[8px] capitalize text-white">
-                                {new Date(dayData.day).toLocaleDateString()}
-                            </Text>
-                            <Text className="text-[8px] text-white font-semibold">
-                                Saldo do dia R$ {(dayData.totalValue / 100).toFixed(2)}
-                            </Text>
+                data={uniqueSalesData}
+                keyExtractor={(item) => item.id}
+                style={{ marginBottom: 80 }}
+                renderItem={({ item }) => (
+                    <>
+                        <View className="flex flex-row items-center justify-between border-b border-b-[#ffffff38] pb-1 mt-5">
+                            <Text className=" text-sm capitalize text-white">{formatDate(item.day)}</Text>
+                            <Text className=" text-sm text-white font-semibold">Saldo do dia {formatCurrency(String(item.totalValue))}</Text>
                         </View>
-
-                        <FlatList
-                            data={dayData.sales}
-                            keyExtractor={(sale) => sale.id}
-                            renderItem={({ item: sale }) => (
-                                <View className="flex flex-row items-start justify-between mb-3 p-2 bg-[#333] rounded-lg">
-                                    <View>
-                                        <Text className="text-white text-sm font-semibold">{sale.customer}</Text>
-                                        <Text className="text-white text-xs">{sale.transactionType}</Text>
-                                        <Text className="text-white text-xs">Total: R$ {(sale.totalPrice / 100).toFixed(2)}</Text>
-                                    </View>
-                                    <View>
-                                        {sale.saleItems.map((item) => (
-                                            <View key={item.id} className="flex flex-row items-center mt-2">
-                                                
-                                                <View>
-                                                    <Text className="text-white text-xs">
-                                                        {item.stock.customProduct?.name || item.stock.product?.name}
-                                                    </Text>
-                                                    <Text className="text-white text-xs">
-                                                        Quantidade: {item.quantity}
-                                                    </Text>
-                                                    <Text className="text-white text-xs">
-                                                        Preço: R$ {(item.price / 100).toFixed(2)}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        ))}
-                                    </View>
-                                </View>
-                            )}
-                        />
-                    </View>
+                        <View className="mt-5">
+                            {item.sales.map((sale: any) => {
+                                return (
+                                    <SaleItem
+                                        key={sale.uniqueId} // Use o novo ID único
+                                        sale={sale}
+                                        onPress={() => handlePress(sale)}
+                                    />
+                                );
+                            })}
+                        </View>
+                    </>
                 )}
-                onEndReached={() => hasNextPage && fetchNextPage()}
-                onEndReachedThreshold={0.1}
+                onEndReached={() => {
+                    if (hasNextPage) {
+                        fetchNextPage();
+                    }
+                }}
+                onEndReachedThreshold={1}
+                ListFooterComponent={() => {
+                    if (isFetchingNextPage) {
+                        return <ActivityIndicator size="small" color={"#FF7100"} />
+                    } else {
+                        return null;
+                    }
+                }}
+
             />
+
         </>
     );
 }

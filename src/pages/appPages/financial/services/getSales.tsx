@@ -1,8 +1,21 @@
 import { backend } from "@/api/backend"
 
-export async function GetSales({month, pageSize, page}) {
+export interface GetSalesRequest {
+    month: string;
+    pageSize: number;
+    page: number;
+}
 
-    const response = await backend.get(`/sale/month/11`)
+
+
+export async function GetSales({ month, pageSize, page }: GetSalesRequest) {
+    console.log(month)
+    const response = await backend.get(`/sale/month/${month}`, {
+        params: {
+            page,
+            pageSize,
+        }
+    })
 
     return response
 }
