@@ -5,7 +5,7 @@ import { Dimensions, Modal } from "react-native";
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 
 type ScannerProps = {
-    onScan: (data: FieldValues) => void;
+    onScan: (data: string) => void;
 };
 
 export function ScannerScreen({ onScan }: ScannerProps) {

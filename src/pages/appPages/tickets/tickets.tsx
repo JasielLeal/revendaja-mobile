@@ -1,12 +1,18 @@
 import { Text, View } from "react-native";
 import { ScannerScreen } from "./components/ScannerScreen";
-import { FieldValues } from "react-hook-form";
+import { ProcessBankSlip } from "./components/processBankSlip";
 
 
 export function Tickets() {
 
-    const handleScan = async (code: FieldValues) => {
-        console.log(code)
+    const handleScan = async (code: string) => {
+        try {
+            const { vencimento, valor } = ProcessBankSlip(code);
+            console.log(`Data de vencimento: ${vencimento}`);
+            console.log(`Valor: ${valor}`);
+        } catch (error) {
+            console.error("Erro ao processar o boleto");
+        }
     };
 
     return (

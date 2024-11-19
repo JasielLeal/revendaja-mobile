@@ -1,6 +1,5 @@
 import { StatusBar } from "expo-status-bar";
 import "./global.css";
-import { GluestackUIProvider } from "@/components/gluestack-ui-provider";
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Routes } from "@/routes";
@@ -16,20 +15,18 @@ export default function App() {
   return (
     <>
       <GestureHandlerRootView>
-        <GluestackUIProvider>
-          <QueryClientProvider client={client}>
-            <NavigationContainer>
-              <SuccessProvider>
-                <AuthProvider>
-                  <StatusBar backgroundColor="#000" style="light" />
+        <QueryClientProvider client={client}>
+          <NavigationContainer>
+            <SuccessProvider>
+              <AuthProvider>
+                <StatusBar backgroundColor="#000" style="light" />
 
-                  <Routes />
+                <Routes />
 
-                </AuthProvider>
-              </SuccessProvider>
-            </NavigationContainer>
-          </QueryClientProvider>
-        </GluestackUIProvider>
+              </AuthProvider>
+            </SuccessProvider>
+          </NavigationContainer>
+        </QueryClientProvider>
       </GestureHandlerRootView>
     </>
   );

@@ -4,13 +4,6 @@ import { FinancialOverview } from "./components/financialOverview";
 import { Input } from "@/components/input";
 
 export function Extract() {
-    // Estado para controlar o botão selecionado
-    const [selected, setSelected] = useState("diario");
-
-    // Função para definir o estado do botão selecionado
-    const handleSelect = (option: string) => {
-        setSelected(option);
-    };
 
     return (
         <>
