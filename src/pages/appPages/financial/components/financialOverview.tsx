@@ -10,6 +10,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native";
 import { RootStackParamList } from "@/types/navigation";
 import { formatDate } from "@/utils/formatDate";
+import { MonthAmount } from "./monthAmount";
 
 export function FinancialOverview() {
     const currentMonth = (new Date().getMonth() + 1).toString(); // Obtém o mês atual e converte para string
@@ -92,7 +93,7 @@ export function FinancialOverview() {
                 <View className="flex flex-row items-center justify-between">
                     <View>
                         <Text className="text-white text-sm">Saldo</Text>
-                        <Text className="text-white font-semibold text-xl">R$ 12.000,00</Text>
+                        <MonthAmount month={month}/>
                     </View>
                     <Select
                         label="Selecione o mês"

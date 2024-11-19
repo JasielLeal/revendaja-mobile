@@ -9,7 +9,6 @@ export interface GetSalesRequest {
 
 
 export async function GetSales({ month, pageSize, page }: GetSalesRequest) {
-    console.log(month)
     const response = await backend.get(`/sale/month/${month}`, {
         params: {
             page,
