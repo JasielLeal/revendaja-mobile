@@ -1,15 +1,12 @@
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
-import { FieldValues } from "react-hook-form";
-import { Dimensions, Modal } from "react-native";
-import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type ScannerProps = {
     onScan: (data: string) => void;
 };
 
 export function ScannerScreen({ onScan }: ScannerProps) {
-
     const [permission, requestPermission] = useCameraPermissions();
     const [isCameraVisible, setIsCameraVisible] = useState(false);
     const [scanned, setScanned] = useState(false);
@@ -20,19 +17,18 @@ export function ScannerScreen({ onScan }: ScannerProps) {
 
     if (!permission.granted) {
         return (
-            <View>
-                <TouchableOpacity className="bg-blue-300 p-3 rounded-xl" onPress={requestPermission}>
-                    <Text className="text-white text-center font-semibold">
-                        Conceder Permissão
-                    </Text>
+            <View style={styles.permissionContainer}>
+                <TouchableOpacity
+                    style={styles.permissionButton}
+                    onPress={requestPermission}
+                >
+                    <Text style={styles.permissionText}>Conceder Permissão</Text>
                 </TouchableOpacity>
             </View>
         );
     }
 
-    const { width, height } = Dimensions.get('window');
-
-    const handleBarCodeScanned = ({ type, data }: FieldValues) => {
+    const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
         setScanned(true);
         setIsCameraVisible(false);
         onScan(data);
@@ -51,44 +47,108 @@ export function ScannerScreen({ onScan }: ScannerProps) {
                     <View style={styles.cameraContainer}>
                         <CameraView
                             onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-
-                            style={{ width, height }}
-
+                            style={StyleSheet.absoluteFillObject}
                         >
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setIsCameraVisible(false)}>
+                            {/* Texto auxiliar e linha central */}
+                            <View style={styles.overlay}>
+                                <Text style={styles.topText}>
+                                    Alinhe o código de barras na linha central
+                                </Text>
+
+                                {/* Linha vermelha no centro */}
+                                <View style={styles.redLine} />
+
+                                <Text style={styles.bottomText}>
+                                    A leitura será feita automaticamente
+                                </Text>
+                            </View>
+
+                            {/* Botão para fechar a câmera */}
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setIsCameraVisible(false)}
+                            >
                                 <Text style={styles.closeButtonText}>Fechar</Text>
                             </TouchableOpacity>
                         </CameraView>
                     </View>
                 </Modal>
             ) : (
-                <View className="flex flex-row items-center">
-                    <TouchableOpacity onPress={() => setIsCameraVisible(true)} className="bg-[#e0e0e0] dark:bg-white p-3 rounded-xl w-[270px]">
-                        <Text className="font-semibold text-background text-center w-full">Scanear Produto</Text>
+                <View style={styles.scanButtonContainer}>
+                    <TouchableOpacity onPress={() => setIsCameraVisible(true)}>
+                        <Text style={styles.scanButtonText}>Scanear Código de Barras</Text>
                     </TouchableOpacity>
                 </View>
             )}
         </>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
+    permissionContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    permissionButton: {
+        backgroundColor: "#4CAF50",
+        padding: 12,
+        borderRadius: 10,
+    },
+    permissionText: {
+        color: "#fff",
+        fontSize: 16,
+        textAlign: "center",
+    },
     cameraContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#000',
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#000",
+    },
+    overlay: {
+        flex: 1,
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 100,
+        backgroundColor: "rgba(0, 0, 0, 0.7)", // Fundo preto translúcido
+    },
+    redLine: {
+        width: "90%",
+        height: 2,
+        backgroundColor: "#FF0000",
+    },
+    topText: {
+        color: "#fff",
+        fontSize: 16,
+        textAlign: "center",
+        marginBottom: 10,
+    },
+    bottomText: {
+        color: "#fff",
+        fontSize: 14,
+        textAlign: "center",
+        marginTop: 10,
     },
     closeButton: {
-        position: 'absolute',
+        position: "absolute",
         top: 50,
         right: 20,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         padding: 10,
         borderRadius: 5,
     },
     closeButtonText: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 18,
+    },
+    scanButtonContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    scanButtonText: {
+        fontSize: 14,
+        color: "#FF7100",
+        fontWeight: "bold",
     },
 });

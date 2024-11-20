@@ -8,19 +8,14 @@ import { FlatList } from "react-native-gesture-handler";
 import { formatDate } from "@/utils/formatDate";
 import { Button } from "@/components/buttton";
 import { formatCurrency } from "@/utils/formatCurrency";
-
+import Icon from 'react-native-vector-icons/Ionicons'
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/navigation";
 
 export function Tickets() {
 
-    const handleScan = async (code: string) => {
-        try {
-            const { vencimento, valor } = ProcessBankSlip(code);
-            console.log(`Data de vencimento: ${vencimento}`);
-            console.log(`Valor: ${valor}`);
-        } catch (error) {
-            console.error("Erro ao processar o boleto");
-        }
-    };
+    
 
     const [activeButton, setActiveButton] = useState<string>("Todos");
 
@@ -35,7 +30,6 @@ export function Tickets() {
         },
         getNextPageParam: (lastPage, allPages) => {
             const currentPage = allPages.length;
-            console.log(lastPage.data?.totalPages)
 
             if (currentPage < lastPage.data?.totalPages) {
 
@@ -47,13 +41,21 @@ export function Tickets() {
         initialPageParam: 0
     })
 
-    const allBankSlips = data?.pages.flatMap((page) => page.data.bankSlips) || [];
+    const allBankSlips = data?.pages.flatMap((page) => page.data.bankSlips) || []
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
         <View className="bg-bg h-screen w-full px-5">
             <View>
-                <Text className="text-white font-medium mt-16 text-lg text-center mb-5">Boletos</Text>
-                
+                <View className="flex flex-row items-center mt-16 mb-5 justify-between">
+                    <TouchableOpacity onPress={()=> navigate.goBack()}>
+                        <Icon name="chevron-back" color={"#fff"} size={20} />
+                    </TouchableOpacity>
+                    <Text className="text-white font-medium text-lg text-center ">Boletos</Text>
+                    <TouchableOpacity onPress={()=> navigate.navigate('AddBankSlip')}>
+                        <Icon name="add" color={"#fff"} size={20} />
+                    </TouchableOpacity>
+                </View>
                 <View style={{ flexDirection: "row", justifyContent: "space-around", marginVertical: 10 }}>
                     {buttons.map((button) => (
                         <TouchableOpacity

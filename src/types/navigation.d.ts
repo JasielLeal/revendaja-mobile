@@ -7,5 +7,7 @@ export type RootStackParamList = {
   Extract: undefined;
   SaleDetails: { sale: Sale };
   tickets: undefined;
+  Home: undefined;
+  AddBankSlip: undefined;
   // Adicione outras rotas aqui se necessário
 };
