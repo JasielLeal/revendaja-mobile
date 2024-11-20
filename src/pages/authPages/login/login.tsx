@@ -1,6 +1,6 @@
 import { ImageBackground, View, Image, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import bg from '@/assets/bg.png';
-import logo from "@/assets/LogoWhite - Completa.png"
+import logo from "@/assets/logo.png"
 import AuthContext from "@/context/authContext";
 import { useContext } from "react";
 import { Controller, FieldValues, useForm } from "react-hook-form";
