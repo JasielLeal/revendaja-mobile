@@ -7,6 +7,9 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { TouchableOpacity } from "react-native";
 import { ForEveryDayLife } from "./components/forEveryDayLife";
 import { RecentSales } from "./components/recentSales";
+import { useQuery } from "@tanstack/react-query";
+import { CalculateMonthlyBalance } from "./services/calculateMonthlyBalance";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 export function Home() {
 
@@ -18,13 +21,22 @@ export function Home() {
         setHiddenMoney(!hiddenMoney)
     }
 
+    const month = (new Date().getMonth() + 1).toString().padStart(2, '0');
+
+    const { data: monthAmount } = useQuery({
+        queryKey: ["CalculateMonthlyBalance", month],
+        queryFn: () => CalculateMonthlyBalance(month)
+    })
+
+    console.log(monthAmount)
+
     return (
         <>
             <View className="bg-[#121212] h-screen w-full">
                 <View className="pt-16 px-7 bg-primaryPrimary pb-5 rounded-b-3xl ">
                     <View className="flex flex-row justify-between items-center w-full">
                         <View className="flex flex-row items-center gap-2">
-                            
+
                             <View>
                                 <Text className="text-white font-semibold">
                                     {user?.name} {user?.secondName}
@@ -47,7 +59,7 @@ export function Home() {
                             hiddenMoney ?
                                 <View className="flex flex-row items-center justify-between w-full">
                                     <Text className="text-white font-semibold text-lg">
-                                        R$ 0,00
+                                        R$ {formatCurrency(String(monthAmount))}
                                     </Text>
                                     <TouchableOpacity onPress={toggleHiddenMoney}>
                                         <Icon name="eye" size={25} color={'#fff'} />
