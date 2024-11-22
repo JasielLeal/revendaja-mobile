@@ -15,8 +15,6 @@ import { RootStackParamList } from "@/types/navigation";
 
 export function Tickets() {
 
-    
-
     const [activeButton, setActiveButton] = useState<string>("Todos");
 
     const buttons = ["Todos", "A vencer", "Vencidos"];
@@ -44,15 +42,19 @@ export function Tickets() {
     const allBankSlips = data?.pages.flatMap((page) => page.data.bankSlips) || []
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
+    function handlePress(ticket: any) {
+        navigate.navigate('TicketsDetails', { ticket })
+    }
+
     return (
         <View className="bg-bg h-screen w-full px-5">
             <View>
                 <View className="flex flex-row items-center mt-16 mb-5 justify-between">
-                    <TouchableOpacity onPress={()=> navigate.goBack()}>
+                    <TouchableOpacity onPress={() => navigate.navigate("appRoutes")}>
                         <Icon name="chevron-back" color={"#fff"} size={20} />
                     </TouchableOpacity>
                     <Text className="text-white font-medium text-lg text-center ">Boletos</Text>
-                    <TouchableOpacity onPress={()=> navigate.navigate('AddBankSlip')}>
+                    <TouchableOpacity onPress={() => navigate.navigate('AddBankSlip')}>
                         <Icon name="add" color={"#fff"} size={20} />
                     </TouchableOpacity>
                 </View>
@@ -87,7 +89,7 @@ export function Tickets() {
                     keyExtractor={(item) => item.id}
                     style={{ marginBottom: 180 }}
                     renderItem={({ item }) => (
-                        <>
+                        <TouchableOpacity onPress={() => handlePress(item)}>
                             <View className="bg-forenground p-3 mt-5 rounded-xl">
                                 <View className="flex flex-row">
                                     <Text className="text-white bg-primaryPrimary p-2 rounded-xl">
@@ -105,7 +107,7 @@ export function Tickets() {
                                         {formatDate(item.dueDate)}
                                     </Text>
                                 </View>
-                                <View className="flex flex-row items-center justify-between mt-3">
+                                <View className="flex flex-row items-center justify-between mt-4">
                                     <Text className="text-white font-semibold">
                                         Valor
                                     </Text>
@@ -113,11 +115,16 @@ export function Tickets() {
                                         R$ {formatCurrency(String(item?.value))}
                                     </Text>
                                 </View>
-                                <View className="mt-5">
-                                    <Button name="Copiar codigo de barras" />
+                                <View className="flex flex-row items-center justify-between mt-3">
+                                    <Text className="text-white font-semibold">
+                                        Status
+                                    </Text>
+                                    <Text className="bg-green-500 p-2 text-bg rounded-full">
+                                        A vencer
+                                    </Text>
                                 </View>
                             </View>
-                        </>
+                        </TouchableOpacity>
                     )}
                     onEndReached={() => {
                         if (hasNextPage) {
