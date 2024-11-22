@@ -28,8 +28,6 @@ export function Home() {
         queryFn: () => CalculateMonthlyBalance(month)
     })
 
-    console.log(monthAmount)
-
     return (
         <>
             <View className="bg-[#121212] h-screen w-full">

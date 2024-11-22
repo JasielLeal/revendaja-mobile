@@ -67,13 +67,11 @@ export function AddBankSlip() {
 
     async function onSub(data: FieldValues) {
         const { barcode, companyName, dueDate, value } = data;
-        console.log(data)
+
         // Convertendo a data de vencimento para o formato ISO completo (YYYY-MM-DD HH:mm:ss.SSSZ)
         const [day, month, year] = dueDate.split('/');
         const dueDateObj = new Date(`${year}-${month}-${day}T00:00:00Z`);
         const isoDueDate = dueDateObj.toISOString().replace('T', ' ').split('.')[0] + '.' + dueDateObj.getMilliseconds().toString().padStart(3, '0') + 'Z';
-
-        console.log(isoDueDate)
 
         // Convertendo o valor para centavos (removendo "R$" e a vírgula)
         const numericValue = Math.round(

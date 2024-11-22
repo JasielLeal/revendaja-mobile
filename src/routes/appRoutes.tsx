@@ -14,6 +14,7 @@ import { SaleDetails } from "@/pages/appPages/saleDetails/saleDetails";
 import { Tickets } from "@/pages/appPages/tickets/tickets";
 import { AddBankSlip } from "@/pages/appPages/tickets/components/addBankSlip";
 import { TicketsDetails } from "@/pages/appPages/tickets/components/ticketsDetails";
+import { Profile } from "@/pages/appPages/profile/profile";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -143,6 +144,32 @@ function SubAppRoutes() {
                     ),
                 }}
             />
+
+            <Tab.Screen
+                name="Profile"
+                component={Profile}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, size, focused }) => (
+                        <View
+                            className={`items-center justify-center ${focused ? 'bg-primaryPrimary rounded-full' : ''}`}
+                            style={{
+                                width: size + 20,
+                                height: size + 20,
+                                margin: focused ? -5 : 0,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Icon
+                                name={focused ? "shield-checkmark" : "shield-checkmark-outline"}
+                                size={size}
+                                color={focused ? '#fff' : color}
+                            />
+                        </View>
+                    ),
+                }}
+            />
         </Tab.Navigator>
     );
 }
@@ -166,7 +193,7 @@ export default function AppRoutes() {
             <Stack.Screen name="SaleDetails" component={SaleDetails} options={{ headerShown: false }} />
             <Stack.Screen name="tickets" component={Tickets} options={{ headerShown: false }} />
             <Stack.Screen name="AddBankSlip" component={AddBankSlip} options={{ headerShown: false }} />
-            <Stack.Screen name="TicketsDetails" component={TicketsDetails} options={{ headerShown: false }}/>
+            <Stack.Screen name="TicketsDetails" component={TicketsDetails} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }

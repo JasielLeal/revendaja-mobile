@@ -3,7 +3,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Text, View, FlatList } from "react-native";
 import { GetSales } from "../services/getSales";
-import Icon from 'react-native-vector-icons/Ionicons';
+
 import { formatCurrency } from "@/utils/formatCurrency";
 import SaleItem from "./saleItem";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
