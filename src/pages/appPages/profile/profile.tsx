@@ -1,4 +1,3 @@
-import { Button } from "@/components/buttton";
 import { Separator } from "@/components/separator";
 import AuthContext from "@/context/authContext";
 import { useContext } from "react";

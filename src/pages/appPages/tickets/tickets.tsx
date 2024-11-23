@@ -1,12 +1,9 @@
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
-import { ScannerScreen } from "./components/ScannerScreen";
-import { ProcessBankSlip } from "./components/processBankSlip";
 import { useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListAllStoreByStore } from "./services/ListAllStoreByStore";
 import { FlatList } from "react-native-gesture-handler";
 import { formatDate } from "@/utils/formatDate";
-import { Button } from "@/components/buttton";
 import { formatCurrency } from "@/utils/formatCurrency";
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useNavigation } from "@react-navigation/native";
