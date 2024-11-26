@@ -7,12 +7,13 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { StockItem } from "./components/stockItem";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { GetStock } from "./services/GetStock";
+import { Filter } from "./components/filter";
 
 export function Stock() {
     const pageSize = 10;
     const [searchTerm, setSearchTerm] = useState(""); // Valor digitado no input
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(""); // Valor com debounce
-
+    const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
     // Configurando debounce usando setTimeout
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -26,12 +27,13 @@ export function Stock() {
 
     // Query utilizando o termo debounced
     const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-        queryKey: ["GetStock", debouncedSearchTerm],
+        queryKey: ["GetStock", debouncedSearchTerm, selectedFilter],
         queryFn: ({ pageParam = 0 }) => {
             return GetStock({
                 pageSize,
                 page: pageParam + 1,
                 searchTerm: debouncedSearchTerm,
+                filter: selectedFilter
             });
         },
         staleTime: 1000 * 60 * 5,
@@ -49,6 +51,13 @@ export function Stock() {
 
     const allStock = data?.pages.flatMap((page) => page.data.items) || [];
 
+    const [filter, setFilter] = useState(false)
+
+
+    const handleFilterSelect = (option: string) => {
+        setSelectedFilter(option);
+    };
+
     return (
         <Store>
             <View className="px-5">
@@ -65,7 +74,7 @@ export function Stock() {
                             onChangeText={(text) => setSearchTerm(text)}
                         />
                     </View>
-                    <TouchableOpacity className="bg-forenground p-2 rounded-xl">
+                    <TouchableOpacity className="bg-forenground p-2 rounded-xl" onPress={() => setFilter(!filter)}>
                         <Icon name="filter" color={"#fff"} size={25} />
                     </TouchableOpacity>
                 </View>
@@ -109,6 +118,7 @@ export function Stock() {
                         />
                 }
             </View>
+            <Filter open={filter} onSelectOption={handleFilterSelect} />
         </Store>
     );
 }
