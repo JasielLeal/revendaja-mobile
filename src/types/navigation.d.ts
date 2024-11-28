@@ -10,5 +10,6 @@ export type RootStackParamList = {
   Home: undefined;
   AddBankSlip: undefined;
   TicketsDetails: { ticket: Ticket };
+ 
   // Adicione outras rotas aqui se necessário
 };

@@ -99,6 +99,7 @@ export function Stock() {
                                         brand={productData?.brand || "Marca Desconhecida"}
                                         quantity={item.quantity || 0}
                                         imageUrl={productData?.imgUrl || undefined}
+                                        barcode={productData.barcode}
                                     />
                                 );
                             }}

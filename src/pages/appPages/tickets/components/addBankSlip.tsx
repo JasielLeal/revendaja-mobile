@@ -1,7 +1,6 @@
 import { RootStackParamList } from '@/types/navigation'
-import { NavigationProp, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { useState } from 'react'
 import { Text } from 'react-native'
 import { TouchableOpacity, View } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'

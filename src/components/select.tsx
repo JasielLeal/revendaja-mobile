@@ -38,10 +38,10 @@ export default function Select({ options, label, onSelect }: CustomSelectProps) 
       {isModalVisible && (
         <Modal transparent={true} animationType="fade" visible={isModalVisible} onRequestClose={toggleModal}>
           <TouchableOpacity
-            className="flex-1 justify-center items-center bg-black opacity-50 w-[150px]"
+            className="flex-1 justify-center items-center bg-black opacity-50 "
             onPress={toggleModal}
           />
-          <View className="absolute top-20 bg-white border border-gray-300 rounded-lg w-80">
+          <View className="absolute top-60 right-10 bg-forenground rounded-lg w-80">
             <FlatList
               data={options}
               keyExtractor={(item) => item.value}
@@ -50,7 +50,7 @@ export default function Select({ options, label, onSelect }: CustomSelectProps) 
                   className="p-4"
                   onPress={() => handleSelect(item.value, item.label)}  // Passa o valor numérico e a label
                 >
-                  <Text className="text-gray-700">{item.label}</Text>
+                  <Text className="text-textForenground">{item.label}</Text>
                 </TouchableOpacity>
               )}
             />

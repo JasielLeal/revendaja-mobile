@@ -6,9 +6,10 @@ interface StockItemProps {
     brand: string;
     quantity: number;
     imageUrl?: string;
+    barcode: string
 }
 
-export function StockItem({ name, price, brand, quantity, imageUrl }: StockItemProps) {
+export function StockItem({ name, price, brand, quantity, imageUrl, barcode }: StockItemProps) {
     return (
         <View className="mt-5 flex flex-row items-center gap-5">
             <Image
@@ -23,8 +24,8 @@ export function StockItem({ name, price, brand, quantity, imageUrl }: StockItemP
                     <Text className="text-white text-lg font-semibold">
                         R$ {(Number(price) / 100).toFixed(2).replace('.', ',')}
                     </Text>
-                    <Text className="text-white font-medium text-lg">
-                        - {brand}
+                    <Text className="text-textForenground text-lg">
+                        - {barcode}
                     </Text>
                 </View>
                 <Text className="text-primaryPrimary">
