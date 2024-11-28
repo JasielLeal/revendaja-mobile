@@ -1,6 +1,8 @@
+import { Button } from "@/components/buttton";
+import CustomModal from "@/components/modal";
 import AuthContext from "@/context/authContext";
 import { useNavigation } from "@react-navigation/native";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Image, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -8,7 +10,13 @@ import Icon from "react-native-vector-icons/Ionicons";
 export function Profile() {
 
     const { user, logoutFc } = useContext(AuthContext)
-    const navigation = useNavigation();
+
+    const [openModal, setOpenModal] = useState(false)
+
+    const handleConfirm = () => {
+        console.log('Confirmado!');
+        setOpenModal(false);
+    };
 
     return (
         <>
@@ -75,7 +83,7 @@ export function Profile() {
                     </View>
                 </View>
                 <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
-                    <View className="flex items-center justify-between flex-row w-full">
+                    <TouchableOpacity className="flex items-center justify-between flex-row w-full" onPress={() => setOpenModal(true)}>
                         <View className="flex flex-row items-center gap-1">
                             <Icon name="trash" size={20} color={"#dc2626"} />
                             <Text className="text-red-600 font-medium">
@@ -83,8 +91,18 @@ export function Profile() {
                             </Text>
                         </View>
                         <Icon name='chevron-forward' size={20} color={"#dc2626"} />
-                    </View>
+                    </TouchableOpacity>
                 </View>
+
+                <CustomModal
+                    visible={openModal}
+                    onClose={() => setOpenModal(false)}
+                    title="Deseja deletar sua conta?"
+                    onConfirm={handleConfirm}
+                    confirmText="Confirmar"
+                >
+                    <Text className="text-white">Essa ação não pode ser desfeita. Todos os seus dados serão permanentemente excluídos.</Text>
+                </CustomModal>
 
                 <View className="mt-auto mb-5">
                     <TouchableOpacity className="bg-forenground p-4 rounded-xl mt-auto" onPress={() => logoutFc()}>
