@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/authContext";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'react-native-gesture-handler';
 import { SuccessProvider } from "@/context/successContext";
+import { LoadProvider } from "@/context/loadContext";
 
 export default function App() {
 
@@ -17,14 +18,17 @@ export default function App() {
       <GestureHandlerRootView>
         <QueryClientProvider client={client}>
           <NavigationContainer>
-            <SuccessProvider>
-              <AuthProvider>
-                <StatusBar backgroundColor="#000" style="light" />
+            <LoadProvider>
+              <SuccessProvider>
+                <AuthProvider>
+                  <StatusBar backgroundColor="#000" style="light" />
 
-                <Routes />
+                  <Routes />
 
-              </AuthProvider>
-            </SuccessProvider>
+                </AuthProvider>
+              </SuccessProvider>
+            </LoadProvider>
+
           </NavigationContainer>
         </QueryClientProvider>
       </GestureHandlerRootView>

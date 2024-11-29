@@ -1,7 +1,5 @@
-import { Button } from "@/components/buttton";
 import CustomModal from "@/components/modal";
 import AuthContext from "@/context/authContext";
-import { useNavigation } from "@react-navigation/native";
 import { useContext, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Image, Text, View } from "react-native";
@@ -17,6 +15,7 @@ export function Profile() {
         console.log('Confirmado!');
         setOpenModal(false);
     };
+
 
     return (
         <>
