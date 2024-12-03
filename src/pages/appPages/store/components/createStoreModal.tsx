@@ -16,7 +16,7 @@ type CreateStoreModalProps = {
 };
 
 export default function CreateStoreModal({ open }: CreateStoreModalProps) {
-    
+
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["30%", "80%"], []);
     const { updateUserHasStore } = useContext(AuthContext);
@@ -34,7 +34,7 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
         resolver: zodResolver(CreateStoreSchema),
         mode: 'onSubmit',
     });
-
+    
     const { mutateAsync: createStoreFn } = useMutation({
         mutationFn: CreateStore,
         onSuccess: () => {
@@ -60,7 +60,7 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
             index={open ? 1 : -1}
             snapPoints={snapPoints}
             enablePanDownToClose
-        >
+        >   
             <BottomSheetView className="flex-1 px-5 bg-bg w-full">
                 <View className="w-full h-screen-safe">
                     <Text className="text-2xl font-medium text-white mb-5 text-center mt-10">

@@ -6,6 +6,9 @@ import { useContext } from "react";
 import { Controller, FieldValues, useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema } from "./schemas/LoginSchema";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/navigation";
 
 export function Login() {
 
@@ -24,6 +27,8 @@ export function Login() {
             console.log(JSON.stringify(e, null, 4))
         }
     }
+
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
         <>
@@ -81,7 +86,7 @@ export function Login() {
 
 
                             <View>
-                                <TouchableOpacity className="flex items-end my-5 ">
+                                <TouchableOpacity className="flex items-end my-5 " onPress={()=> navigate.navigate('forgetpassword')}>
                                     <Text className="text-end text-primaryPrimary font-medium">
                                         Esqueceu a senha?
                                     </Text>

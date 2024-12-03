@@ -12,7 +12,6 @@ export function Profile() {
     const [openModal, setOpenModal] = useState(false)
 
     const handleConfirm = () => {
-        console.log('Confirmado!');
         setOpenModal(false);
     };
 

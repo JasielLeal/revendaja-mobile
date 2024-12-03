@@ -36,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadStoragedData() {
       try {
-
         const storagedToken = await AsyncStorage.getItem('token');
         const storagedUser = await AsyncStorage.getItem('user');
 
@@ -69,7 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function singInFc(dataValue: FieldValues) {
     try {
-
       setLoading(true);
       const response = await Session(dataValue);
       const { data } = response;

@@ -11,8 +11,6 @@ export interface GetStockRequest {
 
 export async function GetStock({ pageSize, page, searchTerm, filter }: GetStockRequest) {
 
-    console.log(filter)
-
     const response = await backend.get("/stock/getstock", {
         params: {
             pageSize,
