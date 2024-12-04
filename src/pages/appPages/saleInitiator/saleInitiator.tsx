@@ -95,7 +95,6 @@ export function SaleInitiator() {
         onError: (error) => {
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
-                console.log(status)
             }
         },
     })

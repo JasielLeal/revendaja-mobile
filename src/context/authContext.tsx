@@ -5,6 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, Alert, View } from "react-native";
 import { Session } from "@/pages/authPages/login/services/Session";
 import { jwtDecode } from "jwt-decode";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/navigation";
 
 interface AuthContextData {
   signed: boolean;
@@ -23,6 +26,7 @@ interface User {
   email: string;
   token: string;
   avatar: string;
+  status: string
   userHasStore: boolean;
   paymentStatus: string
 }
@@ -33,9 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
+
   useEffect(() => {
     async function loadStoragedData() {
       try {
+
+
         const storagedToken = await AsyncStorage.getItem('token');
         const storagedUser = await AsyncStorage.getItem('user');
 
@@ -71,15 +79,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       const response = await Session(dataValue);
       const { data } = response;
+  
       setUser(data.user);
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
-    } catch (e) {
-      Alert.alert("Erro no Login", "Não foi possível realizar o login. Por favor, verifique suas credenciais e tente novamente.");
+    } catch (e: any) {
+      console.log(e);
+      console.log(JSON.stringify(e, null, 4));
+  
+      if (e.response?.status === 401) {
+        // Credenciais inválidas
+        Alert.alert(
+          "Credenciais inválidas",
+          "O e-mail ou a senha fornecidos estão incorretos. Por favor, tente novamente."
+        );
+      } else if (e.response?.status === 403) {
+        // E-mail não confirmado
+
+        const email = dataValue.email;
+
+        Alert.alert(
+          "Confirmação pendente",
+          "Seu e-mail ainda não foi confirmado. Vamos redirecioná-lo para a tela de confirmação.",
+          [
+            {
+              text: "Confirmar Agora",
+              onPress: () => navigate.navigate("emailConfirmation", { email }),
+            },
+          ]
+        );
+      } else {
+        // Erro genérico
+        Alert.alert(
+          "Erro ao realizar o login",
+          "Algo deu errado. Por favor, tente novamente mais tarde."
+        );
+      }
     } finally {
       setLoading(false);
     }
   }
+  
 
   async function logoutFc() {
     await AsyncStorage.removeItem('token');

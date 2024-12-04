@@ -5,12 +5,15 @@ import { ForgetPassword } from "./services/ForgetPassword";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ForgepasswordSchema } from "./schemas/Forgetpassword";
 import { Controller, FieldValues, useForm } from "react-hook-form";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/navigation";
 export function Forget() {
 
     const { mutateAsync: ForgetPasswordFn, isPending } = useMutation({
         mutationFn: ForgetPassword,
         onSuccess: () => {
-
+            navigate.navigate("VerifyCode")
         },
         onError: (e) => {
             console.log(e)
@@ -28,6 +31,7 @@ export function Forget() {
         await ForgetPasswordFn(data)
     }
 
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
         <>

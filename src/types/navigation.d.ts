@@ -11,5 +11,8 @@ export type RootStackParamList = {
   AddBankSlip: undefined;
   TicketsDetails: { ticket: Ticket };
   forgetpassword: undefined;
+  VerifyCode: undefined;
+  emailConfirmation: { email: string };
+  login: undefined;
   // Adicione outras rotas aqui se necessário
 };

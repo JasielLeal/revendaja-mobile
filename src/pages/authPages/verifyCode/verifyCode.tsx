@@ -1,8 +1,12 @@
 import { View, Image, Text, TextInput, TouchableOpacity } from "react-native";
-import logo from "@/assets/LogoWhite - Completa.png"
+import logo from "@/assets/logo.png"
 import Icon from 'react-native-vector-icons/Ionicons'
 
-export function VerifyCode() {
+export function VerifyCode({ route }: any) {
+
+    const { email } = route.params;
+    
+
     return (
         <>
             <View className="bg-bg w-full h-screen px-5">
@@ -37,7 +41,7 @@ export function VerifyCode() {
                                 Enviar novamente o codigo
                             </Text>
                             <Text className="text-center text-primaryPrimary font-medium">
-                                <Icon name="reload" size={15}/>
+                                <Icon name="reload" size={15} />
                             </Text>
                         </TouchableOpacity>
                     </View>
