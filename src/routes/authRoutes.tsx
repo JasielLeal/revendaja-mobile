@@ -1,3 +1,4 @@
+import { CreateUser } from "@/pages/authPages/createUser/CreateUser";
 import { EmailConfirmation } from "@/pages/authPages/emailConfirmation/EmailConfirmation";
 import { Forget } from "@/pages/authPages/forget/forget";
 import { Login } from "@/pages/authPages/login/login";
@@ -16,6 +17,7 @@ export function AuthRoutes() {
                 <AuthStack.Screen name="forgetpassword" component={Forget} options={{ headerShown: false }} />
                 <AuthStack.Screen name="VerifyCode" component={VerifyCode} options={{ headerShown: false }} />
                 <AuthStack.Screen name="emailConfirmation" component={EmailConfirmation} options={{ headerShown: false }} />
+                <AuthStack.Screen name="createUser" component={CreateUser} options={{ headerShown: false }} />
             </AuthStack.Navigator>
         </>
     )

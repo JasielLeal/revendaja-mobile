@@ -14,5 +14,6 @@ export type RootStackParamList = {
   VerifyCode: undefined;
   emailConfirmation: { email: string };
   login: undefined;
+  createUser: undefined;
   // Adicione outras rotas aqui se necessário
 };

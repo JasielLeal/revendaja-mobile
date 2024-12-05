@@ -86,7 +86,7 @@ export function Login() {
 
 
                             <View>
-                                <TouchableOpacity className="flex items-end my-5 " onPress={()=> navigate.navigate('forgetpassword')}>
+                                <TouchableOpacity className="flex items-end my-5 " onPress={() => navigate.navigate('forgetpassword')}>
                                     <Text className="text-end text-primaryPrimary font-medium">
                                         Esqueceu a senha?
                                     </Text>
@@ -103,7 +103,7 @@ export function Login() {
                                 <Text className="text-white">
                                     Não tem conta?
                                 </Text>
-                                <TouchableOpacity className="flex items-end ">
+                                <TouchableOpacity className="flex items-end " onPress={() => navigate.navigate("createUser")}>
                                     <Text className="text-end text-primaryPrimary font-medium">
                                         Criar gratuitamente
                                     </Text>
