@@ -33,7 +33,7 @@ export function Login() {
     return (
         <>
             <ImageBackground
-                source={bg}
+                source={require("@/assets/bg.png")}
                 className="flex-1"
                 resizeMode="cover"
             >
