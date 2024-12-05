@@ -1,9 +1,11 @@
 import CustomModal from "@/components/modal";
 import AuthContext from "@/context/authContext";
+import { useMutation } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Image, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { DisableAccount } from "./services/DisabledAccount";
 
 export function Profile() {
 
@@ -11,10 +13,20 @@ export function Profile() {
 
     const [openModal, setOpenModal] = useState(false)
 
-    const handleConfirm = () => {
+    async function handleConfirm() {
+        await DisableAccountFn()
         setOpenModal(false);
     };
 
+    const { mutateAsync: DisableAccountFn } = useMutation({
+        mutationFn: DisableAccount,
+        onSuccess: () => {
+            logoutFc()
+        },
+        onError: () => {
+            console.log("Deu algum error")
+        }
+    })
 
     return (
         <>
