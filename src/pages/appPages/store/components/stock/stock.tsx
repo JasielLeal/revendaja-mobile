@@ -26,7 +26,7 @@ export function Stock() {
     }, [searchTerm]);
 
     // Query utilizando o termo debounced
-    const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+    const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading, isPending } = useInfiniteQuery({
         queryKey: ["GetStock", debouncedSearchTerm, selectedFilter],
         queryFn: ({ pageParam = 0 }) => {
             return GetStock({
@@ -53,6 +53,13 @@ export function Stock() {
 
     const [filter, setFilter] = useState(false)
 
+    function openFilter() {
+        setFilter(true)
+    }
+
+    function closeFilter() {
+        setFilter(false)
+    }
 
     const handleFilterSelect = (option: string) => {
         setSelectedFilter(option);
@@ -74,13 +81,13 @@ export function Stock() {
                             onChangeText={(text) => setSearchTerm(text)}
                         />
                     </View>
-                    <TouchableOpacity className="bg-forenground p-2 rounded-xl" onPress={() => setFilter(!filter)}>
+                    <TouchableOpacity className="bg-forenground p-2 rounded-xl" onPress={openFilter}>
                         <Icon name="filter" color={"#fff"} size={25} />
                     </TouchableOpacity>
                 </View>
 
                 {
-                    isLoading ?
+                    isPending ?
                         <View className="flex justify-center mt-72">
                             <ActivityIndicator size="small" color={"#FF7100"} />
                         </View>
@@ -93,14 +100,16 @@ export function Stock() {
                                 const productData = item.customProduct || item.product;
 
                                 return (
-                                    <StockItem
-                                        name={productData?.name || "Produto Indefinido"}
-                                        price={item.customPrice || productData?.suggestedPrice || "0"}
-                                        brand={productData?.brand || "Marca Desconhecida"}
-                                        quantity={item.quantity || 0}
-                                        imageUrl={productData?.imgUrl || undefined}
-                                        barcode={productData.barcode}
-                                    />
+                                    <>
+                                        <StockItem
+                                            name={productData?.name || "Produto Indefinido"}
+                                            price={item.customPrice || productData?.suggestedPrice || "0"}
+                                            brand={productData?.brand || "Marca Desconhecida"}
+                                            quantity={item.quantity || 0}
+                                            imageUrl={productData?.imgUrl || undefined}
+                                            barcode={productData.barcode}
+                                        />
+                                    </>
                                 );
                             }}
                             onEndReached={() => {
@@ -119,7 +128,7 @@ export function Stock() {
                         />
                 }
             </View>
-            <Filter open={filter} onSelectOption={handleFilterSelect} />
+            <Filter open={filter} onSelectOption={handleFilterSelect} onClose={closeFilter} />
         </Store>
     );
 }

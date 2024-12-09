@@ -17,14 +17,14 @@ export function StockItem({ name, price, brand, quantity, imageUrl, barcode }: S
                 className="w-[90px] h-[90px] rounded-xl"
             />
             <View>
-                <Text className="text-white font-semibold text-lg">
+                <Text className="text-white font-semibold text-sm">
                     {name}
                 </Text>
                 <View className="flex flex-row items-center gap-1">
-                    <Text className="text-white text-lg font-semibold">
+                    <Text className="text-white font-semibold">
                         R$ {(Number(price) / 100).toFixed(2).replace('.', ',')}
                     </Text>
-                    <Text className="text-textForenground text-lg">
+                    <Text className="text-textForenground">
                         - {barcode}
                     </Text>
                 </View>

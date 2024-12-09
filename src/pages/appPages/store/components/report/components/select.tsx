@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, FlatList } from 'react-native';
-
+import Icon from "react-native-vector-icons/Ionicons";
 interface Option {
   label: string;
   value: string; // mantemos o valor como string para representar os números, se necessário
@@ -16,8 +16,12 @@ export default function Select({ options, label, onSelect }: CustomSelectProps) 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
 
+  const toggleModal = () => setIsModalVisible(!isModalVisible);
+
   const modalClose = () =>setIsModalVisible(false);
   const modalOpen = () =>setIsModalVisible(true);
+
+
   const handleSelect = (value: string, label: string) => {
     setSelectedValue(label);  // Armazena o nome do mês (label)
     setIsModalVisible(false);
@@ -27,16 +31,13 @@ export default function Select({ options, label, onSelect }: CustomSelectProps) 
   return (
     <View>
       {/* Campo de Seleção */}
-      <TouchableOpacity
-        onPress={modalOpen}
-        className="bg-bg rounded-xl py-2 px-4 w-[150px]"
-      >
-        <Text className="text-white text-center text-sm">{selectedValue || label}</Text>
+      <TouchableOpacity className="bg-forenground p-2 rounded-xl" onPress={modalOpen}>
+        <Icon name="filter" color={"#fff"} size={25} />
       </TouchableOpacity>
 
       {/* Modal de Opções */}
       {isModalVisible && (
-        <Modal transparent={true} animationType="fade" visible={isModalVisible} onRequestClose={ modalClose}>
+        <Modal transparent={true} animationType="fade" visible={isModalVisible} onRequestClose={modalClose}>
           <TouchableOpacity
             className="flex-1 justify-center items-center bg-black opacity-50 "
             onPress={modalClose}
