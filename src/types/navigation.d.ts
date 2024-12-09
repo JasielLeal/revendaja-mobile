@@ -15,5 +15,6 @@ export type RootStackParamList = {
   emailConfirmation: { email: string };
   login: undefined;
   createUser: undefined;
+  AddProductToStock: undefined
   // Adicione outras rotas aqui se necessário
 };

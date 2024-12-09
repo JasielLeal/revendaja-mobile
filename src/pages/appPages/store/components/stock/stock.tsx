@@ -8,6 +8,9 @@ import { StockItem } from "./components/stockItem";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { GetStock } from "./services/GetStock";
 import { Filter } from "./components/filter";
+import { RootStackParamList } from "@/types/navigation";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
 
 export function Stock() {
     const pageSize = 10;
@@ -49,6 +52,8 @@ export function Stock() {
         initialPageParam: 0,
     });
 
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
+
     const allStock = data?.pages.flatMap((page) => page.data.items) || [];
 
     const [filter, setFilter] = useState(false)
@@ -65,12 +70,14 @@ export function Stock() {
         setSelectedFilter(option);
     };
 
+    
+
     return (
         <Store>
             <View className="px-5">
                 <View className="flex flex-row items-center justify-between mt-5">
                     <Text className="text-white text-xl font-semibold">Estoque</Text>
-                    <Button name="Adicionar Produto" />
+                    <Button name="Adicionar Produto" onPress={()=> navigate.navigate("AddProductToStock")}/>
                 </View>
                 <View className="mt-5 flex flex-row items-center justify-between w-full">
                     <View className="w-5/6">

@@ -14,7 +14,7 @@ export function StockItem({ name, price, brand, quantity, imageUrl, barcode }: S
         <View className="mt-5 flex flex-row items-center gap-5">
             <Image
                 source={imageUrl ? { uri: imageUrl } : require("@/assets/kaiak.jpg")}
-                className="w-[90px] h-[90px] rounded-xl"
+                className="w-[75px] h-[75px] rounded-xl"
             />
             <View>
                 <Text className="text-white font-semibold text-sm">

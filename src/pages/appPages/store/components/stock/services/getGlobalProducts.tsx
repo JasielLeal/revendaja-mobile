@@ -1,18 +1,17 @@
 import { backend } from "@/api/backend";
 
-export interface GetStockRequest {
+export interface GetGlobalProductsRequest {
     pageSize: number;
     page: number;
     searchTerm: string
     filter: string | null
 }
 
-export async function GetStock({ pageSize, page, searchTerm, filter }: GetStockRequest) {
-
-    const response = await backend.get("/stock/getstock", {
+export async function GetGlobalProducts({ filter, page, pageSize, searchTerm }: GetGlobalProductsRequest) {
+    const response = await backend.get('/products/getall', {
         params: {
-            pageSize,
             page,
+            pageSize,
             search: searchTerm,
             filter
         }
