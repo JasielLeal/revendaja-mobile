@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 
-export function QuantityInput() {
-    const [quantity, setQuantity] = useState<number>(1); // Estado para controlar a quantidade
+interface QuantityInputProps {
+    onQuantityChange: (quantity: number) => void; // Callback para enviar o valor ao componente pai
+    initialQuantity?: number; // Valor inicial opcional
+}
 
-    // Função para incrementar a quantidade
-    const incrementQuantity = () => {
-        setQuantity((prevQuantity) => prevQuantity + 1);
+export function QuantityInput({ onQuantityChange, initialQuantity = 1 }: QuantityInputProps) {
+    const [quantity, setQuantity] = useState<number>(initialQuantity);
+
+    const updateQuantity = (newQuantity: number) => {
+        setQuantity(newQuantity);
+        onQuantityChange(newQuantity); // Envia o valor atualizado para o pai
     };
 
-    // Função para decrementar a quantidade
+    const incrementQuantity = () => {
+        updateQuantity(quantity + 1);
+    };
+
     const decrementQuantity = () => {
-        if (quantity > 1) { // Evita que a quantidade seja menor que 1
-            setQuantity((prevQuantity) => prevQuantity - 1);
+        if (quantity > 1) {
+            updateQuantity(quantity - 1);
         }
     };
 
@@ -26,10 +34,10 @@ export function QuantityInput() {
             </TouchableOpacity>
 
             <TextInput
-                value={String(quantity)} // O valor é uma string, para ser exibido no input
-                onChangeText={(text) => setQuantity(Number(text))}
-                keyboardType="numeric" // Só permite entrada numérica
-                className=" text-center text-white justify-center flex items-center w-12 h-12 border border-gray-300 rounded-md"
+                value={String(quantity)}
+                onChangeText={(text) => updateQuantity(Number(text) || 1)}
+                keyboardType="numeric"
+                className="text-center text-white justify-center flex items-center w-12 h-12 border border-gray-300 rounded-md"
             />
 
             <TouchableOpacity

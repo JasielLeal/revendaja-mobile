@@ -70,8 +70,6 @@ export function Stock() {
         setSelectedFilter(option);
     };
 
-    
-
     return (
         <Store>
             <View className="px-5">
