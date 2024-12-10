@@ -33,7 +33,7 @@ const SaleItem = memo(({ sale, onPress }: SaleItemProps) => {
                 </View>
                 <View className='flex flex-row items-center'>
                     <Text className="text-white tex-text">
-                        {formatCurrency(String(sale.totalPrice))}
+                        R$ {formatCurrency(String(sale.totalPrice))}
                     </Text>
                     <Icon name='chevron-forward' size={20} color={'#FF7100'} />
                 </View>

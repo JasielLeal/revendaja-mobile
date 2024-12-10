@@ -1,6 +1,6 @@
 import AuthContext from "@/context/authContext";
 import { useContext, useState } from "react";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { Notifications } from "./components/notifications";
 import { Menu } from "./components/menu";
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -15,7 +15,7 @@ export function Home() {
 
     const { user } = useContext(AuthContext)
 
-    const [hiddenMoney, setHiddenMoney] = useState(true)
+    const [hiddenMoney, setHiddenMoney] = useState(false)
 
     const toggleHiddenMoney = () => {
         setHiddenMoney(!hiddenMoney)
@@ -50,36 +50,77 @@ export function Home() {
                         </View>
                     </View>
                     <View className="mt-10">
-                        <Text className="text-white font-semibold text-lg">
-                            Saldo em conta
-                        </Text>
+                        {
+                            Platform.OS == 'ios' ?
+
+                                <Text className="text-white font-semibold text-lg">
+                                    Saldo em conta
+                                </Text>
+                                :
+                                <Text className="text-white font-semibold text-sm">
+                                    Saldo em conta
+                                </Text>
+                        }
                         {
                             hiddenMoney ?
-                                <View className="flex flex-row items-center justify-between w-full">
-                                    <Text className="text-white font-semibold text-lg">
-                                        R$ {formatCurrency(String(monthAmount))}
-                                    </Text>
-                                    <TouchableOpacity onPress={toggleHiddenMoney}>
-                                        <Icon name="eye" size={25} color={'#fff'} />
-                                    </TouchableOpacity>
-                                </View>
+                                Platform.OS == 'ios' ?
+
+                                    <View className="flex flex-row items-center justify-between w-full">
+                                        <Text className="text-white font-semibold text-lg">
+                                            R$ {formatCurrency(String(monthAmount))}
+                                        </Text>
+                                        <TouchableOpacity onPress={toggleHiddenMoney}>
+                                            <Icon name="eye" size={25} color={'#fff'} />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    :
+
+                                    <View className="flex flex-row items-center justify-between w-full">
+                                        <Text className="text-white font-semibold">
+                                            R$ {formatCurrency(String(monthAmount))}
+                                        </Text>
+                                        <TouchableOpacity onPress={toggleHiddenMoney}>
+                                            <Icon name="eye" size={25} color={'#fff'} />
+                                        </TouchableOpacity>
+                                    </View>
                                 :
-                                <View className="flex flex-row items-center justify-between w-full">
-                                    <Text className="text-white font-semibold text-lg">
-                                        R$ ***
-                                    </Text>
-                                    <TouchableOpacity onPress={toggleHiddenMoney}>
-                                        <Icon name="eye-off" size={25} color={'#fff'} />
-                                    </TouchableOpacity>
-                                </View>
+                                Platform.OS == 'ios' ?
+
+                                    <View className="flex flex-row items-center justify-between w-full">
+                                        <Text className="text-white font-semibold text-lg">
+                                            R$ ***
+                                        </Text>
+                                        <TouchableOpacity onPress={toggleHiddenMoney}>
+                                            <Icon name="eye-off" size={25} color={'#fff'} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    :
+                                    <View className="flex flex-row items-center justify-between w-full">
+                                        <Text className="text-white font-semibold">
+                                            R$ ***
+                                        </Text>
+                                        <TouchableOpacity onPress={toggleHiddenMoney}>
+                                            <Icon name="eye-off" size={25} color={'#fff'} />
+                                        </TouchableOpacity>
+                                    </View>
                         }
 
                     </View>
-                    <View className="mt-5 bg-secondarySecondary w-[200px] p-2 rounded-full">
-                        <Text className="text-center text-white font-medium">
-                            Ver Extrato
-                        </Text>
-                    </View>
+                    {
+                        Platform.OS == 'ios' ?
+                            <View className="mt-5 bg-secondarySecondary w-[200px] p-2 rounded-full">
+                                <Text className="text-center text-white font-medium">
+                                    Ver Extrato
+                                </Text>
+                            </View>
+                            :
+                            <View className="mt-5 bg-secondarySecondary w-[180px] p-2 rounded-full">
+                                <Text className="text-center text-white font-medium text-sm">
+                                    Ver Extrato
+                                </Text>
+                            </View>
+                    }
                 </View>
                 <ForEveryDayLife />
                 <RecentSales />
