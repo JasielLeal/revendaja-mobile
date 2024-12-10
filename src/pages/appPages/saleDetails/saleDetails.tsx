@@ -9,7 +9,7 @@ export function SaleDetails({ route }: any) {
     const navigation = useNavigation();
 
     return (
-        <View className='bg-bg w-full h-screen'>
+        <View className='bg-bg w-full flex-1'>
             <View className='px-5 pt-16'>
                 <View className='flex flex-row justify-between'>
                     <TouchableOpacity onPress={() => navigation.goBack()}>

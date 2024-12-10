@@ -1,26 +1,29 @@
-import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Input } from '@/components/input';
 import Icon from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "@/types/navigation";
-import { Input } from "@/components/input";
-import { useEffect, useState } from "react";
-import { DetailsProduct } from "./detailsProduct";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { GetGlobalProducts } from "../services/getGlobalProducts";
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { GetGlobalProducts } from '../services/getGlobalProducts';  // Importar sua função de requisição
+import { DetailsProduct } from '../components/detailsProduct';  // Importando o componente de detalhes do produto
+import { RootStackParamList } from '@/types/navigation';
+import { Platform } from 'react-native';
+
 
 export function AddProductToStock() {
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
+    const [detailsVisible, setDetailsVisible] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<any>(null);  // Novo estado para armazenar o produto selecionado
 
-    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
-    const [detailsVisible, setDetailsVisible] = useState(false)
-
-
-    function openDetails() {
-        setDetailsVisible(!detailsVisible)
+    function openDetails(product: any) {
+        setSelectedProduct(product);  // Armazena o produto clicado
+        setDetailsVisible(!detailsVisible);  // Abre o modal de detalhes
     }
 
     function closeDetails() {
-        setDetailsVisible(false)
+        setDetailsVisible(false);
+        setSelectedProduct(null);  // Reseta o produto quando o modal for fechado
     }
 
     const pageSize = 10;
@@ -59,12 +62,12 @@ export function AddProductToStock() {
             }
         },
         initialPageParam: 0,
-    })
+    });
 
     const allProducts = data?.pages.flatMap((page) => page.data.items) || [];
 
     return (
-        <View className="bg-bg h-screen w-full px-5">
+        <View className="bg-bg flex-1 w-full px-5">
             <View className='flex flex-row justify-between mt-16'>
                 <TouchableOpacity onPress={() => navigate.goBack()}>
                     <Icon name='chevron-back' size={20} color={"#fff"} />
@@ -86,7 +89,6 @@ export function AddProductToStock() {
                 style={{ marginBottom: 180 }}
                 renderItem={({ item }) => {
                     return (
-
                         isPending ?
 
                             <View className="flex justify-center mt-72">
@@ -96,32 +98,54 @@ export function AddProductToStock() {
                             :
 
                             <>
-                                <TouchableOpacity className="mt-5 flex flex-row items-center gap-5" onPress={() => openDetails()}>
+                                <TouchableOpacity className="mt-5 flex flex-row items-center gap-5" onPress={() => openDetails(item)}>
                                     <Image
                                         source={item.imgUrl ? { uri: item.imgUrl } : require("@/assets/kaiak.jpg")}
                                         className="w-[75px] h-[75px] rounded-xl"
                                     />
                                     <View>
-                                        <Text className="text-white font-semibold text-sm">
+                                        <Text
+                                            style={{
+                                                fontSize: Platform.OS === 'ios' ? 16 : 12, // Ajusta o tamanho do texto para o nome do produto
+                                                fontWeight: '600',
+                                                color: 'white',
+                                            }}
+                                        >
                                             {item.name}
                                         </Text>
-                                        <Text className="text-textForenground">
+                                        <Text
+                                            style={{
+                                                fontSize: Platform.OS === 'ios' ? 14 : 12, // Ajusta o tamanho do texto para a empresa
+                                                color: '#B0B0B0', // Cor padrão para o texto secundário
+                                            }}
+                                        >
                                             {item.company}
                                         </Text>
                                         <View className="flex flex-row items-center gap-1">
-                                            <Text className="text-white font-semibold">
+                                            <Text
+                                                style={{
+                                                    fontSize: Platform.OS === 'ios' ? 14 : 12, // Ajusta o tamanho do texto para o preço normal
+                                                    fontWeight: '600',
+                                                    color: 'white',
+                                                }}
+                                            >
                                                 De: R$ {(Number(item.normalPrice) / 100).toFixed(2).replace('.', ',')}
                                             </Text>
-
                                         </View>
                                         <View className="flex flex-row items-center gap-1">
-                                            <Text className="text-primaryPrimary font-semibold">
+                                            <Text
+                                                style={{
+                                                    fontSize: Platform.OS === 'ios' ? 14 : 12, // Ajusta o tamanho do texto para o preço sugerido
+                                                    fontWeight: '600',
+                                                    color: '#FF7100', // Cor para destacar o preço sugerido
+                                                }}
+                                            >
                                                 Sugerido: R$ {(Number(item.suggestedPrice) / 100).toFixed(2).replace('.', ',')}
                                             </Text>
-
                                         </View>
                                     </View>
                                 </TouchableOpacity>
+
                             </>
                     )
                 }}
@@ -140,7 +164,11 @@ export function AddProductToStock() {
                 }}
             />
 
-            <DetailsProduct open={detailsVisible} onClose={closeDetails} />
+            <DetailsProduct
+                open={detailsVisible}
+                onClose={closeDetails}
+                product={selectedProduct}  // Passa o produto para o DetailsProduct
+            />
         </View>
-    )
+    );
 }
