@@ -11,6 +11,7 @@ import { Filter } from "./components/filter";
 import { RootStackParamList } from "@/types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
+import React from "react";
 
 export function Stock() {
     const pageSize = 10;

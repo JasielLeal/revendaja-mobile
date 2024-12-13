@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, FieldValues, useForm } from "react-hook-form";
 import { VerifyEmailSchema } from "./schemas/VerifyEmailSchema ";
 import { StackNavigationProp } from "@react-navigation/stack";
+import React from "react";
 
 export function EmailConfirmation() {
 
@@ -53,7 +54,7 @@ export function EmailConfirmation() {
 
     return (
         <>
-            <View className="bg-bg w-full h-screen px-5">
+            <View className="bg-bg w-full h-screen px-5 flex-1">
                 <View className="flex justify-center items-center h-screen">
                     <Image source={logo} alt="logo do site" className="w-[185px] h-[35px]" />
 

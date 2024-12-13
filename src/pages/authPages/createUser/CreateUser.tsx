@@ -45,8 +45,8 @@ export function CreateUser() {
 
 
     return (
-        <>
-            <View className="bg-bg w-full h-screen px-5 items-center justify-center">
+      
+            <View className="bg-bg w-full flex-1 px-5 items-center justify-center">
                 <Image source={logo} alt="logo do site" className="w-[185px] h-[35px]" />
                 <Text className="text-white mb-5">Por favor, forneça as informações solicitadas abaixo</Text>
                 <View className="w-full">
@@ -199,6 +199,6 @@ export function CreateUser() {
                     </View>
                 </View>
             </View >
-        </>
+     
     )
 }

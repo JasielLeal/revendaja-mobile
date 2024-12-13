@@ -9,6 +9,9 @@ import { useSuccess } from '@/context/successContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { InsertProductToStockSchema } from '../schemas/InsertProductToStockSchema';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/types/navigation';
 
 type FilterModalProps = {
     open: boolean;
@@ -19,12 +22,14 @@ type FilterModalProps = {
 export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
     const { displaySuccess } = useSuccess();
     const queryClient = useQueryClient();
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     const { mutateAsync: InsertProductToStockFn } = useMutation({
         mutationFn: InsertProductToStock,
         onSuccess: () => {
             queryClient.invalidateQueries(['ListAllStoreByStore'] as InvalidateQueryFilters);
             displaySuccess();
+            navigate.goBack()
         },
         onError: () => {
             console.log('error');
@@ -69,11 +74,11 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
 
         const barcode = product.barcode
 
-        const newData = {...data, barcode}
+        const newData = { ...data, barcode }
 
         await InsertProductToStockFn(newData)
         // Aqui você pode enviar os dados para a API
-        
+
     }
 
     return (

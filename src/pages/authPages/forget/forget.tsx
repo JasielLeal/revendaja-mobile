@@ -8,12 +8,18 @@ import { Controller, FieldValues, useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import { useState } from "react";
 export function Forget() {
+
+
+    const [email, setEmail] = useState()
 
     const { mutateAsync: ForgetPasswordFn, isPending } = useMutation({
         mutationFn: ForgetPassword,
         onSuccess: () => {
-            navigate.navigate("VerifyCode")
+            if (email) {
+                navigate.navigate("VerifyCode", { email: email })
+            }
         },
         onError: (e) => {
             console.log(e)
@@ -28,6 +34,7 @@ export function Forget() {
     });
 
     async function onSub(data: FieldValues) {
+        setEmail(data.email)
         await ForgetPasswordFn(data)
     }
 
@@ -35,7 +42,7 @@ export function Forget() {
 
     return (
         <>
-            <View className="bg-bg w-full h-screen px-5 items-center justify-center">
+            <View className="bg-bg w-full flex-1 px-5 items-center justify-center">
                 <Image source={logo} alt="logo do site" className="w-[185px] h-[35px]" />
                 <Text className="text-white mb-10">Por favor, insira seu e-mail registrado abaixo</Text>
                 <View className="w-full">
@@ -76,11 +83,11 @@ export function Forget() {
 
                     }
 
-                    <View className="flex flex-row  justify-center my-5">
-                        <TouchableOpacity className="flex flex-row items-center gap-2" >
-                            <Text className=" text-white">
-                                Quer voltar ao login?
-                            </Text>
+                    <View className="flex flex-row  justify-center my-5 gap-1">
+                        <Text className=" text-white">
+                            Quer voltar ao login?
+                        </Text>
+                        <TouchableOpacity className="flex flex-row items-center gap-2" onPress={() => navigate.navigate('login')}>
                             <Text className="text-end text-primaryPrimary font-medium">
                                 Clique aqui
                             </Text>

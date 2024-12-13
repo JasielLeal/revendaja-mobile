@@ -11,10 +11,11 @@ export type RootStackParamList = {
   AddBankSlip: undefined;
   TicketsDetails: { ticket: Ticket };
   forgetpassword: undefined;
-  VerifyCode: undefined;
+  VerifyCode: { email: string };
   emailConfirmation: { email: string };
   login: undefined;
   createUser: undefined;
-  AddProductToStock: undefined
+  AddProductToStock: undefined;
+  UpdatePassword: { email: string };
   // Adicione outras rotas aqui se necessário
 };

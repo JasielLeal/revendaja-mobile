@@ -10,6 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateStoreSchema } from '../schemas/createStoreSchema';
 import AuthContext from '@/context/authContext';
 import { useSuccess } from '@/context/successContext';
+import React from 'react';
 
 type CreateStoreModalProps = {
     open: boolean;// Função para chamar ao criar a loja com sucesso
@@ -60,6 +61,12 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
             index={open ? 1 : -1}
             snapPoints={snapPoints}
             enablePanDownToClose
+            handleStyle={{
+                backgroundColor: "#202020",
+            }}
+            handleIndicatorStyle={{
+                backgroundColor: "#fff",
+            }}
         >   
             <BottomSheetView className="flex-1 px-5 bg-bg w-full">
                 <View className="w-full h-screen-safe">

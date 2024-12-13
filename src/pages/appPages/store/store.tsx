@@ -4,6 +4,9 @@ import { ReactNode, useContext, useState } from "react";
 import AuthContext from "@/context/authContext";
 import { Button } from "@/components/buttton";
 import CreateStoreModal from "./components/createStoreModal";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { FindStoreNameByUser } from "./services/FindStoreNameByUser";
 
 type RootStackParamList = {
     Overview: undefined;
@@ -24,6 +27,13 @@ export function Store({ children }: StoreProps) {
 
     const isActive = (routeName: keyof RootStackParamList) => route.name === routeName;
 
+    const { data: subdomain } = useQuery({
+        queryKey: ["FindStoreNameByUser"],
+        queryFn: FindStoreNameByUser
+    })
+
+    console.log(subdomain)
+
     return (
         <View className="bg-bg h-screen w-full">
             <View>
@@ -34,7 +44,12 @@ export function Store({ children }: StoreProps) {
             {user?.userHasStore ? (
                 <>
                     <Text className="text-primaryPrimary text-sm text-center mb-5 px-5">
-                        www.lealperfumaria.revendaja.com
+                        {
+                            subdomain ?
+                                `www.${subdomain.data}.revendaja.com`
+                                :
+                                'www.{subdomain}.revendaja.com'
+                        }
                     </Text>
                     <View className="flex flex-row items-center justify-between px-5">
                         <TouchableOpacity onPress={() => navigation.navigate("Overview")}>

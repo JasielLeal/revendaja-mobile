@@ -21,19 +21,17 @@ export const SuccessProvider = ({ children }: { children: ReactNode }) => {
             {children}
             <Modal
                 animationType="fade"
-                transparent={true}
                 visible={showSuccess}
+                transparent={false} // Adicione este atributo para evitar problemas no Android
                 onRequestClose={() => setShowSuccess(false)}
             >
-                <View className="flex-1 justify-center items-center bg-bg bg-opacity-50">
-                    <View className="p-5 rounded-lg">
-                        <LottieView
-                            source={require('@/assets/AnimationSuccess.json')}
-                            autoPlay
-                            loop={false}
-                            style={{ width: 200, height: 200 }}
-                        />
-                    </View>
+                <View className="flex-1 flex justify-center items-center bg-[#121214] bg-opacity-50">
+                    <LottieView
+                        source={require('@/assets/AnimationSuccess.json')}
+                        autoPlay
+                        loop={true}
+                        style={{ width: 200, height: 200 }}
+                    />
                 </View>
             </Modal>
         </SuccessContext.Provider>
