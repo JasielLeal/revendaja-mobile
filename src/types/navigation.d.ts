@@ -17,5 +17,6 @@ export type RootStackParamList = {
   createUser: undefined;
   AddProductToStock: undefined;
   UpdatePassword: { email: string };
+  DetailsProductStock: { name, price, quantity, imgUrl, barcode};
   // Adicione outras rotas aqui se necessário
 };

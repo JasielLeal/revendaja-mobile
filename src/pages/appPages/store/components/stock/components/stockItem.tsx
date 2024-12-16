@@ -1,4 +1,8 @@
-import { Text, View, Image, Platform } from "react-native";
+import { RootStackParamList } from "@/types/navigation";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import React from "react";
+import { Text, View, Image, Platform, TouchableOpacity } from "react-native";
 
 interface StockItemProps {
     name: string;
@@ -10,8 +14,12 @@ interface StockItemProps {
 }
 
 export function StockItem({ name, price, quantity, imageUrl, barcode }: StockItemProps) {
+
+
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
+
     return (
-        <View className="mt-5 flex flex-row items-center gap-5">
+        <TouchableOpacity className="mt-5 flex flex-row items-center gap-5" onPress={() => navigate.navigate('DetailsProductStock', { name, price, quantity, imgUrl: imageUrl, barcode })}>
             <Image
                 source={imageUrl ? { uri: imageUrl } : require("@/assets/kaiak.jpg")}
                 className="w-[75px] h-[75px] rounded-xl"
@@ -55,6 +63,6 @@ export function StockItem({ name, price, quantity, imageUrl, barcode }: StockIte
                 }
 
             </View>
-        </View>
+        </TouchableOpacity>
     );
 }
