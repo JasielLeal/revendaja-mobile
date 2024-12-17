@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 import { FinancialOverview } from "./components/financialOverview";
 import { Input } from "@/components/input";
+import React from "react";
 
 export function Extract() {
 

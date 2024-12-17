@@ -15,7 +15,6 @@ interface StockItemProps {
 
 export function StockItem({ name, price, quantity, imageUrl, barcode }: StockItemProps) {
 
-
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
@@ -36,7 +35,7 @@ export function StockItem({ name, price, quantity, imageUrl, barcode }: StockIte
                                     R$ {(Number(price) / 100).toFixed(2).replace('.', ',')}
                                 </Text>
                                 <Text className="text-textForenground">
-                                    - {barcode}
+                                  
                                 </Text>
                             </View>
                             <Text className="text-primaryPrimary">
@@ -56,9 +55,14 @@ export function StockItem({ name, price, quantity, imageUrl, barcode }: StockIte
                                     - {barcode}
                                 </Text>
                             </View>
-                            <Text className="text-primaryPrimary text-sm">
+                            {
+                                quantity === 0 ? 
+                                <Text className="text-sm text-red-500">Sem estoque</Text>
+                                : 
+                                <Text className="text-primaryPrimary text-sm">
                                 {quantity}x em Estoque
                             </Text>
+                            }
                         </>
                 }
 

@@ -1,7 +1,9 @@
 import { BarcodeScanningResult, CameraView, useCameraPermissions } from "expo-camera";
+import React from "react";
 import { useState } from "react";
 import { FieldValues } from "react-hook-form";
-import { TouchableOpacity, View, Text, StyleSheet, Modal, Dimensions } from "react-native";
+import { TouchableOpacity, View, Text, StyleSheet, Modal, Dimensions, Platform } from "react-native";
+import Icon from 'react-native-vector-icons/Ionicons'
 
 type ScannerProps = {
     onScan: (data: string) => void;
@@ -66,8 +68,8 @@ export function ScannerScreen({ onScan }: ScannerProps) {
                 </Modal>
             ) : (
                 <View className="flex flex-row items-center">
-                    <TouchableOpacity onPress={() => setIsCameraVisible(true)} className="bg-[#e0e0e0] dark:bg-white p-3 rounded-xl w-[270px]">
-                        <Text className="font-semibold text-background text-center w-full">Scanear Produto</Text>
+                    <TouchableOpacity onPress={() => setIsCameraVisible(true)} className={Platform.OS === 'ios' ? "bg-primaryPrimary p-2 rounded-xl" : "bg-primaryPrimary p-3 rounded-xl"}>
+                        <Icon name="scan" size={25} />
                     </TouchableOpacity>
                 </View>
             )}

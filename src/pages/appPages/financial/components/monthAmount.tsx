@@ -4,6 +4,7 @@ import { Platform, View } from "react-native"
 import { Text } from "react-native"
 import { formatCurrency } from "@/utils/formatCurrency"
 import { useState } from "react"
+import React from "react"
 
 interface MonthAmountProps {
     month: string

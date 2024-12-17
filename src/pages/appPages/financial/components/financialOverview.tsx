@@ -11,6 +11,7 @@ import { ActivityIndicator } from "react-native";
 import { RootStackParamList } from "@/types/navigation";
 import { formatDate } from "@/utils/formatDate";
 import { MonthAmount } from "./monthAmount";
+import React from "react";
 
 export function FinancialOverview() {
     const currentMonth = (new Date().getMonth() + 1).toString(); // Obtém o mês atual e converte para string

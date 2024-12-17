@@ -12,6 +12,7 @@ import { RootStackParamList } from "@/types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 export function Stock() {
     const pageSize = 10;
@@ -71,6 +72,8 @@ export function Stock() {
         setSelectedFilter(option);
     };
 
+     const tabBarHeight = useBottomTabBarHeight();
+
     return (
         <Store>
             <View className="px-5">
@@ -101,7 +104,7 @@ export function Stock() {
                         <FlatList
                             data={allStock}
                             keyExtractor={(item) => item.id}
-                            style={{ marginBottom: 180 }}
+                            style={{ marginBottom: 320, marginTop: 10 }}
                             renderItem={({ item }) => {
                                 const productData = item.customProduct || item.product;
 

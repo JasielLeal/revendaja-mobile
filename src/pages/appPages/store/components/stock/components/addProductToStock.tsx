@@ -86,7 +86,7 @@ export function AddProductToStock() {
             <FlatList
                 data={allProducts}
                 keyExtractor={(item) => item.id}
-                style={{ marginBottom: 180 }}
+                style={{ marginBottom: 10 }}
                 renderItem={({ item }) => {
                     return (
                         isPending ?
@@ -105,6 +105,9 @@ export function AddProductToStock() {
                                     />
                                     <View>
                                         <Text
+                                            numberOfLines={1}
+                                            ellipsizeMode="tail"
+                                            className='text-sm w-[220px]'
                                             style={{
                                                 fontSize: Platform.OS === 'ios' ? 16 : 12, // Ajusta o tamanho do texto para o nome do produto
                                                 fontWeight: '600',
