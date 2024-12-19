@@ -1,12 +1,40 @@
 import { formatCurrency } from '@/utils/formatCurrency';
 import { useNavigation } from '@react-navigation/native';
+import { InvalidateQueryFilters, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { View, Text, TouchableOpacity} from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from "react-native-vector-icons/Ionicons";
+import { DeleteSale } from './services/deleteSale';
+import { useState } from 'react';
+import CustomModal from '@/components/modal';
 
 export function SaleDetails({ route }: any) {
     const { sale } = route.params;
     const navigation = useNavigation();
+    const [modalVisible, setModalVisible] = useState(false)
+
+    const queryClient = useQueryClient();
+
+    const { mutateAsync: DeleteSaleFn } = useMutation({
+        mutationFn: DeleteSale,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['GetSales'] as InvalidateQueryFilters);
+            queryClient.invalidateQueries(['CalculateMonthlyBalance'] as InvalidateQueryFilters);
+            queryClient.invalidateQueries(['getLatestThreePurchases'] as InvalidateQueryFilters);
+            setTimeout(() => {
+                navigation.goBack()
+            }, 1000)
+        },
+        onError: () => {
+
+        }
+        
+    })
+
+    async function onSub() {
+        await DeleteSaleFn(sale.id)
+        setModalVisible(false)
+    }
 
     return (
         <View className='bg-bg w-full flex-1'>
@@ -16,7 +44,9 @@ export function SaleDetails({ route }: any) {
                         <Icon name='chevron-back' size={20} color={"#fff"} />
                     </TouchableOpacity>
                     <Text className='text-white font-semibold'>Detalhes da Compra</Text>
-                    <Text className='text-white w-[30px]'></Text>
+                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                        <Icon name='trash' size={20} color={"#dc2626"} />
+                    </TouchableOpacity>
                 </View>
 
                 <View className='flex flex-col justify-center items-center mt-7'>
@@ -57,7 +87,7 @@ export function SaleDetails({ route }: any) {
                     {sale.saleItems.map((product: any) => (
                         <View key={product.id} className='flex flex-row items-center justify-between bg-[#303030] p-3 rounded-xl mb-2'>
                             <View className='flex flex-row items-center'>
-                                
+
                                 <Text className='text-white mr-3 text-xs'>{product.quantity}x</Text>
                                 <Text className='text-white w-[140px] text-xs' numberOfLines={1} ellipsizeMode="tail">
                                     {product.stock.customProduct?.name || product.stock.product?.name}
@@ -68,6 +98,16 @@ export function SaleDetails({ route }: any) {
                     ))}
                 </View>
             </View>
+
+            <CustomModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                title="Deseja deletar essa venda?"
+                onConfirm={onSub}
+                confirmText="Confirmar"
+            >
+                <Text className="text-white">Essa ação não pode ser desfeita. Os dados da venda não poderam mais ser acessados.</Text>
+            </CustomModal>
         </View>
     );
 }

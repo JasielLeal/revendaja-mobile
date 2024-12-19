@@ -6,6 +6,7 @@ import { TouchableOpacity } from "react-native";
 import { Image, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { DisableAccount } from "./services/DisabledAccount";
+import React from "react";
 
 export function Profile() {
 

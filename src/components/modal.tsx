@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, Text, Pressable, GestureResponderEvent } from 'react-native';
+import { Modal, View, Text, GestureResponderEvent, TouchableOpacity } from 'react-native';
 
 interface CustomModalProps {
     visible: boolean;
@@ -17,6 +17,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
     children,
     onConfirm,
     confirmText = 'Confirmar',
+    
 }) => {
     return (
         <Modal
@@ -30,19 +31,19 @@ const CustomModal: React.FC<CustomModalProps> = ({
                     <Text className="text-lg font-bold text-white">{title}</Text>
                     <View className="my-2 text-white">{children}</View>
                     <View className="flex-row justify-between space-x-3 mt-5 gap-5 w-full">
-                        <Pressable
+                        <TouchableOpacity
                             className="flex-1 px-4 py-3 bg-gray-300 rounded-md"
                             onPress={onClose}
                         >
                             <Text className="w-full text-center">Cancelar</Text>
-                        </Pressable>
+                        </TouchableOpacity>
                         {onConfirm && (
-                            <Pressable
+                            <TouchableOpacity
                                 className="flex-1 px-4 py-3 bg-primaryPrimary rounded-md"
                                 onPress={onConfirm}
                             >
                                 <Text className="text-white text-center">{confirmText}</Text>
-                            </Pressable>
+                            </TouchableOpacity>
                         )}
                     </View>
                 </View>

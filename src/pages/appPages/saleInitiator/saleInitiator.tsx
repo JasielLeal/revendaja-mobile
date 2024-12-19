@@ -132,15 +132,15 @@ export function SaleInitiator() {
     };
 
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
-   
 
     const { mutateAsync: CreateSaleFn } = useMutation({
         mutationFn: CreateSale,
         onSuccess: () => {
-            displaySuccess()
+            setTimeout(() => {
+                navigate.navigate('Extract')
+            }, 1000);
             queryClient.invalidateQueries(['GetSales'] as InvalidateQueryFilters);
             queryClient.invalidateQueries(['MonthlyValue'] as InvalidateQueryFilters);
-            navigate.navigate('Extract')
             setProducts([]);
             setProductsBack([]);
             setCustomerName('');
@@ -259,8 +259,6 @@ export function SaleInitiator() {
                             )}
                         />
                     </View>
-
-
 
                     <View className={Platform.OS === 'ios' ? 'mb-5' : ''}>
                         <View className="flex flex-row mt-5 items-center justify-between mb-3">

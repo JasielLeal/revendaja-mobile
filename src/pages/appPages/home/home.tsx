@@ -10,6 +10,7 @@ import { RecentSales } from "./components/recentSales";
 import { useQuery } from "@tanstack/react-query";
 import { CalculateMonthlyBalance } from "./services/calculateMonthlyBalance";
 import { formatCurrency } from "@/utils/formatCurrency";
+import React from "react";
 
 export function Home() {
 

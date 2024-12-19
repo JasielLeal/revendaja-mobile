@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Text, TouchableOpacity, View, FlatList, ActivityIndicator } from "react-native";
+import { Text, TouchableOpacity, View, FlatList, ActivityIndicator, Platform } from "react-native";
 import { Store } from "../../store";
 import { Button } from "@/components/buttton";
 import { Input } from "@/components/input";
@@ -11,8 +11,10 @@ import { Filter } from "./components/filter";
 import { RootStackParamList } from "@/types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
+
+
 import React from "react";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { OptionsSwipeable } from "./components/optionsSwipeable";
 
 export function Stock() {
     const pageSize = 10;
@@ -31,7 +33,7 @@ export function Stock() {
     }, [searchTerm]);
 
     // Query utilizando o termo debounced
-    const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isLoading, isPending } = useInfiniteQuery({
+    const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isPending } = useInfiniteQuery({
         queryKey: ["GetStock", debouncedSearchTerm, selectedFilter],
         queryFn: ({ pageParam = 0 }) => {
             return GetStock({
@@ -72,8 +74,6 @@ export function Stock() {
         setSelectedFilter(option);
     };
 
-     const tabBarHeight = useBottomTabBarHeight();
-
     return (
         <Store>
             <View className="px-5">
@@ -81,6 +81,7 @@ export function Stock() {
                     <Text className="text-white text-xl font-semibold">Estoque</Text>
                     <Button name="Adicionar Produto" onPress={()=> navigate.navigate("AddProductToStock")}/>
                 </View>
+                
                 <View className="mt-5 flex flex-row items-center justify-between w-full">
                     <View className="w-5/6">
                         <Input
@@ -104,7 +105,7 @@ export function Stock() {
                         <FlatList
                             data={allStock}
                             keyExtractor={(item) => item.id}
-                            style={{ marginBottom: 320, marginTop: 10 }}
+                            style={Platform.OS==='ios' ? { marginBottom: 345, marginTop: 10 } : {marginBottom: 320, marginTop: 10}}
                             renderItem={({ item }) => {
                                 const productData = item.customProduct || item.product;
 
