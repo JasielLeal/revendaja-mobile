@@ -17,6 +17,7 @@ import { TicketsDetails } from "@/pages/appPages/tickets/components/ticketsDetai
 import { Profile } from "@/pages/appPages/profile/profile";
 import { AddProductToStock } from "@/pages/appPages/store/components/stock/components/addProductToStock";
 import { DetailsProductStock } from "@/pages/appPages/store/components/stock/components/detailsProductStock";
+import { OurPlans } from "@/pages/appPages/profile/components/ourPlans";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -198,6 +199,8 @@ export default function AppRoutes() {
             <Stack.Screen name="TicketsDetails" component={TicketsDetails} options={{ headerShown: false }} />
             <Stack.Screen name="AddProductToStock" component={AddProductToStock} options={{ headerShown: false }} />
             <Stack.Screen name="DetailsProductStock" component={DetailsProductStock} options={{ headerShown: false }} />
+            <Stack.Screen name="OurPlans" component={OurPlans} options={{ headerShown: false }} />
+            
 
         </Stack.Navigator>
     )

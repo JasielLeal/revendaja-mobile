@@ -7,6 +7,7 @@ import { Image, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { DisableAccount } from "./services/DisabledAccount";
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
 
 export function Profile() {
 
@@ -28,6 +29,8 @@ export function Profile() {
             console.log("Deu algum error")
         }
     })
+
+    const navigation = useNavigation()
 
     return (
         <>
@@ -53,11 +56,9 @@ export function Profile() {
                                 {user?.secondName}
                             </Text>
                         </View>
-                        <View>
-                            <Text className="text-textForenground">
-                                {user?.email}
-                            </Text>
-                        </View>
+                        <Text className="text-primaryPrimary">
+                            {user?.paymentStatus}
+                        </Text>
                     </View>
                 </View>
                 <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
@@ -71,17 +72,17 @@ export function Profile() {
                         <Icon name='chevron-forward' size={20} color={"#fff"} />
                     </View>
                 </View>
-                <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
+                <TouchableOpacity className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 " onPress={()=> navigation.navigate('OurPlans')}>
                     <View className="flex items-center justify-between flex-row w-full">
                         <View className="flex flex-row items-center gap-1">
                             <Icon name="star" size={20} color={"#fff"} />
                             <Text className="text-white font-medium">
-                                Meu plano
+                               Nossos Planos
                             </Text>
                         </View>
                         <Icon name='chevron-forward' size={20} color={"#fff"} />
                     </View>
-                </View>
+                </TouchableOpacity>
                 <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
                     <View className="flex items-center justify-between flex-row w-full">
                         <View className="flex flex-row items-center gap-1">
