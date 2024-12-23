@@ -132,13 +132,8 @@ export function Stock() {
                                             quantity={item.quantity || 0}
                                             imageUrl={productData?.imgUrl || undefined}
                                             barcode={productData.barcode}
+                                            discount={item.discountValue}
                                         />
-
-                                        <TouchableOpacity onPress={() => DeleteProduct(productData.id)}>
-                                            <Text className="text-white text-center mt-2">
-                                                Deletar
-                                            </Text>
-                                        </TouchableOpacity>
                                     </>
                                 );
                             }}

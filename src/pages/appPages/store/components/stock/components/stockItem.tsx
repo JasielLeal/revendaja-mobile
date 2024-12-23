@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View, Image, Platform } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable"
 import { OptionsSwipeable } from "./optionsSwipeable";
+import { calculatePercentage } from "@/utils/formatDiscount";
 
 interface StockItemProps {
     id: string
@@ -10,10 +11,14 @@ interface StockItemProps {
     brand: string;
     quantity: number;
     imageUrl?: string;
-    barcode: string
+    barcode: string;
+    discount?: number;
 }
 
-export function StockItem({ name, price, quantity, imageUrl, id }: StockItemProps) {
+export function StockItem({ name, price, quantity, imageUrl, id, discount }: StockItemProps) {
+
+    const priceNumber = Number(price);
+    const discountPercentage = discount ? calculatePercentage(priceNumber, discount).percentage : 0;
 
     return (
         <Swipeable renderRightActions={() => <OptionsSwipeable id={id} />} overshootRight={false} rightThreshold={100}>
@@ -33,9 +38,14 @@ export function StockItem({ name, price, quantity, imageUrl, id }: StockItemProp
                                     <Text className="text-white font-semibold">
                                         R$ {(Number(price) / 100).toFixed(2).replace('.', ',')}
                                     </Text>
-                                    <Text className="text-textForenground">
-
-                                    </Text>
+                                    {
+                                        discount ?
+                                            <Text className="text-textForenground text-sm">
+                                                - {discountPercentage.toFixed(2)}% de desconto
+                                            </Text>
+                                            :
+                                           ''
+                                    }
                                 </View>
                                 <Text className="text-primaryPrimary">
                                     {quantity}x em Estoque
@@ -50,9 +60,14 @@ export function StockItem({ name, price, quantity, imageUrl, id }: StockItemProp
                                     <Text className="text-white font-semibold text-sm">
                                         R$ {(Number(price) / 100).toFixed(2).replace('.', ',')}
                                     </Text>
-                                    <Text className="text-textForenground text-sm">
-
-                                    </Text>
+                                    {
+                                        discount ?
+                                            <Text className="text-textForenground text-sm">
+                                                - {discountPercentage.toFixed(2)}% de desconto
+                                            </Text>
+                                            :
+                                           ''
+                                    }
                                 </View>
                                 {
                                     quantity === 0 ?

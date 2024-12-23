@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Keyboard, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'; // Assumindo que você está usando a biblioteca 'gorhom/bottom-sheet'
 import { Button } from '@/components/buttton';
 import { QuantityInput } from '@/components/QuantityInput';
@@ -50,7 +50,7 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
     });
 
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const snapPoints = useMemo(() => ['90%'], []);
+    const snapPoints = useMemo(() => ['100%'], []);
 
     useEffect(() => {
         if (open) {
@@ -129,6 +129,8 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
                                 keyboardType="numeric"
                                 onChangeText={onChange}
                                 value={value}
+                                returnKeyType="done"
+                                onSubmitEditing={Keyboard.dismiss}
                             />
                         )}
                     />

@@ -4,9 +4,6 @@ import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { DeleteStockItem } from "../services/DeleteStockItem";
-import { RootStackParamList } from "@/types/navigation";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
 
 interface OptionsSwipeableProps {
     id: string;
