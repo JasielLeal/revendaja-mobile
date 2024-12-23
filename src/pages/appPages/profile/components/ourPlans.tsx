@@ -41,7 +41,11 @@ export function OurPlans() {
                     <Text className="text-white font-medium mt-10">Seu plano</Text>
             }
             <View className="bg-forenground p-4 rounded-xl mt-5">
-                <Text className="text-white text-xl">{user?.paymentStatus}</Text>
+                <View className="flex flex-row items-center">
+                    <Text className="text-white text-xl">{user?.plan} -</Text>
+                    <Text className="text-primaryPrimary"> Atualmente</Text>
+                </View>
+
                 <View className="flex flex-row gap-2 items-center">
                     <Text className="text-white font-medium text-2xl">R$ 00,00</Text>
                     <Text className="text-textForenground">

@@ -21,7 +21,7 @@ export function StockItem({ name, price, quantity, imageUrl, id, discount }: Sto
     const discountPercentage = discount ? calculatePercentage(priceNumber, discount).percentage : 0;
 
     return (
-        <Swipeable renderRightActions={() => <OptionsSwipeable id={id} />} overshootRight={false} rightThreshold={100}>
+        <Swipeable renderRightActions={() => <OptionsSwipeable id={id} discount={discount} />} overshootRight={false} rightThreshold={100}>
             <View className="mt-5 flex flex-row items-center gap-5 bg-bg">
                 <Image
                     source={imageUrl ? { uri: imageUrl } : require("@/assets/kaiak.jpg")}
