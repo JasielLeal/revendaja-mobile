@@ -19,6 +19,13 @@ const CustomModal: React.FC<CustomModalProps> = ({
     confirmText = 'Confirmar',
     
 }) => {
+    const handleConfirm = (event: GestureResponderEvent) => {
+        if (onConfirm) {
+            onConfirm(event);
+        }
+        onClose();
+    };
+
     return (
         <Modal
             visible={visible}
@@ -40,7 +47,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
                         {onConfirm && (
                             <TouchableOpacity
                                 className="flex-1 px-4 py-3 bg-primaryPrimary rounded-md"
-                                onPress={onConfirm}
+                                onPress={handleConfirm}
                             >
                                 <Text className="text-white text-center">{confirmText}</Text>
                             </TouchableOpacity>

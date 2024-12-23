@@ -27,7 +27,7 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
     const { mutateAsync: InsertProductToStockFn } = useMutation({
         mutationFn: InsertProductToStock,
         onSuccess: () => {
-            queryClient.invalidateQueries(['ListAllStoreByStore'] as InvalidateQueryFilters);
+            queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
             displaySuccess();
             navigate.goBack()
         },

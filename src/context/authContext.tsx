@@ -28,7 +28,7 @@ interface User {
   avatar: string;
   status: string
   userHasStore: boolean;
-  paymentStatus: string
+  plan: string
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);

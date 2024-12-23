@@ -8,6 +8,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { DisableAccount } from "./services/DisabledAccount";
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/navigation";
 
 export function Profile() {
 
@@ -30,7 +32,7 @@ export function Profile() {
         }
     })
 
-    const navigation = useNavigation()
+   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
         <>
@@ -57,7 +59,7 @@ export function Profile() {
                             </Text>
                         </View>
                         <Text className="text-primaryPrimary">
-                            {user?.paymentStatus}
+                            {user?.plan}
                         </Text>
                     </View>
                 </View>

@@ -1,9 +1,10 @@
 import React from "react";
 import { Text, View, Image, Platform } from "react-native";
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable" 
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable"
 import { OptionsSwipeable } from "./optionsSwipeable";
 
 interface StockItemProps {
+    id: string
     name: string;
     price: string;
     brand: string;
@@ -12,10 +13,10 @@ interface StockItemProps {
     barcode: string
 }
 
-export function StockItem({ name, price, quantity, imageUrl, barcode }: StockItemProps) {
+export function StockItem({ name, price, quantity, imageUrl, id }: StockItemProps) {
 
     return (
-        <Swipeable renderRightActions={OptionsSwipeable} overshootRight={false} rightThreshold={100}>
+        <Swipeable renderRightActions={() => <OptionsSwipeable id={id} />} overshootRight={false} rightThreshold={100}>
             <View className="mt-5 flex flex-row items-center gap-5 bg-bg">
                 <Image
                     source={imageUrl ? { uri: imageUrl } : require("@/assets/kaiak.jpg")}
@@ -50,7 +51,7 @@ export function StockItem({ name, price, quantity, imageUrl, barcode }: StockIte
                                         R$ {(Number(price) / 100).toFixed(2).replace('.', ',')}
                                     </Text>
                                     <Text className="text-textForenground text-sm">
-                                        - {barcode}
+
                                     </Text>
                                 </View>
                                 {

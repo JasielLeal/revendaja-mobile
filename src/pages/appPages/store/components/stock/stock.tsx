@@ -5,16 +5,15 @@ import { Button } from "@/components/buttton";
 import { Input } from "@/components/input";
 import Icon from "react-native-vector-icons/Ionicons";
 import { StockItem } from "./components/stockItem";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { InvalidateQueryFilters, QueryClient, useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { GetStock } from "./services/GetStock";
 import { Filter } from "./components/filter";
 import { RootStackParamList } from "@/types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
-
-
 import React from "react";
-import { OptionsSwipeable } from "./components/optionsSwipeable";
+import { DeleteStockItem } from "./services/DeleteStockItem";
+
 
 export function Stock() {
     const pageSize = 10;
@@ -74,6 +73,20 @@ export function Stock() {
         setSelectedFilter(option);
     };
 
+    const queryClient = new QueryClient();
+    const { mutateAsync: DeleteStockItemFn } = useMutation({
+        mutationFn: DeleteStockItem,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
+           
+        }
+    })
+
+    async function DeleteProduct(id: string) {
+        DeleteStockItemFn(id)
+    }
+    
+
     return (
         <Store>
             <View className="px-5">
@@ -112,6 +125,7 @@ export function Stock() {
                                 return (
                                     <>
                                         <StockItem
+                                            id={productData.id}
                                             name={productData?.name || "Produto Indefinido"}
                                             price={item.customPrice || productData?.suggestedPrice || "0"}
                                             brand={productData?.brand || "Marca Desconhecida"}
@@ -119,6 +133,12 @@ export function Stock() {
                                             imageUrl={productData?.imgUrl || undefined}
                                             barcode={productData.barcode}
                                         />
+
+                                        <TouchableOpacity onPress={() => DeleteProduct(productData.id)}>
+                                            <Text className="text-white text-center mt-2">
+                                                Deletar
+                                            </Text>
+                                        </TouchableOpacity>
                                     </>
                                 );
                             }}
