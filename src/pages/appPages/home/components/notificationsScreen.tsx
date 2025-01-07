@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 
-export function Notifications() {
+export function NotificationsScreen() {
  
     return (
         <View className='bg-secondarySecondary p-2 rounded-full'>

@@ -5,15 +5,13 @@ import { Button } from "@/components/buttton";
 import { Input } from "@/components/input";
 import Icon from "react-native-vector-icons/Ionicons";
 import { StockItem } from "./components/stockItem";
-import { InvalidateQueryFilters, QueryClient, useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { GetStock } from "./services/GetStock";
 import { Filter } from "./components/filter";
 import { RootStackParamList } from "@/types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { DeleteStockItem } from "./services/DeleteStockItem";
-
 
 export function Stock() {
     const pageSize = 10;
@@ -72,20 +70,6 @@ export function Stock() {
     const handleFilterSelect = (option: string) => {
         setSelectedFilter(option);
     };
-
-    const queryClient = new QueryClient();
-    const { mutateAsync: DeleteStockItemFn } = useMutation({
-        mutationFn: DeleteStockItem,
-        onSuccess: () => {
-            queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
-           
-        }
-    })
-
-    async function DeleteProduct(id: string) {
-        DeleteStockItemFn(id)
-    }
-    
 
     return (
         <Store>

@@ -109,7 +109,7 @@ export function FinancialOverview() {
                 keyExtractor={(item) => item.id}
                 style={{ marginBottom: 80 }}
                 renderItem={({ item }) => (
-                    <>
+                    <View key={item.id}>
                         <View className="flex flex-row items-center justify-between border-b border-b-[#ffffff38] pb-1 mt-5">
                             <Text className=" text-sm capitalize text-white">{formatDate(item.day)}</Text>
                             <Text className=" text-sm text-white font-semibold">Saldo do dia {formatCurrency(String(item.totalValue))}</Text>
@@ -125,7 +125,7 @@ export function FinancialOverview() {
                                 );
                             })}
                         </View>
-                    </>
+                    </View>
                 )}
                 onEndReached={() => {
                     if (hasNextPage) {

@@ -1,29 +1,42 @@
 {
   "expo": {
-    "name": "revendaja",
+    "name": "Revendaja",
     "slug": "revendaja",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "notification": {
+      "icon": "./assets/icon.png"
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FF7100"
     },
     "ios": {
       "supportsTablet": true,
-      "newArchEnabled": true
+      "newArchEnabled": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/bg.png",
         "backgroundColor": "#ffffff"
       },
-      "newArchEnabled": true
+      "newArchEnabled": true,
+      "package": "com.szreactioon.revendaja",
+      "permissions": ["NOTIFICATIONS"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f72c3ea6-e4d0-47b8-9ce5-ba720c38e40c"
+      }
     }
   }
 }

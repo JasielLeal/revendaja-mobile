@@ -6,6 +6,7 @@ import { formatCurrency } from "@/utils/formatCurrency";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
+import React from "react";
 
 interface Sale {
     customer: string;
@@ -72,7 +73,7 @@ export function RecentSales() {
                             </View>
                             <View className="flex flex-row items-center gap-4">
                                 <Text className="text-white text-sm font-medium">
-                                    R$ {formatCurrency(sale.totalPrice)}
+                                    R$ {formatCurrency(String(sale.totalPrice))}
                                 </Text>
                                 <Icon name="chevron-forward-outline" color={"#fff"} size={20} />
                             </View>

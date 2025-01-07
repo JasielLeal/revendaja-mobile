@@ -1,7 +1,6 @@
 import AuthContext from "@/context/authContext";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Platform, Text, View } from "react-native";
-import { Notifications } from "./components/notifications";
 import { Menu } from "./components/menu";
 import Icon from 'react-native-vector-icons/Ionicons'
 import { TouchableOpacity } from "react-native";
@@ -11,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalculateMonthlyBalance } from "./services/calculateMonthlyBalance";
 import { formatCurrency } from "@/utils/formatCurrency";
 import React from "react";
+import { NotificationsScreen } from "./components/notificationsScreen";
 
 export function Home() {
 
@@ -46,7 +46,7 @@ export function Home() {
                             </View>
                         </View>
                         <View className="flex flex-row items-center gap-5">
-                            <Notifications />
+                            <NotificationsScreen />
                             <Menu />
                         </View>
                     </View>
@@ -125,6 +125,7 @@ export function Home() {
                 </View>
                 <ForEveryDayLife />
                 <RecentSales />
+                
             </View>
         </>
     )

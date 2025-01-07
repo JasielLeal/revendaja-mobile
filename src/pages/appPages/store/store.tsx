@@ -32,6 +32,10 @@ export function Store({ children }: StoreProps) {
         queryFn: FindStoreNameByUser
     })
 
+    console.log(subdomain)
+
+    console.log(user?.userHasStore)
+
     return (
         <View className="bg-bg h-screen w-full">
             <View>

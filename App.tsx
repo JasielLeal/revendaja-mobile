@@ -8,6 +8,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'react-native-gesture-handler';
 import { SuccessProvider } from "@/context/successContext";
 import React, { useState } from "react";
+import { SocketProvider } from "@/context/SocketContext";
+import { ExpoTokenProvider } from "@/context/expoTokenContext";
 
 export default function App() {
 
@@ -16,12 +18,17 @@ export default function App() {
   return (
     <>
       <GestureHandlerRootView>
+
         <QueryClientProvider client={client}>
           <NavigationContainer>
             <SuccessProvider>
               <AuthProvider>
-                <StatusBar backgroundColor="#000" style="light" />
-                <Routes />
+                <ExpoTokenProvider>
+                  <SocketProvider>
+                    <StatusBar backgroundColor="#000" style="light" />
+                    <Routes />
+                  </SocketProvider>
+                </ExpoTokenProvider>
               </AuthProvider>
             </SuccessProvider>
           </NavigationContainer>

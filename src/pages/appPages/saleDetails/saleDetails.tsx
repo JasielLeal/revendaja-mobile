@@ -32,10 +32,14 @@ export function SaleDetails({ route }: any) {
 
     })
 
+    console.log(sale.totalPrice)
+
     async function onSub() {
         await DeleteSaleFn(sale.id)
         setModalVisible(false)
     }
+
+   
 
     return (
         <View className='bg-bg w-full flex-1'>
@@ -57,7 +61,7 @@ export function SaleDetails({ route }: any) {
                                 <Text className="bg-[#303030] p-5 rounded-full">
                                     <Icon name='checkmark' size={20} color={"#FF7100"} />
                                 </Text>
-                                <Text className='text-white font-medium mt-5 text-xl'>R$ {formatCurrency((sale.totalPrice))}</Text>
+                                <Text className='text-white font-medium mt-5 text-xl'>R$ {sale.totalPrice}</Text>
                                 <Text className='text-textForenground '>{sale.customer}</Text>
                                 <Text className='text-xs bg-[#303030] font-medium py-1 mt-2 px-5 rounded-full text-white '>{sale.transactionType}</Text>
                             </View>
@@ -97,7 +101,7 @@ export function SaleDetails({ route }: any) {
                                                 {product.stock.customProduct?.name || product.stock.product?.name}
                                             </Text>
                                         </View>
-                                        <Text className='text-white'>R$ {formatCurrency((product.price))}</Text>
+                                        <Text className='text-white'>R$ {(product.price)}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -108,7 +112,7 @@ export function SaleDetails({ route }: any) {
                                 <Text className="bg-[#303030] p-5 rounded-full">
                                     <Icon name='checkmark' size={20} color={"#FF7100"} />
                                 </Text>
-                                <Text className='text-white font-medium mt-5'>R$ {formatCurrency((sale.totalPrice))}</Text>
+                                <Text className='text-white font-medium mt-5'>R$ {((sale.totalPrice))}</Text>
                                 <Text className='text-textForenground text-xs'>{sale.customer}</Text>
                                 <Text className='text-xs bg-[#303030] font-medium py-1 mt-2 px-5 rounded-full text-white '>{sale.transactionType}</Text>
                             </View>
@@ -148,7 +152,7 @@ export function SaleDetails({ route }: any) {
                                                 {product.stock.customProduct?.name || product.stock.product?.name}
                                             </Text>
                                         </View>
-                                        <Text className='text-white text-xs'>R$ {formatCurrency((product.price))}</Text>
+                                        <Text className='text-white text-xs'>R$ {(String(product?.price))}</Text>
                                     </View>
                                 ))}
                             </View>
