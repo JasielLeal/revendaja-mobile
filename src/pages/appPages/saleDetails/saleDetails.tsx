@@ -32,8 +32,6 @@ export function SaleDetails({ route }: any) {
 
     })
 
-    console.log(sale.totalPrice)
-
     async function onSub() {
         await DeleteSaleFn(sale.id)
         setModalVisible(false)

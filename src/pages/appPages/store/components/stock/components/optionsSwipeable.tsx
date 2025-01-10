@@ -45,8 +45,6 @@ export function OptionsSwipeable({ id, discount }: OptionsSwipeableProps) {
         }
     })
 
-    console.log(discount)
-
     async function onSubAddPromotionInProduct() {
 
         if (price === "") return;

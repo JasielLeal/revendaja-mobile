@@ -9,6 +9,7 @@ import { LoginSchema } from "./schemas/LoginSchema";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import React from "react";
 
 export function Login() {
 
