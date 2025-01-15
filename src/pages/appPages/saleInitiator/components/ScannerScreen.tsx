@@ -23,11 +23,10 @@ export function ScannerScreen({ onScan }: ScannerProps) {
 
     if (!permission.granted) {
         return (
-            <View>
-                <TouchableOpacity className="bg-blue-300 p-3 rounded-xl" onPress={requestPermission}>
-                    <Text className="text-white text-center font-semibold">
-                        Conceder Permissão
-                    </Text>
+
+            <View className="flex flex-row items-center">
+                <TouchableOpacity onPress={requestPermission} className={Platform.OS === 'ios' ? "bg-primaryPrimary p-2 rounded-xl" : "bg-primaryPrimary p-3 rounded-xl"}>
+                    <Icon name="scan" size={25} />
                 </TouchableOpacity>
             </View>
         );

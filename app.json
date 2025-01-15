@@ -28,7 +28,7 @@
       },
       "newArchEnabled": true,
       "package": "com.szreactioon.revendaja",
-      "permissions": ["NOTIFICATIONS"]
+      "permissions": ["NOTIFICATIONS", "CAMERA"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

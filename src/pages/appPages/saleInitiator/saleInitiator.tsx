@@ -1,5 +1,5 @@
 import { Input } from "@/components/input";
-import { Alert, FlatList, Image, Platform, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Dimensions, FlatList, Image, Platform, Text, TouchableOpacity, View } from "react-native";
 import { ScannerScreen } from "./components/ScannerScreen";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { InvalidateQueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,10 +11,10 @@ import React from "react";
 import { Button } from "@/components/buttton";
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { CreateSale } from "./services/createSale";
-import { useSuccess } from "@/context/successContext";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function SaleInitiator() {
     const tabBarHeight = useBottomTabBarHeight();
@@ -29,13 +29,13 @@ export function SaleInitiator() {
         barcode: string;
     }
 
+    const insets = useSafeAreaInsets();
     const [barcodeInput, setBarcodeInput] = useState('');
     const [productList, setProductList] = useState<Product[]>([]);
     const [backendProductList, setBackendProductList] = useState<{ barcode: string; quantity: number }[]>([]);
     const [customerName, setCustomerName] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('Pix');
     const queryClient = useQueryClient();
-    const { displaySuccess } = useSuccess();
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
     const { mutateAsync: fetchProductByBarcode } = useMutation({
@@ -227,7 +227,7 @@ export function SaleInitiator() {
                         )}
                     />
                 </View>
-                <View className={Platform.OS === 'ios' ? 'mb-5' : ''}>
+                <View className={Platform.OS === 'ios' ? `mb-5` : `mb-${insets.bottom + 10}`}>
                     <View className="flex flex-row mt-5 items-center justify-between mb-3">
                         <Text className='text-white font-medium text-base'>Valor total</Text>
                         <Text className='text-white font-medium text-base'>{calculateTotal()}</Text>
