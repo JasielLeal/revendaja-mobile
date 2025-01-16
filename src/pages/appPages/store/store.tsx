@@ -7,12 +7,13 @@ import CreateStoreModal from "./components/createStoreModal";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FindStoreNameByUser } from "./services/FindStoreNameByUser";
+import io from "socket.io-client";
 
 type RootStackParamList = {
     Overview: undefined;
     Stock: undefined;
     Report: undefined;
-    Promotions: undefined;
+    PedingSale: undefined;
 };
 
 type StoreProps = {
@@ -65,9 +66,9 @@ export function Store({ children }: StoreProps) {
                                 Relatório
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Promotions")}>
-                            <Text className={`text-sm ${isActive("Promotions") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
-                                Promoções
+                        <TouchableOpacity onPress={() => navigation.navigate("PedingSale")}>
+                            <Text className={`text-sm ${isActive("PedingSale") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
+                                Vendas Pendentes
                             </Text>
                         </TouchableOpacity>
                     </View>

@@ -13,6 +13,7 @@ import { View } from "react-native";
 import { Image } from "react-native";
 import logo from "@/assets/logo.png"
 import { useState } from "react";
+import React from "react";
 
 
 export function CreateUser() {

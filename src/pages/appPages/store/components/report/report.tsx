@@ -7,6 +7,7 @@ import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import Select from "./components/select";
+import React from "react";
 
 
 export function Report() {

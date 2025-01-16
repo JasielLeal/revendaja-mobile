@@ -19,5 +19,7 @@ export type RootStackParamList = {
   UpdatePassword: { email: string };
   DetailsProductStock: { name; price; quantity; imgUrl; barcode };
   OurPlans: undefined;
+  PedingSale: undefined;
+  PedingSaleDetails: { sale: Sale };
   // Adicione outras rotas aqui se necessário
 };

@@ -9,7 +9,6 @@ import { SaleInitiator } from "@/pages/appPages/saleInitiator/saleInitiator";
 import { Overview } from "@/pages/appPages/store/components/overview/overview";
 import { Stock } from "@/pages/appPages/store/components/stock/stock";
 import { Report } from "@/pages/appPages/store/components/report/report";
-import { Promotions } from "@/pages/appPages/store/components/promotions/promotions";
 import { SaleDetails } from "@/pages/appPages/saleDetails/saleDetails";
 import { Tickets } from "@/pages/appPages/tickets/tickets";
 import { AddBankSlip } from "@/pages/appPages/tickets/components/addBankSlip";
@@ -18,6 +17,8 @@ import { Profile } from "@/pages/appPages/profile/profile";
 import { AddProductToStock } from "@/pages/appPages/store/components/stock/components/addProductToStock";
 import { DetailsProductStock } from "@/pages/appPages/store/components/stock/components/detailsProductStock";
 import { OurPlans } from "@/pages/appPages/profile/components/ourPlans";
+import { PedingSale } from "@/pages/appPages/store/components/pendingSale/pendingSale";
+import { PedingSaleDetails } from "@/pages/appPages/store/components/pendingSale/components/PendingSaleDetails";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -183,7 +184,7 @@ function StoreRoutes() {
             <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }} />
             <StorePages.Screen name="Stock" component={Stock} options={{ headerShown: false }} />
             <StorePages.Screen name="Report" component={Report} options={{ headerShown: false }} />
-            <StorePages.Screen name="Promotions" component={Promotions} options={{ headerShown: false }} />
+            <StorePages.Screen name="PedingSale" component={PedingSale} options={{ headerShown: false }} />
         </StorePages.Navigator>
     )
 }
@@ -194,14 +195,13 @@ export default function AppRoutes() {
         <Stack.Navigator>
             <Stack.Screen name="appRoutes" component={SubAppRoutes} options={{ headerShown: false }} />
             <Stack.Screen name="SaleDetails" component={SaleDetails} options={{ headerShown: false }} />
+            <Stack.Screen name="PedingSaleDetails" component={PedingSaleDetails} options={{ headerShown: false }} />
             <Stack.Screen name="tickets" component={Tickets} options={{ headerShown: false }} />
             <Stack.Screen name="AddBankSlip" component={AddBankSlip} options={{ headerShown: false }} />
             <Stack.Screen name="TicketsDetails" component={TicketsDetails} options={{ headerShown: false }} />
             <Stack.Screen name="AddProductToStock" component={AddProductToStock} options={{ headerShown: false }} />
             <Stack.Screen name="DetailsProductStock" component={DetailsProductStock} options={{ headerShown: false }} />
             <Stack.Screen name="OurPlans" component={OurPlans} options={{ headerShown: false }} />
-            
-
         </Stack.Navigator>
     )
 }

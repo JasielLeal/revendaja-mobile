@@ -37,8 +37,6 @@ export function SaleDetails({ route }: any) {
         setModalVisible(false)
     }
 
-   
-
     return (
         <View className='bg-bg w-full flex-1'>
             <View className='px-5 pt-16'>

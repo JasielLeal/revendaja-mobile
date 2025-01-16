@@ -2,6 +2,7 @@ import { Text } from "react-native";
 import { Store } from "../../store";
 import { View } from "react-native";
 import { Button } from "@/components/buttton";
+import React from "react";
 
 export function Overview() {
 
