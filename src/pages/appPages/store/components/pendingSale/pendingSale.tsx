@@ -135,7 +135,6 @@ export function PedingSale() {
         }[];
     }
 
-
     return (
         <>
             <Store>
@@ -143,52 +142,64 @@ export function PedingSale() {
                     <View className="flex flex-row items-center justify-between mt-7">
                         <Text className="text-white text-xl font-semibold">Vendas Pendentes</Text>
                     </View>
-                    <FlatList
-                        data={allStock}
-                        keyExtractor={(item) => item.id}
-                        style={Platform.OS === 'ios' ? { marginBottom: 345, marginTop: 10 } : { marginBottom: 320, marginTop: 10 }}
-                        renderItem={({ item }) => {
+                    {
+                        allStock.length != 0 ?
 
-                            return (
-                                <TouchableOpacity className="mt-5 flex flex-row items-center justify-between" onPress={() => handlePress(item)}>
-                                    <View className="flex items-center flex-row gap-5">
-                                        <View className="bg-forenground p-4 rounded-xl">
-                                            <Text className="text-white">
-                                                <Icon name='alarm' size={20} color={"#FF7100"} />
-                                            </Text>
-                                        </View>
-                                        <View>
-                                            <Text className="text-white">
-                                                {item.customer}
-                                            </Text>
-                                            <Text className="text-white font-medium">
-                                                R$ {item?.totalPrice}
-                                            </Text>
-                                            <Text className="text-textForenground">
-                                                {timeAgo(item.createdAt)}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    <View>
-                                        <Icon name="chevron-forward" size={25} color={"#FF7100"} />
-                                    </View>
-                                </TouchableOpacity>
-                            )
-                        }}
-                        onEndReached={() => {
-                            if (hasNextPage) {
-                                fetchNextPage();
-                            }
-                        }}
-                        onEndReachedThreshold={1}
-                        ListFooterComponent={() => {
-                            if (isFetchingNextPage) {
-                                return <ActivityIndicator size="small" color={"#FF7100"} />
-                            } else {
-                                return null;
-                            }
-                        }}
-                    />
+                            <FlatList
+                                data={allStock}
+                                keyExtractor={(item) => item.id}
+                                style={Platform.OS === 'ios' ? { marginBottom: 345, marginTop: 10 } : { marginBottom: 320, marginTop: 10 }}
+                                renderItem={({ item }) => {
+
+                                    return (
+                                        <TouchableOpacity className="mt-5 flex flex-row items-center justify-between" onPress={() => handlePress(item)}>
+                                            <View className="flex items-center flex-row gap-5">
+                                                <View className="bg-forenground p-4 rounded-xl">
+                                                    <Text className="text-white">
+                                                        <Icon name='alarm' size={20} color={"#FF7100"} />
+                                                    </Text>
+                                                </View>
+                                                <View>
+                                                    <Text className="text-white">
+                                                        {item.customer}
+                                                    </Text>
+                                                    <Text className="text-white font-medium">
+                                                        R$ {item?.totalPrice}
+                                                    </Text>
+                                                    <Text className="text-textForenground">
+                                                        {timeAgo(item.createdAt)}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <View>
+                                                <Icon name="chevron-forward" size={25} color={"#FF7100"} />
+                                            </View>
+                                        </TouchableOpacity>
+                                    )
+                                }}
+                                onEndReached={() => {
+                                    if (hasNextPage) {
+                                        fetchNextPage();
+                                    }
+                                }}
+                                onEndReachedThreshold={1}
+                                ListFooterComponent={() => {
+                                    if (isFetchingNextPage) {
+                                        return <ActivityIndicator size="small" color={"#FF7100"} />
+                                    } else {
+                                        return null;
+                                    }
+                                }}
+                            />
+
+                            :
+
+                            <View className=" flex items-center justify-center w-full h-4/5">
+                                <Text className="text-2xl font-semibold text-center text-textForenground">
+                                    Você ainda não tem vendas para confirmar :)
+                                </Text>
+                            </View>
+                    }
 
                 </View>
             </Store>
