@@ -2,9 +2,12 @@ import { Button } from "@/components/buttton";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { phoneNumberMaskDynamic } from "@/utils/formatNumberPhone";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { InvalidateQueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect } from "react";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { ApprovedSale } from "../services/ApprovedSale";
+import * as Notifications from "expo-notifications";
 
 export function PedingSaleDetails({ route }: any) {
 
@@ -80,10 +83,48 @@ export function PedingSaleDetails({ route }: any) {
             return `Há ${diffInMinutes} minutos`;
         } else if (diffInHours < 24) {
             return `Há ${diffInHours} horas`;
-        } else {
+        } else if (diffInHours > 48) {
             return `Há ${diffInDays} dias`;
         }
+        else {
+            return `Há ${diffInDays} dia`;
+        }
     }
+
+    Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+        }),
+    });
+
+    useEffect(() => {
+        if (Platform.OS === "ios") {
+            Notifications.requestPermissionsAsync();
+        }
+    }, []);
+
+    const saleId = sale.id
+    const queryClient = useQueryClient()
+
+    const { mutateAsync: ApprovedSaleFn } = useMutation({
+        mutationFn: () => ApprovedSale({ saleId }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["GetSalesPendingByStore"] as InvalidateQueryFilters);
+            navigation.goBack()
+        },
+        onError: async () => {
+            console.log("Algo deu de errado.")
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: "Erro na aprovação",
+                    body: "Algo deu errado ao tentar aprovar a venda.",
+                },
+                trigger: null, // Exibe imediatamente
+            });
+        }
+    })
 
     return (
         <>
@@ -159,7 +200,7 @@ export function PedingSaleDetails({ route }: any) {
                         ))}
                     </View>
                     <View>
-                        <Button name="Confirmar venda"/>
+                        <Button name="Confirmar venda" onPress={() => ApprovedSaleFn()} />
                     </View>
                 </View>
             </View>

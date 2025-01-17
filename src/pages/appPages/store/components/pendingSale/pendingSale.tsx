@@ -54,9 +54,13 @@ export function PedingSale() {
             return `Há ${diffInMinutes} minutos`;
         } else if (diffInHours < 24) {
             return `Há ${diffInHours} horas`;
+        } else if (diffInHours > 48) {
+            return `Há ${diffInHours} dias`;
         } else {
-            return `Há ${diffInDays} dias`;
+            return `Há ${diffInDays} dia`;
         }
+
+
     }
 
     const { socket } = useSocket()
@@ -143,14 +147,14 @@ export function PedingSale() {
                         data={allStock}
                         keyExtractor={(item) => item.id}
                         style={Platform.OS === 'ios' ? { marginBottom: 345, marginTop: 10 } : { marginBottom: 320, marginTop: 10 }}
-                        renderItem={({ item}) => {
+                        renderItem={({ item }) => {
 
                             return (
                                 <TouchableOpacity className="mt-5 flex flex-row items-center justify-between" onPress={() => handlePress(item)}>
                                     <View className="flex items-center flex-row gap-5">
                                         <View className="bg-forenground p-4 rounded-xl">
                                             <Text className="text-white">
-                                                 <Icon name='alarm' size={20} color={"#FF7100"} />
+                                                <Icon name='alarm' size={20} color={"#FF7100"} />
                                             </Text>
                                         </View>
                                         <View>
