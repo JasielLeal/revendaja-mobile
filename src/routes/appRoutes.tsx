@@ -178,7 +178,7 @@ function SubAppRoutes() {
     );
 }
 
-function StoreRoutes() {
+export function StoreRoutes() {
     return (
         <StorePages.Navigator>
             <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }} />

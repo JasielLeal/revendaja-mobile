@@ -4,11 +4,12 @@ import { phoneNumberMaskDynamic } from "@/utils/formatNumberPhone";
 import { useNavigation } from "@react-navigation/native";
 import { InvalidateQueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import {  Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { ApprovedSale } from "../services/ApprovedSale";
 import Toast from "react-native-toast-message";
 import { AxiosError } from "axios";
+import { DeleteSale } from "../services/DeleteSale";
 
 
 export function PedingSaleDetails({ route }: any) {
@@ -119,14 +120,48 @@ export function PedingSaleDetails({ route }: any) {
                 return; // Para evitar que outro Toast seja mostrado
             }
 
-            // Exibe toast genérico para outros erros
             Toast.show({
                 type: 'error',
-                text1: 'Falha na aprovação',
-                text2: axiosError?.response?.data?.error || 'Ocorreu um erro inesperado.',
+                text1: 'Falha no sistema',
+                text2: 'Ocorreu um erro inesperado.',
             });
+            return;
+
         },
     });
+
+    const { mutateAsync: DeleteSaleFn } = useMutation({
+        mutationFn: () => DeleteSale({ saleId }),
+        onSuccess: (response) => {
+            Toast.show({
+                type: 'error',
+                text1: 'Sucesso',
+                text2: response.data.message
+            });
+            queryClient.invalidateQueries(["GetSalesPendingByStore"] as InvalidateQueryFilters);
+            navigation.goBack();
+        },
+        onError: async (error) => {
+            const axiosError = error as AxiosError;
+            // Verifica se o status é 404
+            if (axiosError?.response?.status === 404) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Falha na aprovação',
+                    text2: axiosError?.response?.data?.error || 'Ocorreu um erro inesperado.',
+                });
+                return; // Para evitar que outro Toast seja mostrado
+            }
+            Toast.show({
+                type: 'error',
+                text1: 'Falha no sistema',
+                text2: 'Ocorreu um erro inesperado.',
+            });
+            return;
+
+        },
+
+    })
 
     return (
         <>
@@ -138,7 +173,7 @@ export function PedingSaleDetails({ route }: any) {
                                 <Icon name='chevron-back' size={20} color={"#fff"} />
                             </TouchableOpacity>
                             <Text className='text-white font-semibold'>Informações da Venda</Text>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => DeleteSaleFn()}>
                                 <Icon name='trash' size={20} color={"#dc2626"} />
                             </TouchableOpacity>
                         </View>

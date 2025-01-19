@@ -8,6 +8,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FindStoreNameByUser } from "./services/FindStoreNameByUser";
 import io from "socket.io-client";
+import { StoreRoutes } from "@/routes/appRoutes";
 
 type RootStackParamList = {
     Overview: undefined;
@@ -73,7 +74,7 @@ export function Store({ children }: StoreProps) {
                         </TouchableOpacity>
                     </View>
 
-                    {children}
+                    <StoreRoutes/>
                 </>
             ) : (
                 <>
