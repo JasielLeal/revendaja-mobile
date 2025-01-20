@@ -29,7 +29,6 @@ export function SaleDetails({ route }: any) {
         onError: () => {
 
         }
-
     })
 
     async function onSub() {

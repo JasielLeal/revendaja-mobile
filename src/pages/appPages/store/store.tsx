@@ -1,6 +1,6 @@
 import { Text, View, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute, RouteProp, NavigationProp } from "@react-navigation/native";
-import { ReactNode, useContext, useState } from "react";
+import { Children, ReactNode, useContext, useState } from "react";
 import AuthContext from "@/context/authContext";
 import { Button } from "@/components/buttton";
 import CreateStoreModal from "./components/createStoreModal";
@@ -74,7 +74,7 @@ export function Store({ children }: StoreProps) {
                         </TouchableOpacity>
                     </View>
 
-                    <StoreRoutes/>
+                    {children}
                 </>
             ) : (
                 <>

@@ -88,7 +88,7 @@ export function Stock() {
                             onChangeText={(text) => setSearchTerm(text)}
                         />
                     </View>
-                    <TouchableOpacity className="bg-forenground p-2 rounded-xl" onPress={openFilter}>
+                    <TouchableOpacity className={Platform.OS == 'ios' ? "bg-forenground p-3 rounded-xl" : "bg-forenground p-2 rounded-xl"} onPress={openFilter}>
                         <Icon name="filter" color={"#fff"} size={25} />
                     </TouchableOpacity>
                 </View>

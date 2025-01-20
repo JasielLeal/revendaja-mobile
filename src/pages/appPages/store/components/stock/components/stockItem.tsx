@@ -20,8 +20,6 @@ export function StockItem({ name, price, quantity, imageUrl, id, discount }: Sto
     const priceNumber = Number(price);
     const discountPercentage = discount ? calculatePercentage(priceNumber, discount).percentage : 0;
 
-    console.log(quantity)
-
     return (
         <Swipeable renderRightActions={() => <OptionsSwipeable id={id} discount={discount} />} overshootRight={false} rightThreshold={100}>
             <View className="mt-5 flex flex-row items-center gap-5 bg-bg">

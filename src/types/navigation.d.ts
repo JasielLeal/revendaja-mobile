@@ -1,5 +1,5 @@
 export type RootStackParamList = {
-  appRoutes: undefined;
+  appRoutes: { screen: string; params?: { screen: string } };
   Overview: undefined;
   Stock: undefined;
   Report: undefined;
@@ -21,5 +21,6 @@ export type RootStackParamList = {
   OurPlans: undefined;
   PedingSale: undefined;
   PedingSaleDetails: { sale: Sale };
+  AddCustomProduct: undefined;
   // Adicione outras rotas aqui se necessário
 };

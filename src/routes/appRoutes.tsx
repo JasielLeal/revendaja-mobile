@@ -19,6 +19,7 @@ import { DetailsProductStock } from "@/pages/appPages/store/components/stock/com
 import { OurPlans } from "@/pages/appPages/profile/components/ourPlans";
 import { PedingSale } from "@/pages/appPages/store/components/pendingSale/pendingSale";
 import { PedingSaleDetails } from "@/pages/appPages/store/components/pendingSale/components/PendingSaleDetails";
+import { AddCustomProductToStock } from "@/pages/appPages/store/components/stock/components/addCustomProductToStock";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -202,6 +203,7 @@ export default function AppRoutes() {
             <Stack.Screen name="AddProductToStock" component={AddProductToStock} options={{ headerShown: false }} />
             <Stack.Screen name="DetailsProductStock" component={DetailsProductStock} options={{ headerShown: false }} />
             <Stack.Screen name="OurPlans" component={OurPlans} options={{ headerShown: false }} />
+            <Stack.Screen name="AddCustomProduct" component={AddCustomProductToStock} options={{ headerShown: false }}/>
         </Stack.Navigator>
     )
 }

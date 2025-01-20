@@ -73,7 +73,9 @@ export function AddProductToStock() {
                     <Icon name='chevron-back' size={20} color={"#fff"} />
                 </TouchableOpacity>
                 <Text className='text-white font-semibold'>Adicionar produto</Text>
-                <Text className='text-white w-[33px]'></Text>
+                <TouchableOpacity className='text-white'>
+                    <Icon name='add' size={20} color={"#fff"} onPress={() => navigate.push("AddCustomProduct")} />
+                </TouchableOpacity>
             </View>
             <View className="my-5">
                 <Input

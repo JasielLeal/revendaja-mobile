@@ -1,4 +1,4 @@
-import { ImageBackground, View, Image, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { ImageBackground, View, Image, Text, TextInput, TouchableOpacity, ScrollView, Platform } from "react-native";
 import bg from '@/assets/bg.png';
 import logo from "@/assets/logo.png"
 import AuthContext from "@/context/authContext";
@@ -52,7 +52,7 @@ export function Login() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <>
                                         <TextInput
-                                            className="bg-[#202020] py-3 px-3 rounded-xl w-full text-white"
+                                            className={Platform.OS == 'ios' ?  "bg-[#202020] py-4 px-4 rounded-xl w-full text-white" : "bg-[#202020] py-3 px-3 rounded-xl w-full text-white"}
                                             placeholder="seuemail@gmail.com"
                                             placeholderTextColor={'#7D7D7D'}
                                             keyboardType="email-address"
@@ -73,7 +73,7 @@ export function Login() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <View >
                                         <TextInput
-                                            className="bg-[#202020] py-3 px-3 rounded-xl w-full text-white"
+                                            className={Platform.OS == 'ios' ?  "bg-[#202020] py-4 px-4 rounded-xl w-full text-white" : "bg-[#202020] py-3 px-3 rounded-xl w-full text-white"}
                                             placeholder="Sua senha"
                                             placeholderTextColor={'#7D7D7D'}
                                             keyboardType="default"
