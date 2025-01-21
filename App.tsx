@@ -13,6 +13,7 @@ import { ExpoTokenProvider } from "@/context/expoTokenContext";
 import * as Notifications from "expo-notifications";
 import { Platform, View } from "react-native";
 import Toast, { BaseToast } from 'react-native-toast-message';
+import { NotificationProvider } from "@/context/NotificationContext";
 
 export default function App() {
 
@@ -37,26 +38,30 @@ export default function App() {
         <QueryClientProvider client={client}>
           <NavigationContainer>
             <SuccessProvider>
-              <AuthProvider>
-                <ExpoTokenProvider>
-                  <SocketProvider>
-                    <StatusBar backgroundColor="#000" style="light" />
-                    <Routes />
+              <NotificationProvider>
+                <AuthProvider>
+                  <ExpoTokenProvider>
+                    <SocketProvider>
+
+                      <StatusBar backgroundColor="#000" style="light" />
+                      <Routes />
                       <Toast
                         config={{
                           error: (props) => (
                             <BaseToast
                               {...props}
-                              style={{ borderLeftColor: '#000', width: 'auto', marginHorizontal: 20, borderRadius: 15}}
+                              style={{ borderLeftColor: '#000', width: 'auto', marginHorizontal: 20, borderRadius: 15 }}
                               text1Style={{ fontSize: 16, fontWeight: 'bold', }}
-                              text2Style={{ fontSize: 14, color: 'gray' }}                    
+                              text2Style={{ fontSize: 14, color: 'gray' }}
                             />
                           ),
                         }}
-                      />     
-                  </SocketProvider>
-                </ExpoTokenProvider>
-              </AuthProvider>
+                      />
+
+                    </SocketProvider>
+                  </ExpoTokenProvider>
+                </AuthProvider>
+              </NotificationProvider>
             </SuccessProvider>
           </NavigationContainer>
         </QueryClientProvider>

@@ -227,7 +227,7 @@ export function SaleInitiator() {
                         )}
                     />
                 </View>
-                <View className={Platform.OS === 'ios' ? `mb-5` : `mb-${insets.bottom + 10}`}>
+                <View className={Platform.OS === 'ios' ? `mb-5` : `mb-${insets.bottom}`}>
                     <View className="flex flex-row mt-5 items-center justify-between mb-3">
                         <Text className='text-white font-medium text-base'>Valor total</Text>
                         <Text className='text-white font-medium text-base'>{calculateTotal()}</Text>

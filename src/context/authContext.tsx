@@ -8,6 +8,7 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import { useNotification } from "./NotificationContext";
 
 interface AuthContextData {
   signed: boolean;
@@ -43,10 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function loadStoragedData() {
       try {
 
-
         const storagedToken = await AsyncStorage.getItem('token');
         const storagedUser = await AsyncStorage.getItem('user');
-
+      
         if (storagedToken && storagedUser) {
           const decodedToken = jwtDecode(storagedToken);
 
@@ -79,14 +79,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       const response = await Session(dataValue);
       const { data } = response;
-  
+
       setUser(data.user);
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
     } catch (e: any) {
       console.log(e);
       console.log(JSON.stringify(e, null, 4));
-  
+
       if (e.response?.status === 401) {
         // Credenciais inválidas
         Alert.alert(
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   }
-  
+
 
   async function logoutFc() {
     await AsyncStorage.removeItem('token');

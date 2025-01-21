@@ -11,6 +11,10 @@ import { CalculateMonthlyBalance } from "./services/calculateMonthlyBalance";
 import { formatCurrency } from "@/utils/formatCurrency";
 import React from "react";
 import { NotificationsScreen } from "./components/notificationsScreen";
+import { useNotification } from "@/context/NotificationContext";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/navigation";
 
 export function Home() {
 
@@ -29,6 +33,9 @@ export function Home() {
         queryFn: () => CalculateMonthlyBalance(month)
     })
 
+    const { clearNotifications } = useNotification()
+    const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
+
     return (
         <>
             <View className="bg-[#121212] h-screen w-full">
@@ -45,10 +52,9 @@ export function Home() {
                                 </Text>
                             </View>
                         </View>
-                        <View className="flex flex-row items-center gap-5">
+                        <TouchableOpacity className="flex flex-row items-center gap-5" onPress={clearNotifications}>
                             <NotificationsScreen />
-                            <Menu />
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View className="mt-10">
                         {
@@ -111,7 +117,7 @@ export function Home() {
                     {
                         Platform.OS == 'ios' ?
                             <View className="mt-5 bg-secondarySecondary w-[200px] p-2 rounded-full">
-                                <Text className="text-center text-white font-medium">
+                                <Text className="text-center text-white font-medium" onPress={() => navigate.navigate("Extract")}>
                                     Ver Extrato
                                 </Text>
                             </View>
@@ -125,7 +131,7 @@ export function Home() {
                 </View>
                 <ForEveryDayLife />
                 <RecentSales />
-                
+
             </View>
         </>
     )

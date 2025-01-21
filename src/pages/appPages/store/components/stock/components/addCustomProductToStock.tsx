@@ -116,7 +116,7 @@ export function AddCustomProductToStock() {
                 </View>
 
                 <View className="mt-5">
-                    <Text className="text-white font-medium mb-2 text-lg">
+                    <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-2 text-sm"}>
                         Nome
                     </Text>
                     <Controller
@@ -134,7 +134,7 @@ export function AddCustomProductToStock() {
                             />
                         )}
                     />
-                    <Text className="text-white font-medium mt-5 mb-2 text-lg">
+                    <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-4 mt-2 text-sm"}>
                         Descrição
                     </Text>
                     <Controller
@@ -151,7 +151,7 @@ export function AddCustomProductToStock() {
                             />
                         )}
                     />
-                    <Text className="text-white font-medium mt-5 mb-2 text-lg">
+                    <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-4 mt-2 text-sm"}>
                         Codigo de barras
                     </Text>
 
@@ -160,8 +160,8 @@ export function AddCustomProductToStock() {
                         name="barcode"
                         render={({ field: { onChange, value } }) => (
                             <Input
-                                name="Adicione um codigo de barras que vai ser vinculado ao produto"
-                                placeholder="Adicione um codigo de barras que vai ser vinculado ao produto"
+                                name="Adicione um codigo de barras "
+                                placeholder="Adicione um codigo de barras"
                                 placeholderTextColor="#7D7D7D"
                                 onChangeText={onChange}
                                 value={value}
@@ -175,7 +175,7 @@ export function AddCustomProductToStock() {
                     <View className="mt-5 flex flex-row justify-between w-full">
                         <View className="w-2/5">
                             <View className="flex flex-row items-center justify-between mb-2 ">
-                                <Text className="text-white font-medium text-lg">
+                                <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-2 mt-2 text-sm"}>
                                     Preço Original
                                 </Text>
                                 <TouchableOpacity className="bg-primaryPrimary px-[9] py-1 rounded-full">
@@ -203,7 +203,7 @@ export function AddCustomProductToStock() {
                         </View>
                         <View className="w-2/5">
                             <View className="flex flex-row items-center justify-between mb-2 ">
-                                <Text className="text-white font-medium text-lg">
+                                <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-2 mt-2 text-sm"}>
                                     Preço Atual
                                 </Text>
                                 <TouchableOpacity className="bg-primaryPrimary px-[9] py-1 rounded-full">
@@ -232,7 +232,7 @@ export function AddCustomProductToStock() {
                     </View>
 
                     <View className="w-full">
-                        <Text className="text-white font-medium mt-5 mb-2 text-lg">
+                        <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-4 mt-4 text-sm"}>
                             Quantidade do estoque
                         </Text>
                         <Controller
@@ -246,7 +246,7 @@ export function AddCustomProductToStock() {
                     </View>
 
                     <View>
-                        <Text className="text-white font-medium mt-5 mb-2 text-lg">
+                        <Text className={Platform.OS == 'ios' ? "text-white font-medium mb-2 text-lg" : "text-white font-medium mb-4 mt-2 text-sm"}>
                             Adicione uma imagem
                         </Text>
                         <TouchableOpacity className="text-white font-medium text-lg bg-forenground p-4 rounded-xl flex items-center justify-center" onPress={openGallery}>

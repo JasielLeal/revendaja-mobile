@@ -7,11 +7,13 @@ import { GetSalesPendingByStore } from "./services/GetSalesPendingByStore";
 import { useSocket } from "@/context/SocketContext";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/navigation";
-
+import { useNotification } from "@/context/NotificationContext";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 export function PedingSale() {
 
     const pageSize = 10;
+
 
     const { data, hasNextPage, fetchNextPage, isFetchingNextPage, isPending } = useInfiniteQuery({
         queryKey: ["GetSalesPendingByStore"],
@@ -60,7 +62,6 @@ export function PedingSale() {
             return `Há ${diffInDays} dia`;
         }
 
-
     }
 
     const { socket } = useSocket()
@@ -70,13 +71,16 @@ export function PedingSale() {
         // Ouve o evento de atualização de vendas
         socket?.on("atualizarVendas", (novaVenda) => {
             console.log("Nova venda recebida:", novaVenda);
-            queryClient.invalidateQueries(["GetSalesPendingByStore"] as InvalidateQueryFilters); // Atualiza a lista
+
+            // Invalida a consulta de vendas pendentes para atualizar a lista de vendas
+            queryClient.invalidateQueries(["GetSalesPendingByStore"] as InvalidateQueryFilters);
         });
 
+        // Remover o listener ao desmontar o componente
         return () => {
-            socket?.off("atualizarVendas"); // Remove o listener ao desmontar o componente
+            socket?.off("atualizarVendas");
         };
-    }, [socket]);
+    }, [socket, queryClient]);
 
     const navigate = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -152,29 +156,58 @@ export function PedingSale() {
                                 renderItem={({ item }) => {
 
                                     return (
-                                        <TouchableOpacity className="mt-5 flex flex-row items-center justify-between" onPress={() => handlePress(item)}>
-                                            <View className="flex items-center flex-row gap-5">
-                                                <View className="bg-forenground p-4 rounded-xl">
-                                                    <Text className="text-white">
-                                                        <Icon name='alarm' size={20} color={"#FF7100"} />
-                                                    </Text>
+                                        Platform.OS === 'ios' ?
+
+                                            <TouchableOpacity className="mt-5 flex flex-row items-center justify-between" onPress={() => handlePress(item)}>
+                                                <View className="flex items-center flex-row gap-5">
+                                                    <View className="bg-forenground p-4 rounded-xl">
+                                                        <Text className="text-white">
+                                                            <Icon name='alarm' size={20} color={"#FF7100"} />
+                                                        </Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text className="text-white">
+                                                            {item.customer}
+                                                        </Text>
+                                                        <Text className="text-white font-medium">
+                                                            R$ {item?.totalPrice}
+                                                        </Text>
+                                                        <Text className="text-textForenground">
+                                                            {timeAgo(item.createdAt)}
+                                                        </Text>
+                                                    </View>
                                                 </View>
                                                 <View>
-                                                    <Text className="text-white">
-                                                        {item.customer}
-                                                    </Text>
-                                                    <Text className="text-white font-medium">
-                                                        R$ {item?.totalPrice}
-                                                    </Text>
-                                                    <Text className="text-textForenground">
-                                                        {timeAgo(item.createdAt)}
-                                                    </Text>
+                                                    <Icon name="chevron-forward" size={25} color={"#FF7100"} />
                                                 </View>
-                                            </View>
-                                            <View>
-                                                <Icon name="chevron-forward" size={25} color={"#FF7100"} />
-                                            </View>
-                                        </TouchableOpacity>
+                                            </TouchableOpacity>
+
+                                            :
+
+                                            <TouchableOpacity className="mt-5 flex flex-row items-center justify-between" onPress={() => handlePress(item)}>
+                                                <View className="flex items-center flex-row gap-5">
+                                                    <View className="bg-forenground p-4 rounded-xl">
+                                                        <Text className="text-white">
+                                                            <Icon name='alarm' size={20} color={"#FF7100"} />
+                                                        </Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text className="text-white text-xs">
+                                                            {item.customer}
+                                                        </Text>
+                                                        <Text className="text-white font-medium text-sm">
+                                                            R$ {formatCurrency(String(item?.totalPrice))}
+                                                        </Text>
+                                                        <Text className="text-textForenground text-xs">
+                                                            {timeAgo(item.createdAt)}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                                <View>
+                                                    <Icon name="chevron-forward" size={25} color={"#FF7100"} />
+                                                </View>
+                                            </TouchableOpacity>
+
                                     )
                                 }}
                                 onEndReached={() => {
