@@ -1,21 +1,15 @@
 import { Text, View, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute, RouteProp, NavigationProp } from "@react-navigation/native";
-import { Children, ReactNode, useContext, useState } from "react";
+import { ReactNode, useContext, useState } from "react";
 import AuthContext from "@/context/authContext";
 import { Button } from "@/components/buttton";
 import CreateStoreModal from "./components/createStoreModal";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FindStoreNameByUser } from "./services/FindStoreNameByUser";
-import io from "socket.io-client";
-import { StoreRoutes } from "@/routes/appRoutes";
+import { RootStackParamList } from "@/types/navigation";
 
-type RootStackParamList = {
-    Overview: undefined;
-    Stock: undefined;
-    Report: undefined;
-    PedingSale: undefined;
-};
+
 
 type StoreProps = {
     children: ReactNode;
@@ -27,7 +21,12 @@ export function Store({ children }: StoreProps) {
     const { user } = useContext(AuthContext);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const isActive = (routeName: keyof RootStackParamList) => route.name === routeName;
+    const isActive = (routeName: string) => {
+        if (route.params && 'screen' in route.params) {
+            return route.params.screen === routeName;
+        }
+        return false;
+    };
 
     const { data: subdomain } = useQuery({
         queryKey: ["FindStoreNameByUser"],
@@ -52,22 +51,42 @@ export function Store({ children }: StoreProps) {
                         }
                     </Text>
                     <View className="flex flex-row items-center justify-between px-5">
-                        <TouchableOpacity onPress={() => navigation.navigate("Overview")}>
+                        <TouchableOpacity onPress={() => navigation.navigate('appRoutes', {
+                            screen: 'Store',
+                            params: {
+                                screen: 'Overview'
+                            }
+                        })}>
                             <Text className={`text-sm ${isActive("Overview") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
                                 Overview
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Stock")}>
+                        <TouchableOpacity onPress={() => navigation.navigate('appRoutes', {
+                            screen: 'Store',
+                            params: {
+                                screen: 'Stock'
+                            }
+                        })}>
                             <Text className={`text-sm ${isActive("Stock") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
                                 Estoque
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("Report")}>
+                        <TouchableOpacity onPress={() => navigation.navigate('appRoutes', {
+                            screen: 'Store',
+                            params: {
+                                screen: 'Report'
+                            }
+                        })}>
                             <Text className={`text-sm ${isActive("Report") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
                                 Relatório
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => navigation.navigate("PedingSale")}>
+                        <TouchableOpacity onPress={() => navigation.navigate('appRoutes', {
+                            screen: 'Store',
+                            params: {
+                                screen: 'PedingSale'
+                            }
+                        })}>
                             <Text className={`text-sm ${isActive("PedingSale") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
                                 Vendas Pendentes
                             </Text>
@@ -88,7 +107,8 @@ export function Store({ children }: StoreProps) {
                         open={isModalOpen} // Exibe animação ao criar loja
                     />
                 </>
-            )}
-        </View>
+            )
+            }
+        </View >
     );
 }

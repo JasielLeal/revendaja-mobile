@@ -30,6 +30,8 @@ export default function App() {
     if (Platform.OS === "ios") {
       Notifications.requestPermissionsAsync();
     }
+
+    
   }, []);
   return (
     <>

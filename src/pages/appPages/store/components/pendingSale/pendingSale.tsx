@@ -141,8 +141,8 @@ export function PedingSale() {
 
     return (
         <>
-            <Store>
-                <View className="px-5">
+         
+                <View className="px-5 flex-1 bg-bg">
                     <View className="flex flex-row items-center justify-between mt-7">
                         <Text className="text-white text-xl font-semibold">Vendas Pendentes</Text>
                     </View>
@@ -235,7 +235,7 @@ export function PedingSale() {
                     }
 
                 </View>
-            </Store>
+          
         </>
     )
 }

@@ -72,13 +72,14 @@ export function Stock() {
     };
 
     return (
-        <Store>
-            <View className="px-5">
+
+        <>
+            <View className="px-5 flex-1 bg-bg">
                 <View className="flex flex-row items-center justify-between mt-5">
                     <Text className="text-white text-xl font-semibold">Estoque</Text>
-                    <Button name="Adicionar Produto" onPress={()=> navigate.navigate("AddProductToStock")}/>
+                    <Button name="Adicionar Produto" onPress={() => navigate.navigate("AddProductToStock")} />
                 </View>
-                
+
                 <View className="mt-5 flex flex-row items-center justify-between w-full">
                     <View className="w-5/6">
                         <Input
@@ -102,7 +103,7 @@ export function Stock() {
                         <FlatList
                             data={allStock}
                             keyExtractor={(item) => item.id}
-                            style={Platform.OS==='ios' ? { marginBottom: 345, marginTop: 10 } : {marginBottom: 320, marginTop: 10}}
+                            style={Platform.OS === 'ios' ? { marginBottom: 345, marginTop: 10 } : { marginBottom: 320, marginTop: 10 }}
                             renderItem={({ item }) => {
                                 const productData = item.customProduct || item.product;
 
@@ -138,6 +139,7 @@ export function Stock() {
                 }
             </View>
             <Filter open={filter} onSelectOption={handleFilterSelect} onClose={closeFilter} />
-        </Store>
+
+        </>
     );
 }

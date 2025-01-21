@@ -39,8 +39,8 @@ export function Report() {
 
     return (
         <>
-            <Store>
-                <View className="px-5">
+           
+                <View className="px-5 flex-1 bg-bg">
                     <View className="flex flex-row items-center justify-between mt-5">
                         <Text className="text-white text-xl font-semibold">Despesas</Text>
                         <Button name="Adicionar Despesa" />
@@ -61,7 +61,7 @@ export function Report() {
                         />
                     </View>
                 </View>
-            </Store>
+           
         </>
     )
 }

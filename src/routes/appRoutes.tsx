@@ -20,6 +20,8 @@ import { OurPlans } from "@/pages/appPages/profile/components/ourPlans";
 import { PedingSale } from "@/pages/appPages/store/components/pendingSale/pendingSale";
 import { PedingSaleDetails } from "@/pages/appPages/store/components/pendingSale/components/PendingSaleDetails";
 import { AddCustomProductToStock } from "@/pages/appPages/store/components/stock/components/addCustomProductToStock";
+import { NavigationContainer } from '@react-navigation/native';
+import { Store } from "@/pages/appPages/store/store";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -181,12 +183,17 @@ function SubAppRoutes() {
 
 export function StoreRoutes() {
     return (
-        <StorePages.Navigator>
-            <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }} />
-            <StorePages.Screen name="Stock" component={Stock} options={{ headerShown: false }} />
-            <StorePages.Screen name="Report" component={Report} options={{ headerShown: false }} />
-            <StorePages.Screen name="PedingSale" component={PedingSale} options={{ headerShown: false }} />
-        </StorePages.Navigator>
+        
+            <Store>
+                <StorePages.Navigator>
+                    <StorePages.Screen name="Overview" component={Overview} options={{ headerShown: false }} />
+                    <StorePages.Screen name="Stock" component={Stock} options={{ headerShown: false }} />
+                    <StorePages.Screen name="Report" component={Report} options={{ headerShown: false }} />
+                    <StorePages.Screen name="PedingSale" component={PedingSale} options={{ headerShown: false }} />
+                </StorePages.Navigator>
+            </Store>
+     
+
     )
 }
 
@@ -203,7 +210,7 @@ export default function AppRoutes() {
             <Stack.Screen name="AddProductToStock" component={AddProductToStock} options={{ headerShown: false }} />
             <Stack.Screen name="DetailsProductStock" component={DetailsProductStock} options={{ headerShown: false }} />
             <Stack.Screen name="OurPlans" component={OurPlans} options={{ headerShown: false }} />
-            <Stack.Screen name="AddCustomProduct" component={AddCustomProductToStock} options={{ headerShown: false }}/>
+            <Stack.Screen name="AddCustomProduct" component={AddCustomProductToStock} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }

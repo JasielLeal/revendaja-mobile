@@ -168,9 +168,9 @@ export function PedingSaleDetails({ route }: any) {
     })
 
     return (
-        <>
-            <View className='bg-bg w-full flex-1'>
-                <View className={Platform.OS === 'ios' ? `mb-7 px-5 pt-16 flex justify-between flex-1` : `px-5 pt-16 flex justify-between flex-1 mb-${insets.bottom + 5}`} >
+      
+            <View className='bg-bg flex-1'>
+                <View className={Platform.OS === 'ios' ? `mb-7 px-5 pt-16 flex justify-between ` : `px-5 pt-16 flex justify-between flex-1 mb-${insets.bottom + 5} bg-bg`} >
                     <View>
                         <View className='flex flex-row justify-between'>
                             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -310,6 +310,6 @@ export function PedingSaleDetails({ route }: any) {
                     </View>
                 </View>
             </View>
-        </>
+       
     )
 }
