@@ -1,7 +1,6 @@
 import AuthContext from "@/context/authContext";
 import { useContext, useEffect, useState } from "react";
 import { Platform, Text, View } from "react-native";
-import { Menu } from "./components/menu";
 import Icon from 'react-native-vector-icons/Ionicons'
 import { TouchableOpacity } from "react-native";
 import { ForEveryDayLife } from "./components/forEveryDayLife";

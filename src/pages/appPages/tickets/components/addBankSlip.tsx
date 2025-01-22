@@ -15,6 +15,7 @@ import { AddBankSlipSchema } from '../schemas/AddBankSlipSchema'
 import { InvalidateQueryFilters, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CreateBankSlip } from '../services/CreateBankSlip'
 import { useSuccess } from '@/context/successContext'
+import React from 'react'
 
 export function AddBankSlip() {
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();

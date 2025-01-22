@@ -7,6 +7,7 @@ import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { DeleteById } from "../services/DeleteById";
 import { useSuccess } from "@/context/successContext";
+import React from "react";
 export function TicketsDetails({ route }: any) {
 
     const { ticket } = route.params;
@@ -25,11 +26,23 @@ export function TicketsDetails({ route }: any) {
         }
     })
 
+    function dateSelece(date: Date) {
+        if (date == new Date()) {
+            return 'Vence Hoje'
+        }
+        if (date > new Date) {
+            return formatDate(String(date))
+        } else {
+            return 'Vencido'
+        }
+    }
+
     return (
         <>
             <View className='bg-bg w-full h-screen'>
                 <View className='px-5 pt-16'>
-                    <View className='flex flex-row justify-between'>
+                    <View>
+                        <View className='flex flex-row justify-between'>
                         <TouchableOpacity onPress={() => navigation.goBack()}>
                             <Icon name='chevron-back' size={20} color={"#fff"} />
                         </TouchableOpacity>
@@ -42,12 +55,12 @@ export function TicketsDetails({ route }: any) {
                         <Text className="bg-[#303030] p-5 rounded-full">
                             <Icon name='receipt' size={20} color={"#FF7100"} />
                         </Text>
-                        <Text className='text-white font-medium mt-5'>Natura</Text>
+                        <Text className='text-white font-medium mt-5'>{ticket.companyName}</Text>
                         <Text className='text-white font-semibold text-xl'>
                             R$ {formatCurrency(String(ticket.value))}
                         </Text>
                     </View>
-                    <View className='bg-[#303030] p-3 rounded-xl mt-5 flex justify-between h-[180px]'>
+                    <View className='p-3 rounded-xl mt-5 flex justify-between h-[180px]'>
                         <View className="flex gap-2">
                             <View className='flex flex-row items-center justify-between'>
                                 <Text className='text-white'>Vencimento</Text>
@@ -55,16 +68,24 @@ export function TicketsDetails({ route }: any) {
                             </View>
                             <View className='flex flex-row items-center justify-between'>
                                 <Text className='text-white'>Status</Text>
-                                <Text className='text-green-500 capitalize'>A vencer</Text>
+                                {
+                                    dateSelece(ticket.dueDate) === 'Vencido' ?
+                                        <Text className='text-red-500 capitalize'>Vencido</Text>
+                                        :
+                                        <Text className='text-green-500 capitalize'>A vencer</Text>
+                                }
                             </View>
                             <View className='flex flex-row items-center justify-between'>
                                 <Text className='text-white'>Empresa</Text>
                                 <Text className='text-textForenground capitalize'>{ticket.companyName}</Text>
                             </View>
                         </View>
-                        <Button name="Dar Baixa" />
+                        
                     </View>
+                    </View>
+                    <Button name="Dar Baixa" />
                 </View>
+                
             </View>
         </>
     )

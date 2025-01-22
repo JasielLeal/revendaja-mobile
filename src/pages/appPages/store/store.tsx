@@ -15,6 +15,8 @@ type StoreProps = {
     children: ReactNode;
 };
 
+
+
 export function Store({ children }: StoreProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const route = useRoute<RouteProp<RootStackParamList>>();
@@ -22,16 +24,16 @@ export function Store({ children }: StoreProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const isActive = (routeName: string) => {
-        if (route.params && 'screen' in route.params) {
-            return route.params.screen === routeName;
-        }
-        return false;
+        const screen = route.params?.screen || "Overview";
+        return screen === routeName;
     };
+    
 
     const { data: subdomain } = useQuery({
         queryKey: ["FindStoreNameByUser"],
         queryFn: FindStoreNameByUser
     })
+
 
     return (
         <View className="bg-bg h-screen w-full">

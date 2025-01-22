@@ -1,4 +1,4 @@
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from "react-native";
 import { useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListAllStoreByStore } from "./services/ListAllStoreByStore";
@@ -9,11 +9,12 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import * as Clipboard from "expo-clipboard";
 
 export function Tickets() {
 
     const [activeButton, setActiveButton] = useState<string>("Todos");
-
+    33
     const buttons = ["Todos", "A vencer", "Vencidos"];
 
     const pageSize = 10
@@ -43,11 +44,36 @@ export function Tickets() {
         navigate.navigate('TicketsDetails', { ticket })
     }
 
+    interface bankSlip {
+        id: string,
+        storeId: string,
+        companyName: string,
+        barcode: string,
+        value: number,
+        dueDate: Date
+    }
+
+    async function clipboardTicket(barcode: string) {
+        await Clipboard.setStringAsync(barcode); // Copia o texto para a área de transferência
+        Alert.alert("Sucesso", "Código de barras copiado para a área de transferência!");
+    }
+
+    function dateSelece(date: Date) {
+        if (date == new Date()) {
+            return 'Vence Hoje'
+        }
+        if (date > new Date) {
+            return formatDate(String(date))
+        } else {
+            return 'Vencido'
+        }
+    }
+
     return (
         <View className="bg-bg flex-1 w-full px-5">
             <View>
                 <View className="flex flex-row items-center mt-16 mb-5 justify-between">
-                    <TouchableOpacity onPress={() => navigate.navigate("appRoutes")}>
+                    <TouchableOpacity onPress={() => navigate.goBack()}>
                         <Icon name="chevron-back" color={"#fff"} size={20} />
                     </TouchableOpacity>
                     <Text className="text-white font-medium text-lg text-center ">Boletos</Text>
@@ -55,71 +81,59 @@ export function Tickets() {
                         <Icon name="add" color={"#fff"} size={20} />
                     </TouchableOpacity>
                 </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-around", marginVertical: 10 }}>
-                    {buttons.map((button) => (
-                        <TouchableOpacity
-                            key={button}
-                            onPress={() => setActiveButton(button)}
-                            style={{
-                                padding: 10,
-                                borderRadius: 10,
-                                backgroundColor: activeButton === button ? "#FF7100" : "",
-                                borderColor: activeButton === button ? "" : "#ADADAD",
-                                borderWidth: 1,
-                                width: 90,
-                                height: 40,
-                                display: "flex",
-                                alignItems: "center"
-                            }}
-                        >
-                            <Text style={{ color: activeButton === button ? "#fff" : "#ADADAD" }}>
-                                {button}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+
             </View>
 
             <View>
                 <FlatList
                     data={allBankSlips}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item: bankSlip) => item.id}
                     style={{ marginBottom: 180 }}
                     renderItem={({ item }) => (
-                        <TouchableOpacity onPress={() => handlePress(item)}>
-                            <View className="bg-forenground p-3 mt-5 rounded-xl">
-                                <View className="flex flex-row">
-                                    <Text className="text-white bg-primaryPrimary p-2 rounded-xl">
+                        <TouchableOpacity
+                            className="bg-forenground p-4 rounded-xl mt-5"
+                            onPress={() => handlePress(item)}
+                        >
+                            <View className="flex flex-row items-start justify-between">
+                                <View>
+                                    <Text className="text-textForenground">
                                         {item.companyName}
                                     </Text>
-                                    <Text>
+                                    <Text className="text-white font-semibold text-2xl">
+                                        R$ {formatCurrency(String(item.value))}
+                                    </Text>
+                                </View>
+                                {
+                                    dateSelece(item.dueDate) == 'Vencido' ?
+                                        <Text className="text-red-500">
+                                            {
+                                                dateSelece(item.dueDate)
+                                            }
+                                        </Text>
+                                        :
+                                        <Text className="text-white">
+                                            {
+                                                dateSelece(item.dueDate)
+                                            }
+                                        </Text>
+                                }
 
-                                    </Text>
-                                </View>
-                                <View className="flex flex-row items-center justify-between mt-3">
-                                    <Text className="text-white font-semibold">
-                                        Vencimento
-                                    </Text>
-                                    <Text className="text-textForenground font-medium">
-                                        {formatDate(item.dueDate)}
-                                    </Text>
-                                </View>
-                                <View className="flex flex-row items-center justify-between mt-4">
-                                    <Text className="text-white font-semibold">
-                                        Valor
-                                    </Text>
-                                    <Text className="text-textForenground font-medium">
-                                        R$ {formatCurrency(String(item?.value))}
-                                    </Text>
-                                </View>
-                                <View className="flex flex-row items-center justify-between mt-3">
-                                    <Text className="text-white font-semibold">
-                                        Status
-                                    </Text>
-                                    <Text className="bg-green-500 p-2 text-bg rounded-full">
-                                        A vencer
-                                    </Text>
-                                </View>
+                            </View>
+                            <View className="mt-5 flex flex-row justify-between items-center relative">
+                                <Text
+                                    className="bg-bg p-2 rounded-xl text-white w-5/6"
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                >
+                                    {item.barcode}
+                                </Text>
+                                {/* Botão de copiar posicionado absolutamente */}
+                                <TouchableOpacity
+                                    onPress={() => clipboardTicket(item.barcode)}
+                                    className="absolute right-0"
+                                >
+                                    <Icon name="copy-outline" size={25} color={"#fff"} />
+                                </TouchableOpacity>
                             </View>
                         </TouchableOpacity>
                     )}
@@ -131,12 +145,13 @@ export function Tickets() {
                     onEndReachedThreshold={1}
                     ListFooterComponent={() => {
                         if (isFetchingNextPage) {
-                            return <ActivityIndicator size="small" color={"#FF7100"} />
+                            return <ActivityIndicator size="small" color={"#FF7100"} />;
                         } else {
                             return null;
                         }
                     }}
                 />
+
             </View>
         </View>
     )
