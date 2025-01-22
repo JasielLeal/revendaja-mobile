@@ -26,7 +26,7 @@ interface User {
   role: string;
   email: string;
   token: string;
-  avatar: string;
+  image: string;
   status: string
   userHasStore: boolean;
   plan: string

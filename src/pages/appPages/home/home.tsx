@@ -15,6 +15,7 @@ import { useNotification } from "@/context/NotificationContext";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import { Avatar } from "@/components/avatart";
 
 export function Home() {
 
@@ -42,7 +43,7 @@ export function Home() {
                 <View className="pt-16 px-7 bg-primaryPrimary pb-5 rounded-b-3xl ">
                     <View className="flex flex-row justify-between items-center w-full">
                         <View className="flex flex-row items-center gap-2">
-
+                            <Avatar/>
                             <View>
                                 <Text className="text-white font-semibold">
                                     {user?.name} {user?.secondName}
