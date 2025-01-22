@@ -11,7 +11,7 @@ export function Extract() {
                 <View>
                     <Text className="text-white font-medium mt-16 text-lg text-center mb-5">Extrato</Text>
                 </View>
-                <Input name="e" placeholder="Nome do cliente..."/>
+                
 
                 <FinancialOverview />
             </View>

@@ -1,6 +1,6 @@
 import Select from "@/components/select";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, FlatList } from "react-native";
 import { GetSales } from "../services/getSales";
 
@@ -12,11 +12,15 @@ import { RootStackParamList } from "@/types/navigation";
 import { formatDate } from "@/utils/formatDate";
 import { MonthAmount } from "./monthAmount";
 import React from "react";
+import { Input } from "@/components/input";
 
 export function FinancialOverview() {
     const currentMonth = (new Date().getMonth() + 1).toString(); // Obtém o mês atual e converte para string
 
     const [month, setMonth] = useState(currentMonth); // Define o mês atual como estado inicial // Estado inicial do mês selecionado
+
+    const [searchTerm, setSearchTerm] = useState(""); // Valor digitado no input
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(""); // Valor com debounce
 
     const options = [
         { label: 'Janeiro', value: '01' },
@@ -35,10 +39,20 @@ export function FinancialOverview() {
 
     const pageSize = 10
 
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm); // Atualiza o termo apenas após 500ms
+        }, 500);
+
+        return () => {
+            clearTimeout(handler); // Limpa o timeout anterior
+        };
+    }, [searchTerm]);
+
     const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
-        queryKey: ["GetSales", month],
+        queryKey: ["GetSales", month, debouncedSearchTerm],
         queryFn: ({ pageParam = 0 }) => {
-            return GetSales({ month, pageSize, page: pageParam + 1 })
+            return GetSales({ month, pageSize, page: pageParam + 1, search: debouncedSearchTerm })
         },
         getNextPageParam: (lastPage, allPages) => {
             const currentPage = allPages.length;
@@ -90,11 +104,17 @@ export function FinancialOverview() {
 
     return (
         <>
+            <Input
+                name="Buscar"
+                placeholder="Buscar"
+                value={searchTerm} // Valor controlado pelo estado
+                onChangeText={(text) => setSearchTerm(text)}
+            />
             <View className="bg-forenground p-4 rounded-xl mt-5">
                 <View className="flex flex-row items-center justify-between">
                     <View>
                         <Text className="text-white text-sm">Saldo</Text>
-                        <MonthAmount month={month}/>
+                        <MonthAmount month={month} />
                     </View>
                     <Select
                         label="Selecione o mês"
