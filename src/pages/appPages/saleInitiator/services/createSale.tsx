@@ -11,7 +11,7 @@ export async function CreateSale({ customer, items, paymentMethod  }: CreateSale
         customer,
         transactionType: paymentMethod ,
         items,
-        status: 'Aproved'
+        status: 'Approved'
     })
 
     return response

@@ -30,19 +30,13 @@ export function Avatar() {
                     className="rounded-full"
                 />
                 :
-
-                <>
-                    <View className="bg-white p-4 rounded-full">
-                        <Text>
-                            {initials}
-                        </Text>
-                    </View>
-                    
-                </>
+                <View className="bg-secondarySecondary p-4 rounded-full">
+                    <Text className="text-white">
+                        {initials}
+                    </Text>
+                </View>
 
             }
-
-
         </>
     )
 }

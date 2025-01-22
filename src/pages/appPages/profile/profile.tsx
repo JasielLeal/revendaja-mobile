@@ -10,6 +10,7 @@ import React from "react";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import { Avatar } from "@/components/avatart";
 
 export function Profile() {
 
@@ -32,7 +33,7 @@ export function Profile() {
         }
     })
 
-   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     return (
         <>
@@ -41,14 +42,7 @@ export function Profile() {
                     <Text className='text-white font-semibold text-center'>Meu perfil</Text>
                 </View>
                 <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl">
-                    <Image
-                        source={{
-                            uri: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a73f7931-dd45-46f1-8bb4-9175b0b4ede5/de6c4z0-5bdf4b63-e262-4af1-9a68-c0f924182d16.png/v1/fit/w_828,h_1038,q_70,strp/sung_jin_woo_by_dextrobluejay_de6c4z0-414w-2x.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTI5NSIsInBhdGgiOiJcL2ZcL2E3M2Y3OTMxLWRkNDUtNDZmMS04YmI0LTkxNzViMGI0ZWRlNVwvZGU2YzR6MC01YmRmNGI2My1lMjYyLTRhZjEtOWE2OC1jMGY5MjQxODJkMTYucG5nIiwid2lkdGgiOiI8PTEwMzMifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.Y6BzM4bVJOUP0kAnRr9gXOHMZHpVcpHMdFvJxZl8GFQ"
-                        }}
-                        width={60}
-                        height={60}
-                        className="rounded-full"
-                    />
+                    <Avatar/>
                     <View>
                         <View className="flex flex-row items-center gap-1">
                             <Text className="text-white font-medium">
@@ -74,12 +68,12 @@ export function Profile() {
                         <Icon name='chevron-forward' size={20} color={"#fff"} />
                     </View>
                 </View>
-                <TouchableOpacity className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 " onPress={()=> navigation.navigate('OurPlans')}>
+                <TouchableOpacity className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 " onPress={() => navigation.navigate('OurPlans')}>
                     <View className="flex items-center justify-between flex-row w-full">
                         <View className="flex flex-row items-center gap-1">
                             <Icon name="star" size={20} color={"#fff"} />
                             <Text className="text-white font-medium">
-                               Nossos Planos
+                                Nossos Planos
                             </Text>
                         </View>
                         <Icon name='chevron-forward' size={20} color={"#fff"} />

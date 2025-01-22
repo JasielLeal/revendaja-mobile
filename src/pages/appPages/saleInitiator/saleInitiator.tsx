@@ -91,9 +91,12 @@ export function SaleInitiator() {
             setBarcodeInput('');
         },
         onError: (error) => {
+
+            console.log(error.response)
+
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
-                // Handle error based on status
+              
             }
         },
     });
@@ -104,6 +107,7 @@ export function SaleInitiator() {
     };
 
     const addProductToList = async (barcode: string) => {
+        console.log(barcode)
         await fetchProductByBarcode(barcode);
     };
 
@@ -123,6 +127,7 @@ export function SaleInitiator() {
             }, 1000);
             queryClient.invalidateQueries(['GetSales'] as InvalidateQueryFilters);
             queryClient.invalidateQueries(['MonthlyValue'] as InvalidateQueryFilters);
+            queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
             setProductList([]);
             setBackendProductList([]);
             setCustomerName('');
@@ -192,11 +197,11 @@ export function SaleInitiator() {
                                                 </Text>
                                                 <View className="flex flex-row items-center gap-1">
                                                     <Text className="text-white text-lg font-semibold">
-                                                        R$ {formatCurrency(item.price)}
+                                                        R$ {formatCurrency(item?.price)}
                                                     </Text>
                                                 </View>
                                                 <Text className="text-primaryPrimary">
-                                                    Quantidade: {String(item.quantity)}
+                                                    Quantidade: {String(item?.quantity)}
                                                 </Text>
                                             </View>
                                         </View> :
