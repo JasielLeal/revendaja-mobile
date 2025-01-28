@@ -15,6 +15,8 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SelectPaymentMethod } from "./components/select";
+
 
 export function SaleInitiator() {
     const tabBarHeight = useBottomTabBarHeight();
@@ -92,11 +94,9 @@ export function SaleInitiator() {
         },
         onError: (error) => {
 
-            console.log(error.response)
-
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
-              
+
             }
         },
     });
@@ -107,7 +107,7 @@ export function SaleInitiator() {
     };
 
     const addProductToList = async (barcode: string) => {
-        console.log(barcode)
+       
         await fetchProductByBarcode(barcode);
     };
 
@@ -151,6 +151,8 @@ export function SaleInitiator() {
         await createSale({ customer: customerName, items: backendProductList, paymentMethod });
     };
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     return (
         <View className='bg-bg w-full h-screen'>
             <View className="px-5 flex justify-between flex-1">
@@ -164,14 +166,19 @@ export function SaleInitiator() {
                             onChangeText={setCustomerName}
                         />
                     </View>
-                    <View className="mb-5">
-                        <Input
-                            name="Forma de pagamento"
-                            placeholder="Forma de pagamento"
-                            value={paymentMethod}
-                            onChangeText={setPaymentMethod}
-                        />
-                    </View>
+
+                    <TouchableOpacity
+                        onPress={() => setIsModalOpen(!isModalOpen)}
+                        className={Platform.OS === 'ios' ? `bg-forenground p-4 rounded-xl mb-5 flex flex-row justify-between` : `mb-0`}
+                    >
+                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `mb-0`}>
+                            {paymentMethod ? paymentMethod : "Selecionar forma de pagamento"}
+                        </Text>
+                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `mb-0`}>
+                            <Icon name="chevron-down" />
+                        </Text>
+                    </TouchableOpacity>
+
                     <View className="flex flex-row items-center justify-between">
                         <View className="w-4/5">
                             <Input name="Codigo de barras" placeholder="Codigo de barras do produto" />
@@ -240,6 +247,9 @@ export function SaleInitiator() {
                     <Button name="Finalizar Venda" onPress={handleCreateSale} style={{ marginBottom: tabBarHeight }} />
                 </View>
             </View>
+            <SelectPaymentMethod open={isModalOpen} onSelectPaymentMethod={setPaymentMethod} />
         </View>
+
+
     );
 }

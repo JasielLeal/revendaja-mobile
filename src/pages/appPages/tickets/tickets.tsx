@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Platform, Text, TouchableOpacity, View } from "react-native";
 import { useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ListAllStoreByStore } from "./services/ListAllStoreByStore";
@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
 import * as Clipboard from "expo-clipboard";
+import React from "react";
 
 export function Tickets() {
 
@@ -94,47 +95,98 @@ export function Tickets() {
                             className="bg-forenground p-4 rounded-xl mt-5"
                             onPress={() => handlePress(item)}
                         >
-                            <View className="flex flex-row items-start justify-between">
-                                <View>
-                                    <Text className="text-textForenground">
-                                        {item.companyName}
-                                    </Text>
-                                    <Text className="text-white font-semibold text-2xl">
-                                        R$ {formatCurrency(String(item.value))}
-                                    </Text>
-                                </View>
-                                {
-                                    dateSelece(item.dueDate) == 'Vencido' ?
-                                        <Text className="text-red-500">
+                            {
+                                Platform.OS == 'ios' ?
+                                    <>
+                                        <View className="flex flex-row items-start justify-between">
+                                            <View>
+                                                <Text className="text-textForenground">
+                                                    {item.companyName}
+                                                </Text>
+                                                <Text className="text-white font-semibold text-2xl">
+                                                    R$ {formatCurrency(String(item.value))}
+                                                </Text>
+                                            </View>
                                             {
-                                                dateSelece(item.dueDate)
+                                                dateSelece(item.dueDate) == 'Vencido' ?
+                                                    <Text className="text-red-500">
+                                                        {
+                                                            dateSelece(item.dueDate)
+                                                        }
+                                                    </Text>
+                                                    :
+                                                    <Text className="text-white">
+                                                        {
+                                                            dateSelece(item.dueDate)
+                                                        }
+                                                    </Text>
                                             }
-                                        </Text>
-                                        :
-                                        <Text className="text-white">
-                                            {
-                                                dateSelece(item.dueDate)
-                                            }
-                                        </Text>
-                                }
 
-                            </View>
-                            <View className="mt-5 flex flex-row justify-between items-center relative">
-                                <Text
-                                    className="bg-bg p-2 rounded-xl text-white w-5/6"
-                                    numberOfLines={1}
-                                    ellipsizeMode="tail"
-                                >
-                                    {item.barcode}
-                                </Text>
-                                {/* Botão de copiar posicionado absolutamente */}
-                                <TouchableOpacity
-                                    onPress={() => clipboardTicket(item.barcode)}
-                                    className="absolute right-0"
-                                >
-                                    <Icon name="copy-outline" size={25} color={"#fff"} />
-                                </TouchableOpacity>
-                            </View>
+                                        </View>
+                                        <View className="mt-5 flex flex-row justify-between items-center relative">
+                                            <Text
+                                                className="bg-bg p-2 rounded-xl text-white w-5/6"
+                                                numberOfLines={1}
+                                                ellipsizeMode="tail"
+                                            >
+                                                {item.barcode}
+                                            </Text>
+                                            {/* Botão de copiar posicionado absolutamente */}
+                                            <TouchableOpacity
+                                                onPress={() => clipboardTicket(item.barcode)}
+                                                className="absolute right-0"
+                                            >
+                                                <Icon name="copy-outline" size={25} color={"#fff"} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </>
+
+                                    :
+
+                                    <>
+                                        <View className="flex flex-row items-start justify-between">
+                                            <View>
+                                                <Text className="text-textForenground text-xs">
+                                                    {item.companyName}
+                                                </Text>
+                                                <Text className="text-white font-semibold text-xl">
+                                                    R$ {formatCurrency(String(item.value))}
+                                                </Text>
+                                            </View>
+                                            {
+                                                dateSelece(item.dueDate) == 'Vencido' ?
+                                                    <Text className="text-red-500">
+                                                        {
+                                                            dateSelece(item.dueDate)
+                                                        }
+                                                    </Text>
+                                                    :
+                                                    <Text className="text-white">
+                                                        {
+                                                            dateSelece(item.dueDate)
+                                                        }
+                                                    </Text>
+                                            }
+
+                                        </View>
+                                        <View className="mt-5 flex flex-row justify-between items-center relative">
+                                            <Text
+                                                className="bg-bg p-2 rounded-xl text-white w-5/6 text-sm"
+                                                numberOfLines={1}
+                                                ellipsizeMode="tail"
+                                            >
+                                                {item.barcode}
+                                            </Text>
+                                            {/* Botão de copiar posicionado absolutamente */}
+                                            <TouchableOpacity
+                                                onPress={() => clipboardTicket(item.barcode)}
+                                                className="absolute right-0"
+                                            >
+                                                <Icon name="copy-outline" size={25} color={"#fff"} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </>
+                            }
                         </TouchableOpacity>
                     )}
                     onEndReached={() => {

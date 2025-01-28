@@ -8,7 +8,6 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
-import { useNotification } from "./NotificationContext";
 
 interface AuthContextData {
   signed: boolean;

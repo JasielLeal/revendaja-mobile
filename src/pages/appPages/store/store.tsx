@@ -9,15 +9,13 @@ import { useQuery } from "@tanstack/react-query";
 import { FindStoreNameByUser } from "./services/FindStoreNameByUser";
 import { RootStackParamList } from "@/types/navigation";
 
-
-
 type StoreProps = {
     children: ReactNode;
 };
 
-
-
 export function Store({ children }: StoreProps) {
+
+    
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const route = useRoute<RouteProp<RootStackParamList>>();
     const { user } = useContext(AuthContext);
@@ -28,12 +26,10 @@ export function Store({ children }: StoreProps) {
         return screen === routeName;
     };
     
-
     const { data: subdomain } = useQuery({
         queryKey: ["FindStoreNameByUser"],
         queryFn: FindStoreNameByUser
     })
-
 
     return (
         <View className="bg-bg h-screen w-full">
@@ -90,7 +86,7 @@ export function Store({ children }: StoreProps) {
                             }
                         })}>
                             <Text className={`text-sm ${isActive("PedingSale") ? "border-b-2 border-primaryPrimary" : ""} text-white`}>
-                                Vendas Pendentes
+                                Pendentes
                             </Text>
                         </TouchableOpacity>
                     </View>
