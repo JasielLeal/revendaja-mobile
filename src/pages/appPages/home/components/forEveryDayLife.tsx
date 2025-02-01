@@ -18,8 +18,6 @@ export function ForEveryDayLife() {
     return (
         <View className='flex flex-row justify-between my-7 px-5'>
             {items.map((item, index) => (
-                <>
-                   
                     <TouchableOpacity key={item.id} onPress={() => navigate.navigate(`${item.navigate}`)}>
                         <View className='flex items-center'>
                             <View className='bg-[#303030] p-4 rounded-xl w-16 h-16 flex items-center justify-center mb-2'>
@@ -30,7 +28,6 @@ export function ForEveryDayLife() {
                             </Text>
                         </View>
                     </TouchableOpacity>
-                </>
             ))}
         </View>
     );

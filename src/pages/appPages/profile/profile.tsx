@@ -55,7 +55,7 @@ export function Profile() {
                         <Text className="text-primaryPrimary">
                             {user?.plan}
                         </Text>
-                    </View>''
+                    </View>
                 </View>
                 <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
                     <View className="flex items-center justify-between flex-row w-full">

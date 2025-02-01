@@ -169,12 +169,12 @@ export function SaleInitiator() {
 
                     <TouchableOpacity
                         onPress={() => setIsModalOpen(!isModalOpen)}
-                        className={Platform.OS === 'ios' ? `bg-forenground p-4 rounded-xl mb-5 flex flex-row justify-between` : `mb-0`}
+                        className={Platform.OS === 'ios' ? `bg-forenground p-4 rounded-xl mb-5 flex flex-row justify-between items-center` : `bg-forenground p-3 rounded-xl mb-5 flex flex-row justify-between items-center`}
                     >
-                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `mb-0`}>
+                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
                             {paymentMethod ? paymentMethod : "Selecionar forma de pagamento"}
                         </Text>
-                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `mb-0`}>
+                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
                             <Icon name="chevron-down" />
                         </Text>
                     </TouchableOpacity>

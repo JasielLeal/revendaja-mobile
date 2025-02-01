@@ -5,14 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
-    "notification": {
-      "icon": "./assets/icon.png"
-    },
+    "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png", 
       "resizeMode": "contain",
-      "backgroundColor": "#FF7100"
+      "backgroundColor": "#000"
     },
     "ios": {
       "supportsTablet": true,
@@ -22,13 +19,12 @@
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/bg.png",
-        "backgroundColor": "#ffffff"
-      },
       "newArchEnabled": true,
       "package": "com.szreactioon.revendaja",
-      "permissions": ["NOTIFICATIONS", "CAMERA"]
+      "permissions": ["NOTIFICATIONS", "CAMERA"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
