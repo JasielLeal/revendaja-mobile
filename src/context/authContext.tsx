@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Ajuste caso seja necessário
@@ -8,6 +8,8 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GetPlan } from "@/pages/appPages/profile/services/GetPlan";
 
 interface AuthContextData {
   signed: boolean;
@@ -16,6 +18,7 @@ interface AuthContextData {
   logoutFc(): Promise<void>;
   updateUserHasStore(hasStore: boolean): void;
   loading: boolean;
+  setUser: Dispatch<SetStateAction<User | null>>
 }
 
 interface User {
@@ -36,6 +39,7 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
@@ -45,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const storagedToken = await AsyncStorage.getItem('token');
         const storagedUser = await AsyncStorage.getItem('user');
-      
+
         if (storagedToken && storagedUser) {
           const decodedToken = jwtDecode(storagedToken);
 
@@ -76,12 +80,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function singInFc(dataValue: FieldValues) {
     try {
       setLoading(true);
+
       const response = await Session(dataValue);
       const { data } = response;
 
       setUser(data.user);
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      queryClient.invalidateQueries({ queryKey: ["GetPlan"] });
     } catch (e: any) {
       console.log(e);
       console.log(JSON.stringify(e, null, 4));
@@ -119,7 +125,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-
   async function logoutFc() {
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('user');
@@ -134,8 +139,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const { data, isSuccess } = useQuery({
+    queryKey: ["GetPlan"],
+    queryFn: GetPlan,
+  });
+
+  useEffect(() => {
+
+    if (isSuccess && data) {
+      setUser((prevUser) => {
+        if (prevUser) {
+          const updatedUser = { ...prevUser, plan: data.plan };
+          AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+          return updatedUser;
+        }
+        return prevUser;
+      });
+    }
+  }, [isSuccess, data]);
+
   return (
-    <AuthContext.Provider value={{ signed: !!user, user, singInFc, loading, logoutFc, updateUserHasStore }}>
+    <AuthContext.Provider value={{ signed: !!user, user, setUser, singInFc, loading, logoutFc, updateUserHasStore }}>
       {loading ? (
         <View className="flex items-center justify-center h-screen w-full bg-[#121212]">
           <ActivityIndicator size="large" color={"#FF7100"} />
