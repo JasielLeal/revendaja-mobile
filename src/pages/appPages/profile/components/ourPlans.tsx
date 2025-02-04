@@ -18,8 +18,8 @@ export function OurPlans() {
     const [loading, setLoading] = useState(false);
 
     const plans = [
-        { name: "Starter", price: "29,90", priceId: "price_1QoO4D2M4f5OsxL2ZS0QMXQx", customProducts: "10", stock: "250", tickets: "20" },
-        { name: "Premium", price: "49,90", priceId: "price_1QoO5E...", customProducts: "40", stock: "500", tickets: "40" },
+        { name: "Starter", price: "29,99", priceId: "price_1QoO4D2M4f5OsxL2ZS0QMXQx", customProducts: "10", stock: "250", tickets: "20", description: "O plano ideal para quem está começando e deseja explorar funcionalidades essenciais com um preço acessível." },
+        { name: "Premium", price: "49,99", priceId: "price_1QoO5E...", customProducts: "40", stock: "500", tickets: "40", description: "Aproveite o máximo da nossa plataforma com recursos exclusivos e prioridade de atendimento para uma experiência completa" },
     ];
 
     const { mutateAsync: UpdatePlanFn } = useMutation({
@@ -99,12 +99,19 @@ export function OurPlans() {
                 </View>
 
                 <View className="flex flex-row gap-2 items-center">
-                    <Text className="text-white font-medium text-2xl">R$ 00,00</Text>
-                    <Text className="text-textForenground">/ Gratuito</Text>
+                    <Text className="text-white font-medium text-2xl">{user?.plan === "Free" ? "Gratuito" : user?.plan === "Starter" ? "R$ 29,99" : "R$ 49,99"}</Text>
+                    <Text className="text-textForenground"> {user?.plan === "Free" ? "" : "/ Mês"}</Text>
                 </View>
 
                 <Text className="text-textForenground mt-5 text-sm">
-                    O ponto de partida perfeito para explorar tudo o que nossa aplicação tem a oferecer!
+
+                    {
+                        user?.plan === "Free" ?
+                            "O ponto de partida perfeito para explorar tudo o que nossa aplicação tem a oferecer!"
+                            : user?.plan === "Starter" ?
+                                "O plano ideal para quem está começando e deseja explorar funcionalidades essenciais com um preço acessível."
+                                :
+                                "Aproveite o máximo da nossa plataforma com recursos exclusivos e prioridade de atendimento para uma experiência completa"}
                 </Text>
             </View>
 
@@ -122,7 +129,7 @@ export function OurPlans() {
                             <Text className="text-textForenground text-lg">/ mês</Text>
                         </View>
                         <Text className="text-textForenground mt-3 text-sm">
-                            O plano perfeito se você está apenas começando a usar nosso produto
+                            {plan.description}
                         </Text>
 
                         {/* Benefícios do Plano */}
@@ -151,7 +158,15 @@ export function OurPlans() {
                             </View>
 
                             {/* Botão de Pagamento */}
-                            <Button name="Adquirir" onPress={() => fetchPaymentIntent(plan.priceId, plan.name)} disabled={loading} />
+                            {
+                                user?.plan === plan.name ?
+
+                                    <Button name="Seu plano atual"  disabled={true}/>
+
+                                    :
+
+                                    <Button name="Adquirir" onPress={() => fetchPaymentIntent(plan.priceId, plan.name)} disabled={loading} />
+                            }
                         </View>
                     </View>
                 ))}

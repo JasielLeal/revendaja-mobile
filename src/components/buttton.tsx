@@ -6,25 +6,22 @@ type ButtonProps = TouchableOpacityProps & {
     name: string;
 };
 
-export function Button({ name, ...props }: ButtonProps) {
-
+export function Button({ name, disabled, ...props }: ButtonProps) {
     return (
-        Platform.OS == 'ios' ?
-
-            <>
-                <TouchableOpacity className="bg-primaryPrimary py-4 px-4 rounded-xl mt-2" {...props}>
-                    <Text className="text-center font-medium text-white">
-                        {name}
-                    </Text>
-                </TouchableOpacity>
-            </>
-            :
-            <>
-                <TouchableOpacity className="bg-primaryPrimary py-3 px-3 rounded-xl mt-2" {...props}>
-                    <Text className="text-center font-medium text-white text-sm">
-                        {name}
-                    </Text>
-                </TouchableOpacity>
-            </>
-    )
+        <TouchableOpacity
+            className={`${
+                disabled ? "bg-[#9b4702]" : "bg-primaryPrimary"
+            } ${Platform.OS === "ios" ? "py-4 px-4" : "py-3 px-3"} rounded-xl mt-2`}
+            disabled={disabled}
+            {...props}
+        >
+            <Text
+                className={`text-center font-medium ${
+                    disabled ? "text-gray-200" : "text-white"
+                } ${Platform.OS !== "ios" && "text-sm"}`}
+            >
+                {name}
+            </Text>
+        </TouchableOpacity>
+    );
 }
