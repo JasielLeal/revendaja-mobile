@@ -2,24 +2,24 @@ import { backend } from "@/api/backend";
 import { Button } from "@/components/buttton";
 import AuthContext from "@/context/authContext";
 import { useNavigation } from "@react-navigation/native";
-import { useStripe } from "@stripe/stripe-react-native";
-import { InvalidateQueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
+import { retrievePaymentIntent, useStripe } from "@stripe/stripe-react-native";
+import { useMutation } from "@tanstack/react-query";
 import React, { useContext, useState } from "react";
-import { Alert, Platform, ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { Alert,ScrollView, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UpdatePlan } from "../services/UpdatePlan";
+import { CreateSubscription } from "../services/CreateSubscription";
 
 export function OurPlans() {
     const navigation = useNavigation();
     const { user, setUser } = useContext(AuthContext);
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
-    const queryClient = useQueryClient();
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     const plans = [
-        { name: "Starter", price: "29,99", priceId: "price_1QoO4D2M4f5OsxL2ZS0QMXQx", customProducts: "10", stock: "250", tickets: "20", description: "O plano ideal para quem está começando e deseja explorar funcionalidades essenciais com um preço acessível." },
-        { name: "Premium", price: "49,99", priceId: "price_1QoO5E...", customProducts: "40", stock: "500", tickets: "40", description: "Aproveite o máximo da nossa plataforma com recursos exclusivos e prioridade de atendimento para uma experiência completa" },
+        { name: "Starter", price: "29,99", priceId: "price_1QjiK12M4f5OsxL2WEwMqvxg", customProducts: "10", stock: "250", tickets: "20", description: "O plano ideal para quem está começando e deseja explorar funcionalidades essenciais com um preço acessível." },
+        { name: "Exclusive", price: "49,99", priceId: "price_1QoO4D2M4f5OsxL2ZS0QMXQx", customProducts: "40", stock: "500", tickets: "40", description: "Aproveite o máximo da nossa plataforma com recursos exclusivos e prioridade de atendimento para uma experiência completa" },
     ];
 
     const { mutateAsync: UpdatePlanFn } = useMutation({
@@ -30,22 +30,21 @@ export function OurPlans() {
         try {
             const response = await backend.post("/stripe/CreatePaymentIntent", { priceId });
 
-            console.log("Resposta da API:", response.data); // DEBUG
-
             if (!response.data) {
                 Alert.alert("Erro", "clientSecret não recebido da API.");
                 return;
             }
 
-            setClientSecret(response.data);
-            openPaymentSheet(response.data, planName); // Chamar diretamente após obter o clientSecret
+            console.log()
+
+            setClientSecret(response.data.client_secret);
+            openPaymentSheet(response.data.client_secret, planName, priceId); // Chamar diretamente após obter o clientSecret
         } catch (error) {
-            console.error("Erro ao buscar clientSecret:", error);
             Alert.alert("Erro", "Não foi possível iniciar o pagamento.");
         }
     }
 
-    async function openPaymentSheet(clientSecret: string, planName: string) {
+    async function openPaymentSheet(clientSecret: string, planName: string, priceId: string) {
 
         const { error } = await initPaymentSheet({
             paymentIntentClientSecret: clientSecret,
@@ -64,6 +63,12 @@ export function OurPlans() {
             console.error("Erro ao apresentar PaymentSheet:", paymentError);
             Alert.alert("Erro", paymentError.message);
         } else {
+
+            const paymentIntent = await retrievePaymentIntent(clientSecret);
+
+            const paymentMethodId = paymentIntent?.paymentIntent?.paymentMethodId
+
+            await CreateSubscription(priceId, paymentMethodId)
             await UpdatePlanFn(planName); // Atualiza o plano no backend
 
             setUser((prevUser) => {
@@ -161,7 +166,7 @@ export function OurPlans() {
                             {
                                 user?.plan === plan.name ?
 
-                                    <Button name="Seu plano atual"  disabled={true}/>
+                                    <Button name="Seu plano atual" disabled={true} />
 
                                     :
 
