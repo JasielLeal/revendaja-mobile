@@ -22,6 +22,7 @@ import { PedingSaleDetails } from "@/pages/appPages/store/components/pendingSale
 import { AddCustomProductToStock } from "@/pages/appPages/store/components/stock/components/addCustomProductToStock";
 import { NavigationContainer } from '@react-navigation/native';
 import { Store } from "@/pages/appPages/store/store";
+import { MyPlan } from "@/pages/appPages/profile/components/myPlan/MyPlan";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -211,6 +212,7 @@ export default function AppRoutes() {
             <Stack.Screen name="DetailsProductStock" component={DetailsProductStock} options={{ headerShown: false }} />
             <Stack.Screen name="OurPlans" component={OurPlans} options={{ headerShown: false }} />
             <Stack.Screen name="AddCustomProduct" component={AddCustomProductToStock} options={{ headerShown: false }} />
+            <Stack.Screen name="MyPlan" component={MyPlan} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
 }

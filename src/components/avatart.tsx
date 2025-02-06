@@ -1,6 +1,6 @@
 import AuthContext from "@/context/authContext";
 import React, { useContext } from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Platform, Text, View } from "react-native";
 
 export function Avatar() {
 
@@ -30,11 +30,23 @@ export function Avatar() {
                     className="rounded-full"
                 />
                 :
-                <View className="bg-secondarySecondary p-4 rounded-full">
-                    <Text className="text-white">
-                        {initials}
-                    </Text>
-                </View>
+                <>
+                    {
+                        Platform.OS == 'ios' ?
+
+                            <View className="bg-secondarySecondary p-4 rounded-full">
+                                <Text className="text-white">
+                                    {initials}
+                                </Text>
+                            </View>
+                            :
+                            <View className="bg-secondarySecondary py-[16px] px-[18px] rounded-full">
+                                <Text className="text-white">
+                                    {initials}
+                                </Text>
+                            </View>
+                    }
+                </>
 
             }
         </>

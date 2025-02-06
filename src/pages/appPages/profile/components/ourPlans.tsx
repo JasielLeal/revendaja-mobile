@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { retrievePaymentIntent, useStripe } from "@stripe/stripe-react-native";
 import { useMutation } from "@tanstack/react-query";
 import React, { useContext, useState } from "react";
-import { Alert,ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UpdatePlan } from "../services/UpdatePlan";
 import { CreateSubscription } from "../services/CreateSubscription";
@@ -86,13 +86,16 @@ export function OurPlans() {
         <View className="flex-1 bg-bg px-5">
             {/* Header */}
             <View className="flex flex-row justify-between pt-16">
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Icon name="chevron-back" size={20} color={"#fff"} />
-                </TouchableOpacity>
-                <Text className="text-white font-semibold text-xl">Nossos Planos</Text>
-                <TouchableOpacity>
-                    <Icon name="help-circle" size={25} color={"#FF7100"} />
-                </TouchableOpacity>
+                <View>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Icon name="chevron-back" size={20} color={"#fff"} />
+                    </TouchableOpacity>
+                    <Text className="text-white font-semibold text-xl">Nossos Planos</Text>
+                    <TouchableOpacity>
+                        <Icon name="help-circle" size={25} color={"#FF7100"} />
+                    </TouchableOpacity>
+                </View>
+                
             </View>
 
             {/* Plano Atual */}

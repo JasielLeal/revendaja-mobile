@@ -35,71 +35,64 @@ export function Profile() {
 
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>()
 
+    const Links = [
+        { id: 1, name: "Gerenciar Minha Assinatura", icon: "card", link: 'MyPlan' },
+        { id: 2, name: "Assinaturas Disponíveis", icon: "star", link: '/' },
+        { id: 3, name: "Seus Dados", icon: "shield-checkmark", link: '/' },
+        { id: 4, name: "Nossos Termos", icon: "reader", link: '/' }
+    ]
+
     return (
         <>
             <View className="flex-1 bg-bg px-5">
-                <View className='flex flex-row items-center justify-center mt-16 mb-5'>
-                    <Text className='text-white font-semibold text-center'>Meu perfil</Text>
-                </View>
-                <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl">
-                    <Avatar/>
-                    <View>
-                        <View className="flex flex-row items-center gap-1">
-                            <Text className="text-white font-medium">
-                                {user?.name}
-                            </Text>
-                            <Text className="text-white font-medium">
-                                {user?.secondName}
-                            </Text>
+                <View>
+                    <View className='flex flex-row items-center justify-center mt-16 mb-5'>
+                        <Text className='text-white font-semibold text-center'> Perfil</Text>
+                    </View>
+                    <View className="flex flex-row items-center gap-3  rounded-xl justify-between">
+                        <View className="flex flex-row gap-3 items-center">
+                            <Avatar />
+                            <View>
+                                <View className="flex flex-row items-center gap-1">
+                                    <Text className="text-white font-medium">
+                                        {user?.name}
+                                    </Text>
+                                    <Text className="text-white font-medium">
+                                        {user?.secondName}
+                                    </Text>
+                                </View>
+                                <Text className="text-primaryPrimary">
+                                    {user?.plan}
+                                </Text>
+                            </View>
                         </View>
-                        <Text className="text-primaryPrimary">
-                            {user?.plan}
-                        </Text>
+                        <TouchableOpacity>
+                            <Text className="text-red-600" onPress={() => logoutFc()}>
+                                Sair
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-                <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
-                    <View className="flex items-center justify-between flex-row w-full">
-                        <View className="flex flex-row items-center gap-1">
-                            <Icon name="extension-puzzle" size={20} color={"#fff"} />
-                            <Text className="text-white font-medium">
-                                Suporte
-                            </Text>
-                        </View>
-                        <Icon name='chevron-forward' size={20} color={"#fff"} />
-                    </View>
-                </View>
-                <TouchableOpacity className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 " onPress={() => navigation.navigate('OurPlans')}>
-                    <View className="flex items-center justify-between flex-row w-full">
-                        <View className="flex flex-row items-center gap-1">
-                            <Icon name="star" size={20} color={"#fff"} />
-                            <Text className="text-white font-medium">
-                                Nossos Planos
-                            </Text>
-                        </View>
-                        <Icon name='chevron-forward' size={20} color={"#fff"} />
-                    </View>
-                </TouchableOpacity>
-                <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
-                    <View className="flex items-center justify-between flex-row w-full">
-                        <View className="flex flex-row items-center gap-1">
-                            <Icon name="document-attach" size={20} color={"#fff"} />
-                            <Text className="text-white font-medium">
-                                Termos de Uso e Privacidade
-                            </Text>
-                        </View>
-                        <Icon name='chevron-forward' size={20} color={"#fff"} />
-                    </View>
-                </View>
-                <View className="flex flex-row items-center gap-3 bg-forenground p-4 rounded-xl mt-5 ">
-                    <TouchableOpacity className="flex items-center justify-between flex-row w-full" onPress={() => setOpenModal(true)}>
-                        <View className="flex flex-row items-center gap-1">
-                            <Icon name="trash" size={20} color={"#dc2626"} />
-                            <Text className="text-red-600 font-medium">
-                                Deletar conta
-                            </Text>
-                        </View>
-                        <Icon name='chevron-forward' size={20} color={"#dc2626"} />
-                    </TouchableOpacity>
+
+
+                <View className="pt-5">
+                    {
+                        Links.map((link) => (
+                            <TouchableOpacity 
+                            className="flex flex-row items-center justify-between border-b pb-4 border-[#ffffff17] pt-4"
+                            onPress={()=> navigation.navigate(link.link)}
+                            
+                            >
+                                <View className="flex flex-row items-center gap-3 ">
+                                    <Icon name={link.icon} size={25} color={"#fff"} />
+                                    <Text className="text-white font-medium">
+                                        {link.name}
+                                    </Text>
+                                </View>
+                                <Icon name="chevron-forward" size={20} color={"#fff"} />
+                            </TouchableOpacity>
+                        ))
+                    }
                 </View>
 
                 <CustomModal
@@ -112,13 +105,7 @@ export function Profile() {
                     <Text className="text-white">Essa ação não pode ser desfeita. Todos os seus dados serão permanentemente excluídos.</Text>
                 </CustomModal>
 
-                <View className="mt-auto mb-5">
-                    <TouchableOpacity className="bg-forenground p-4 rounded-xl mt-auto" onPress={() => logoutFc()}>
-                        <Text className="text-white text-center font-medium">
-                            Sair
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+
             </View>
         </>
     )
