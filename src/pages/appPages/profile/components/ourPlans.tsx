@@ -86,16 +86,13 @@ export function OurPlans() {
         <View className="flex-1 bg-bg px-5">
             {/* Header */}
             <View className="flex flex-row justify-between pt-16">
-                <View>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="chevron-back" size={20} color={"#fff"} />
-                    </TouchableOpacity>
-                    <Text className="text-white font-semibold text-xl">Nossos Planos</Text>
-                    <TouchableOpacity>
-                        <Icon name="help-circle" size={25} color={"#FF7100"} />
-                    </TouchableOpacity>
-                </View>
-                
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Icon name="chevron-back" size={20} color={"#fff"} />
+                </TouchableOpacity>
+                <Text className="text-white font-semibold text-xl">Nossos Planos</Text>
+                <TouchableOpacity>
+                    <Icon name="help-circle" size={25} color={"#FF7100"} />
+                </TouchableOpacity>
             </View>
 
             {/* Plano Atual */}

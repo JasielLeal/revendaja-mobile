@@ -37,7 +37,7 @@ export function Profile() {
 
     const Links = [
         { id: 1, name: "Gerenciar Minha Assinatura", icon: "card", link: 'MyPlan' },
-        { id: 2, name: "Assinaturas Disponíveis", icon: "star", link: '/' },
+        { id: 2, name: "Assinaturas Disponíveis", icon: "star", link: 'OurPlans' },
         { id: 3, name: "Seus Dados", icon: "shield-checkmark", link: '/' },
         { id: 4, name: "Nossos Termos", icon: "reader", link: '/' }
     ]
@@ -79,6 +79,7 @@ export function Profile() {
                     {
                         Links.map((link) => (
                             <TouchableOpacity 
+                            key={link.id}
                             className="flex flex-row items-center justify-between border-b pb-4 border-[#ffffff17] pt-4"
                             onPress={()=> navigation.navigate(link.link)}
                             

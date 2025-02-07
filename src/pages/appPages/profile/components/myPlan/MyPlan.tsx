@@ -7,8 +7,6 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
-import { Image } from "react-native";
-import logoVisa from "@/assets/visa-seeklogo.png"
 import { formatCurrency } from "@/utils/formatCurrency";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,6 +24,15 @@ export function MyPlan() {
         return
     }
 
+    const planName =
+        data.amount == null
+            ? "Free"
+            : data.amount == "29.99"
+                ? "Starter"
+                : data.amount == "49.99"
+                    ? "Exclusive"
+                    : "Unknown";
+
     return (
         <View className="flex-1 bg-bg px-5">
             <View className="flex flex-row items-center mt-16 mb-5 justify-between">
@@ -37,10 +44,11 @@ export function MyPlan() {
                 </TouchableOpacity>
             </View>
 
+
             <View className="bg-forenground p-4 rounded-lg">
                 <View className='flex flex-row items-center gap-1'>
                     <Text className="text-primaryPrimary text-xl font-medium">
-                        Starter
+                        {planName}
                     </Text>
                     <Text className="text-white text-sm">
                         / Atual
@@ -54,42 +62,63 @@ export function MyPlan() {
                 </View>
             </View>
 
-            <Text className="text-white font-medium my-7">
-                Detalhes do pagamento
-            </Text>
+            {
+                data.length = 0 ?
 
-            <View className="bg-forenground rounded-lg p-4">
-                <View className=" flex flex-row items-center gap-4">
-                    <Image
-                        source={logoVisa}
-                        className="w-[50px] h-[15px] rounded-xl"
-                    />
+                    ''
+                    :
+                    <>
+                        <Text className="text-white font-medium my-7">
+                            Detalhes do pagamento
+                        </Text>
 
-                    <Text className="text-white">**********{data?.last4}</Text>
-                </View>
-                <View className="flex flex-row items-center gap-3 mt-5">
-                    <Text className="text-white font-medium">
-                        Renovação:
-                    </Text>
-                    <Text className="text-textForenground capitalize">
-                        {format(data.nextPaymentDate, "d 'de' MMMM, yyyy '", { locale: ptBR })}
+                        <View className="bg-forenground rounded-lg p-4">
+                            <View className=" flex flex-row items-center gap-3">
+                                <Text className="text-white font-medium">
+                                    Cartão:
+                                </Text>
+                                <Text className="text-textForenground">**********{data?.last4}</Text>
+                            </View>
+                            <View className="flex flex-row items-center gap-3 mt-5">
+                                <Text className="text-white font-medium">
+                                    Renovação:
+                                </Text>
+                                <Text className="text-textForenground capitalize">
+                                    {format(data.nextPaymentDate, "d 'de' MMMM, yyyy '", { locale: ptBR })}
 
-                    </Text>
-                </View>
-                <View className="flex flex-row items-center gap-3">
-                    <Text className="text-white font-medium">
-                        Preço:
-                    </Text>
-                    <Text className="text-textForenground">
-                        R$ {formatCurrency(data.amount)}
-                    </Text>
-                </View>
-                <TouchableOpacity>
-                    <Text className="text-red-500 mt-5">
-                        Cancelar Assinatura
-                    </Text>
-                </TouchableOpacity>
-            </View>
+                                </Text>
+                            </View>
+                            <View className="flex flex-row items-center gap-3">
+                                <Text className="text-white font-medium">
+                                    Preço:
+                                </Text>
+                                <Text className="text-textForenground">
+                                    R$ {formatCurrency(data.amount)}
+                                </Text>
+                            </View>
+                            {
+                                data?.cancel_at ?
+
+                                    <TouchableOpacity>
+                                        <Text className="text-primaryPrimary mt-5">
+                                            Reativar Assinatura
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    :
+
+                                    <TouchableOpacity>
+                                        <Text className="text-red-500 mt-5">
+                                            Cancelar Assinatura
+                                        </Text>
+                                    </TouchableOpacity>
+                            }
+                        </View>
+                    </>
+            }
+
+
+
 
         </View>
     )
