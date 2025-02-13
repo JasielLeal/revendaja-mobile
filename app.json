@@ -3,20 +3,19 @@
     "name": "Revendaja",
     "slug": "revendaja",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/icon.png", 
-      "resizeMode": "contain",
-      "backgroundColor": "#000"
-    },
     "ios": {
       "supportsTablet": true,
       "newArchEnabled": true,
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
       }
+    },
+    "splash": {
+      "image": "./assets/splash (2).png",
+      "resizeMode": "contain"
     },
     "android": {
       "newArchEnabled": true,
@@ -34,6 +33,19 @@
         "projectId": "f72c3ea6-e4d0-47b8-9ce5-ba720c38e40c"
       }
     },
-    "scheme": "revendaja"
+    "scheme": "revendaja",
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#232323",
+          "image": "./assets/splash (2).png",
+          "dark": {
+            "image": "./assets/splash (2).png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ]
   }
 }

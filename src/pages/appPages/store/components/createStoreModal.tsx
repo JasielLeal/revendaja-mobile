@@ -44,14 +44,14 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
             displaySuccess()
             updateUserHasStore(true); // Chama a função ao ter sucesso na criação
         },
-        onError: () => {
+        onError: (error) => {
             console.log('Error creating store.');
+            console.log(error)
         }
     });
 
     async function onSubmit(data: FieldValues) {
         try {
-
             const newData = {...data, numberPhone}
             await createStoreFn(newData)
         } catch (e) {
@@ -133,6 +133,8 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
                                         }}
                                         value={numberPhone}
                                         keyboardType="numeric"
+                                        returnKeyType='done'
+                                        returnKeyLabel='Próximo'
                                     />
                                     {errors.numberPhone && <Text className="text-red-500">{errors.numberPhone.message as string}</Text>}
                                 </>

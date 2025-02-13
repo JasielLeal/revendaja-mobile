@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 export const backend = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_BACKEND_DEV,
+  baseURL: process.env.EXPO_PUBLIC_BACKEND_PROD,
 });
 
 backend.interceptors.request.use(
