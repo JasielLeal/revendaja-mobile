@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
 import React from "react";
+import { InputHidden } from "../../../components/inputHidden";
 
 export function Login() {
 
@@ -52,7 +53,7 @@ export function Login() {
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <>
                                         <TextInput
-                                            className={Platform.OS == 'ios' ?  "bg-[#202020] py-4 px-4 rounded-xl w-full text-white" : "bg-[#202020] py-3 px-3 rounded-xl w-full text-white"}
+                                            className={Platform.OS == 'ios' ? "bg-[#202020] py-4 px-4 rounded-xl w-full text-white" : "bg-[#202020] py-3 px-3 rounded-xl w-full text-white"}
                                             placeholder="seuemail@gmail.com"
                                             placeholderTextColor={'#7D7D7D'}
                                             keyboardType="email-address"
@@ -72,19 +73,18 @@ export function Login() {
                                 name='password'
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <View >
-                                        <TextInput
-                                            className={Platform.OS == 'ios' ?  "bg-[#202020] py-4 px-4 rounded-xl w-full text-white" : "bg-[#202020] py-3 px-3 rounded-xl w-full text-white"}
+                                        <InputHidden
+                                            name="password"
                                             placeholder="Sua senha"
-                                            placeholderTextColor={'#7D7D7D'}
                                             keyboardType="default"
-                                            secureTextEntry onChangeText={onChange} onBlur={onBlur} value={value}
+                                            onChangeText={onChange}
+                                            onBlur={onBlur}
+                                            value={value}
                                         />
                                         {errors.password && <Text className="text-red-500">{errors.password.message as string}</Text>}
                                     </View>
                                 )}
                             />
-
-
 
                             <View>
                                 <TouchableOpacity className="flex items-end my-5 " onPress={() => navigate.navigate('forgetpassword')}>
