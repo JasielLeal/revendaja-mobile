@@ -86,6 +86,8 @@ export function Login() {
                                 )}
                             />
 
+                           
+
                             <View>
                                 <TouchableOpacity className="flex items-end my-5 " onPress={() => navigate.navigate('forgetpassword')}>
                                     <Text className="text-end text-primaryPrimary font-medium">

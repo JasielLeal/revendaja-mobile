@@ -10,6 +10,7 @@ import { Controller, FieldValues, useForm } from "react-hook-form";
 import { VerifyEmailSchema } from "./schemas/VerifyEmailSchema ";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
+import InputOPT from "@/components/inputOPT";
 
 export function EmailConfirmation() {
 
@@ -46,7 +47,9 @@ export function EmailConfirmation() {
 
     async function onSub(data: FieldValues) {
 
+
         const newData = { ...data, email }
+        console.log(newData)
 
         await VerifyCodeFn(newData)
 
@@ -65,7 +68,7 @@ export function EmailConfirmation() {
                         {email}
                     </Text>
 
-                    <Text className="text-white text-sm font-normal my-5">
+                    <Text className="text-white text-sm font-normal ">
                         Digite o codigo de 6 digitos que enviamos
                     </Text>
 
@@ -73,9 +76,7 @@ export function EmailConfirmation() {
                         control={control}
                         name='code'
                         render={({ field: { onChange, onBlur, value } }) => (
-                            <TextInput
-                                className="bg-[#202020] py-3 px-3 rounded-xl w-full text-white"
-                                placeholderTextColor={'#7D7D7D'}
+                            <InputOPT
                                 onBlur={onBlur}
                                 onChangeText={onChange}
                                 value={value}

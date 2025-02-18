@@ -43,9 +43,9 @@ export function Store({ children }: StoreProps) {
                     <Text className="text-primaryPrimary text-sm text-center mb-5 px-5">
                         {
                             subdomain ?
-                                `www.${subdomain.data}.revendaja.com`
+                                `${subdomain.data}.revendaja.com`
                                 :
-                                'www.{subdomain}.revendaja.com'
+                                ''
                         }
                     </Text>
                     <View className="flex flex-row items-center justify-between px-5">

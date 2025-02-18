@@ -9,6 +9,7 @@ import { Alert, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { UpdatePlan } from "../services/UpdatePlan";
 import { CreateSubscription } from "../services/CreateSubscription";
+import { ActiveStore } from "./myPlan/services/activeStore";
 
 export function OurPlans() {
     const navigation = useNavigation();
@@ -18,8 +19,8 @@ export function OurPlans() {
     const [loading, setLoading] = useState(false);
 
     const plans = [
-        { name: "Starter", price: "29,99", priceId: "price_1QjiK12M4f5OsxL2WEwMqvxg", customProducts: "10", stock: "250", tickets: "20", description: "O plano ideal para quem está começando e deseja explorar funcionalidades essenciais com um preço acessível." },
-        { name: "Exclusive", price: "49,99", priceId: "price_1QoO4D2M4f5OsxL2ZS0QMXQx", customProducts: "40", stock: "500", tickets: "40", description: "Aproveite o máximo da nossa plataforma com recursos exclusivos e prioridade de atendimento para uma experiência completa" },
+        { name: "Starter", price: "29,99", priceId: "price_1QjiK12M4f5OsxL2WEwMqvxg", customProducts: "25", stock: "250", tickets: "20", description: "O plano ideal para quem está começando e deseja explorar funcionalidades essenciais com um preço acessível.", limitSale: "Sem limite" },
+        { name: "Exclusive", price: "49,99", priceId: "price_1QoO4D2M4f5OsxL2ZS0QMXQx", customProducts: "100", stock: "500", tickets: "60", description: "Aproveite o máximo da nossa plataforma com recursos exclusivos e prioridade de atendimento para uma experiência completa", limitSale: "Sem limite" },
     ];
 
     const { mutateAsync: UpdatePlanFn } = useMutation({
@@ -34,8 +35,6 @@ export function OurPlans() {
                 Alert.alert("Erro", "clientSecret não recebido da API.");
                 return;
             }
-
-            console.log()
 
             setClientSecret(response.data.client_secret);
             openPaymentSheet(response.data.client_secret, planName, priceId); // Chamar diretamente após obter o clientSecret
@@ -70,6 +69,7 @@ export function OurPlans() {
 
             await CreateSubscription(priceId, paymentMethodId)
             await UpdatePlanFn(planName); // Atualiza o plano no backend
+            await ActiveStore()
 
             setUser((prevUser) => {
                 if (prevUser) {
@@ -127,7 +127,7 @@ export function OurPlans() {
             {/* Lista de Planos */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: 16 }}>
                 {plans.map((plan) => (
-                    <View key={plan.name} className="bg-forenground p-4 rounded-xl shadow-lg mt-5" style={{ width: 340, height: 340 }}>
+                    <View key={plan.name} className="bg-forenground p-4 rounded-xl shadow-lg mt-5 w-[300] mb-10">
                         <Text className="text-primaryPrimary text-xl font-semibold">{plan.name}</Text>
                         <View className="flex flex-row gap-2 items-center">
                             <Text className="text-white font-medium text-2xl">R$ {plan.price}</Text>
@@ -159,7 +159,7 @@ export function OurPlans() {
                             )}
                             <View className="flex flex-row items-center gap-2 mb-10">
                                 <Icon name="checkmark" size={25} color="#FF7100" />
-                                <Text className="text-white">Adicionar Metas</Text>
+                                <Text className="text-white">Sem limite de vendas</Text>
                             </View>
 
                             {/* Botão de Pagamento */}
