@@ -94,7 +94,7 @@ export function AddBankSlip() {
 
 
     return (
-        <View className="bg-bg h-screen w-full px-5 justify-between">
+        <View className="bg-bg flex-1 w-full px-5 justify-between">
             <View>
                 <View className="flex flex-row items-center mt-16 mb-5 justify-between">
                     <TouchableOpacity onPress={() => navigate.goBack()}>

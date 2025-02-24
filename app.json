@@ -14,7 +14,7 @@
       }
     },
     "splash": {
-      "image": "./assets/splash (2).png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain"
     },
     "android": {

@@ -22,6 +22,12 @@ export function Graphic() {
         "Jequiti": "#9C27B0"
     };
 
+    if (!bestSelling) {
+        return
+    }
+
+    console.log(`Tamanho do grafico ${bestSelling.lenght}`)
+
     // Garantir que bestSelling é um array antes de processar
     const formattedData = Array.isArray(bestSelling)
         ? bestSelling
@@ -39,38 +45,41 @@ export function Graphic() {
 
     return (
         <>
-            <View className="mt-5 rounded-lg">
-                <View className="bg-forenground rounded-t-lg p-4">
-                    <Text className="text-white text-lg font-semibold  ">Gráficos de vendas</Text>
-                    <Text className="text-textForenground">Distribuição de marcas mais vendidas</Text>
-                </View>
-                <PieChart
-                    data={formattedData}
-                    width={screenWidth * 0.916}
-                    height={220}
-                    chartConfig={{
-                        color: () => `black`,
-                        decimalPlaces: 2,
-                    }}
-
-                    accessor="population"
-                    backgroundColor="#202020"
-                    paddingLeft="10"
-                    center={[10, 0]}
-                />
-
-            </View>
-
-            {
-                formattedData?.map((company: any) => (
-                    
-                    <View className={`p-4 bg-forenground mt-5 rounded-lg`} key={company?.id}>
-                        <Text className="text-white font-semibold">
-                            {company.population} - {company.name}
-                        </Text>
+            <>
+                <View className="mt-5 rounded-lg">
+                    <View className="bg-forenground rounded-t-lg p-4">
+                        <Text className="text-white text-lg font-semibold  ">Gráficos de vendas</Text>
+                        <Text className="text-textForenground">Distribuição de marcas mais vendidas</Text>
                     </View>
-                ))
-            }
+                    <PieChart
+                        data={formattedData}
+                        width={screenWidth * 0.916}
+                        height={220}
+                        chartConfig={{
+                            color: () => `black`,
+                            decimalPlaces: 2,
+                        }}
+
+                        accessor="population"
+                        backgroundColor="#202020"
+                        paddingLeft="10"
+                        center={[10, 0]}
+                    />
+
+                </View>
+
+
+                {
+                    formattedData?.map((company: any) => (
+
+                        <View className={`p-4 bg-forenground mt-5 rounded-lg`} key={company?.id}>
+                            <Text className="text-white font-semibold">
+                                {company.population} - {company.name}
+                            </Text>
+                        </View>
+                    ))
+                }
+            </>
         </>
     )
 }

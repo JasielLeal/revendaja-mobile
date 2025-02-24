@@ -52,7 +52,7 @@ export function Stock() {
         },
         initialPageParam: 0,
     });
-
+    
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
     const allStock = data?.pages.flatMap((page) => page.data.items) || [];
@@ -110,7 +110,8 @@ export function Stock() {
                                 return (
                                     <>
                                         <StockItem
-                                            id={productData.id}
+                                            id={item.id}
+                                            productId={productData.id}
                                             name={productData?.name || "Produto Indefinido"}
                                             price={item.customPrice || productData?.suggestedPrice || "0"}
                                             brand={productData?.brand || "Marca Desconhecida"}

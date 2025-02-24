@@ -12,6 +12,7 @@ import { InsertProductToStockSchema } from '../schemas/InsertProductToStockSchem
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types/navigation';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 type FilterModalProps = {
     open: boolean;
@@ -50,7 +51,7 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
     });
 
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const snapPoints = useMemo(() => ['100%'], []);
+    const snapPoints = useMemo(() => ['80%'], []);
 
     useEffect(() => {
         if (open) {
@@ -106,8 +107,9 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
                         />
                     </View>
                     <View>
-                        <Text className="font-medium text-2xl text-white mt-5">{product.name}</Text>
-                        <Text className="text-white">{product.company}</Text>
+                        
+                        <Text className="text-textForenground mt-5">{product.company}</Text>
+                        <Text className="font-medium text-2xl text-white">{product.name}</Text>
 
                         <Text className="font-medium mt-5 text-white">
                             De: R$ {(Number(product.normalPrice) / 100).toFixed(2).replace('.', ',')}
@@ -127,13 +129,17 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
                                 placeholder="Adicione seu valor de venda"
                                 placeholderTextColor="#7D7D7D"
                                 keyboardType="numeric"
-                                onChangeText={onChange}
+                                onChangeText={(text) => {
+                                    const formattedValue = formatCurrency(text);
+                                    onChange(formattedValue);
+                                  }}
                                 value={value}
                                 returnKeyType="done"
                                 onSubmitEditing={Keyboard.dismiss}
                             />
                         )}
                     />
+
                     <Text className="text-textForenground text-sm mt-2 mb-5">
                         {Platform.OS === 'ios'
                             ? 'Obs: se não adicionar valor ao produto ele irá com o valor sugerido.'

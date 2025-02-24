@@ -16,6 +16,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectPaymentMethod } from "./components/select";
+import CustomModal from "@/components/modal";
 
 
 export function SaleInitiator() {
@@ -96,7 +97,11 @@ export function SaleInitiator() {
 
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
-
+                setStatusCode(Number(status))
+                if (statusCode === 404) {
+                    setCustomModal(true)
+                }
+                setCustomModal(true)
             }
         },
     });
@@ -107,7 +112,7 @@ export function SaleInitiator() {
     };
 
     const addProductToList = async (barcode: string) => {
-       
+
         await fetchProductByBarcode(barcode);
     };
 
@@ -133,7 +138,9 @@ export function SaleInitiator() {
             setCustomerName('');
         },
         onError: (error) => {
-            Alert.alert("Error", `${error}`);
+            if (axios.isAxiosError(error)) {
+                const status = error.response?.status;
+            }
         },
     });
 
@@ -151,7 +158,13 @@ export function SaleInitiator() {
         await createSale({ customer: customerName, items: backendProductList, paymentMethod });
     };
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+    const [customModal, setCustomModal] = useState(false)
+    const [statusCode, setStatusCode] = useState(0)
+
+    async function handleConfirm() {
+        console.log("abriu")
+    }
 
     return (
         <View className='bg-bg w-full h-screen'>
@@ -168,7 +181,7 @@ export function SaleInitiator() {
                     </View>
 
                     <TouchableOpacity
-                        onPress={() => setIsModalOpen(!isModalOpen)}
+                        onPress={() => setPaymentModalOpen(!paymentModalOpen)}
                         className={Platform.OS === 'ios' ? `bg-forenground p-4 rounded-xl mb-5 flex flex-row justify-between items-center` : `bg-forenground p-3 rounded-xl mb-5 flex flex-row justify-between items-center`}
                     >
                         <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
@@ -247,7 +260,23 @@ export function SaleInitiator() {
                     <Button name="Finalizar Venda" onPress={handleCreateSale} style={{ marginBottom: tabBarHeight }} />
                 </View>
             </View>
-            <SelectPaymentMethod open={isModalOpen} onSelectPaymentMethod={setPaymentMethod} />
+            <SelectPaymentMethod open={paymentModalOpen} onSelectPaymentMethod={setPaymentMethod} />
+            <CustomModal
+                visible={customModal}
+                onClose={() => setCustomModal(false)}
+                title={statusCode == 404 ? "Produto não cadastrado no estoque" : "Produto sem estoque"}
+                onConfirm={handleConfirm}
+                confirmText="Confirmar"
+            >
+                <Text className="text-white">
+                    {
+                        statusCode == 404 ? 
+                        ""
+                        :
+                        ""
+                    }
+                </Text>
+            </CustomModal>
         </View>
 
 

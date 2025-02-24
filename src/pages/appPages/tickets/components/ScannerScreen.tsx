@@ -1,6 +1,6 @@
 import { Camera, CameraView, useCameraPermissions } from "expo-camera";
 import { useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type ScannerProps = {
     onScan: (data: string) => void;
@@ -76,7 +76,7 @@ export function ScannerScreen({ onScan }: ScannerProps) {
             ) : (
                 <View style={styles.scanButtonContainer}>
                     <TouchableOpacity onPress={() => setIsCameraVisible(true)}>
-                        <Text style={styles.scanButtonText}>Scanear Código de Barras</Text>
+                        <Text style={styles.scanButtonText}>Scanear Código</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     scanButtonText: {
-        fontSize: 14,
+        fontSize: Platform.OS == 'ios' ? 14 : 10,
         color: "#FF7100",
         fontWeight: "bold",
     },

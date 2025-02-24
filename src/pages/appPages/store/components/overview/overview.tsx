@@ -15,10 +15,6 @@ export function Overview() {
                 <Graphic />
                 
             </View>
-
-            
-
-
         </>
     )
 }

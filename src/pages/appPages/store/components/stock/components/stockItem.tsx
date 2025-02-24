@@ -6,6 +6,7 @@ import { calculatePercentage } from "@/utils/formatDiscount";
 
 interface StockItemProps {
     id: string
+    productId: string
     name: string;
     price: string;
     brand: string;
@@ -15,13 +16,13 @@ interface StockItemProps {
     discount?: number;
 }
 
-export function StockItem({ name, price, quantity, imageUrl, id, discount }: StockItemProps) {
+export function StockItem({ name, price, quantity, imageUrl, id, discount, productId }: StockItemProps) {
 
     const priceNumber = Number(price);
     const discountPercentage = discount ? calculatePercentage(priceNumber, discount).percentage : 0;
 
     return (
-        <Swipeable renderRightActions={() => <OptionsSwipeable id={id} discount={discount} />} overshootRight={false} rightThreshold={100}>
+        <Swipeable renderRightActions={() => <OptionsSwipeable id={id} discount={discount} productId={productId}  />} overshootRight={false} rightThreshold={100}>
             <View className="mt-5 flex flex-row items-center gap-5 bg-bg">
                 <Image
                     source={imageUrl ? { uri: imageUrl } : require("@/assets/kaiak.jpg")}
@@ -75,7 +76,7 @@ export function StockItem({ name, price, quantity, imageUrl, id, discount }: Sto
                                     }
                                 </View>
                                 {
-                                    quantity < 0 ?
+                                    quantity <= 0 ?
                                         <Text className="text-sm text-red-500">Sem estoque</Text>
                                         :
                                         <Text className="text-primaryPrimary text-sm">
