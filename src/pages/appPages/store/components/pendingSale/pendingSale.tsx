@@ -1,13 +1,11 @@
 import { ActivityIndicator, FlatList, Platform, Text, TouchableOpacity, View } from "react-native";
-import { Store } from "../../store";
 import React, { useEffect } from "react";
 import Icon from "react-native-vector-icons/Ionicons";
-import { InvalidateQueryFilters, QueryClient, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { InvalidateQueryFilters, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { GetSalesPendingByStore } from "./services/GetSalesPendingByStore";
 import { useSocket } from "@/context/SocketContext";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/navigation";
-import { useNotification } from "@/context/NotificationContext";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 export function PedingSale() {

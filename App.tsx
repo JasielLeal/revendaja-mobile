@@ -17,6 +17,7 @@ import { NotificationProvider } from "@/context/NotificationContext";
 import { backend } from "@/api/backend";
 import { StripeProvider } from '@stripe/stripe-react-native';
 import * as SplashScreen from 'expo-splash-screen';
+import { toastConfig } from "@/utils/toastConfig";
 
 export default function App() {
   const client = new QueryClient();
@@ -80,21 +81,7 @@ export default function App() {
                       <StatusBar backgroundColor="#000" style="light" />
                       <Routes />
                       <Toast
-                        config={{
-                          error: (props) => (
-                            <BaseToast
-                              {...props}
-                              style={{
-                                borderLeftColor: '#000',
-                                width: 'auto',
-                                marginHorizontal: 20,
-                                borderRadius: 15
-                              }}
-                              text1Style={{ fontSize: 16, fontWeight: 'bold' }}
-                              text2Style={{ fontSize: 14, color: 'gray' }}
-                            />
-                          ),
-                        }}
+                        config={toastConfig}
                       />
                     </SocketProvider>
                   </ExpoTokenProvider>

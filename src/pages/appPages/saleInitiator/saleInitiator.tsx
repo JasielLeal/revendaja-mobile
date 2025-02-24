@@ -1,5 +1,5 @@
 import { Input } from "@/components/input";
-import { Alert, Dimensions, FlatList, Image, Platform, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, Keyboard, Platform, Text, TouchableOpacity, View } from "react-native";
 import { ScannerScreen } from "./components/ScannerScreen";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { InvalidateQueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +17,10 @@ import { RootStackParamList } from "@/types/navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SelectPaymentMethod } from "./components/select";
 import CustomModal from "@/components/modal";
-
+import { TextInput } from "react-native-gesture-handler";
+import { InsertProductToStock } from "./services/insertProductToStock";
+import Toast from "react-native-toast-message";
+import { CustomToast } from "@/components/CustomToast";
 
 export function SaleInitiator() {
     const tabBarHeight = useBottomTabBarHeight();
@@ -40,6 +43,7 @@ export function SaleInitiator() {
     const [paymentMethod, setPaymentMethod] = useState('Pix');
     const queryClient = useQueryClient();
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+    const [barcode, setBarcode] = useState('')
 
     const { mutateAsync: fetchProductByBarcode } = useMutation({
         mutationFn: FindProductsByBarcode,
@@ -61,11 +65,21 @@ export function SaleInitiator() {
                     price: response.data.customPrice,
                     barcode: response.data.product.barcode,
                     imgUrl: response.data.product.imgUrl,
-                };
+                }
 
             const existingProductIndex = productList.findIndex(
                 (product) => product.id === productData.id
             );
+
+            if(response.data.quantity  === 0 ){
+                Toast.show({
+                    type: 'error',
+                    text1: 'Produto sem estoque',
+                    text2: 'Por favor, primeiro adicione estoque ao produto para realizar uma venda.',
+                });
+
+                return
+            }
 
             if (existingProductIndex >= 0) {
                 const updatedProductList = [...productList];
@@ -112,7 +126,7 @@ export function SaleInitiator() {
     };
 
     const addProductToList = async (barcode: string) => {
-
+        setBarcode(barcode)
         await fetchProductByBarcode(barcode);
     };
 
@@ -158,13 +172,36 @@ export function SaleInitiator() {
         await createSale({ customer: customerName, items: backendProductList, paymentMethod });
     };
 
+    const { mutateAsync: InsertProductToStockFn } = useMutation({
+        mutationFn: InsertProductToStock,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
+            Toast.show({
+                type: 'success',
+                text1: 'Produto adicionado com sucesso',
+                text2: 'Seu produto foi adicionado com sucesso ao seu estoque, por padrão com 1 item em estoque.',
+            });
+        },
+    })
+
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [customModal, setCustomModal] = useState(false)
     const [statusCode, setStatusCode] = useState(0)
+    const [addPriceProductModal, setAddPriceProductModal] = useState(false)
+    const [value, onChange] = React.useState('');
 
     async function handleConfirm() {
-        console.log("abriu")
+        setCustomModal(false)
+        setTimeout(() => {
+            setAddPriceProductModal(true)
+        }, 500);
     }
+
+    async function handleAddPrice(barcode: string, value: string) {
+        InsertProductToStockFn({ barcode, customPrice: value, quantity: 1 })
+        setAddPriceProductModal(false)
+    }
+
 
     return (
         <View className='bg-bg w-full h-screen'>
@@ -198,6 +235,7 @@ export function SaleInitiator() {
                         </View>
                         <ScannerScreen onScan={addProductToList} />
                     </View>
+
                     <FlatList
                         data={productList}
                         className="mt-10"
@@ -265,18 +303,44 @@ export function SaleInitiator() {
                 visible={customModal}
                 onClose={() => setCustomModal(false)}
                 title={statusCode == 404 ? "Produto não cadastrado no estoque" : "Produto sem estoque"}
-                onConfirm={handleConfirm}
-                confirmText="Confirmar"
+                onConfirm={statusCode == 404 ? handleConfirm : handleConfirm}
+                confirmText={statusCode == 404 ? "Cadastrar Produto" : "Ok"}
             >
                 <Text className="text-white">
                     {
-                        statusCode == 404 ? 
-                        ""
-                        :
-                        ""
+                        statusCode == 404 ?
+                            "Este produto não está cadastrado no estoque. Por favor, verifique o código de barras informado e tente novamente."
+                            :
+                            "No momento não há unidades disponíveis no estoque para o produto informado. Por favor, verifique a quantidade disponível e tente novamente."
                     }
                 </Text>
             </CustomModal>
+            <CustomModal
+                visible={addPriceProductModal}
+                onClose={() => setAddPriceProductModal(false)}
+                title="Adicionar preço ao produto"
+                onConfirm={() => handleAddPrice(barcode, value)}
+                confirmText="Adicionar"
+            >
+                <Text className="text-white">
+                    Adicione o preço do produto informado para prosseguir com a venda.
+                </Text>
+                <TextInput
+                    className="bg-bg text-white p-3 rounded-xl mt-5"
+                    placeholder="Adicione seu valor de venda"
+                    placeholderTextColor="#7D7D7D"
+                    keyboardType="numeric"
+                    onChangeText={(text) => {
+                        const formattedValue = formatCurrency(text);
+                        onChange(formattedValue);
+                    }}
+                    value={`R$ ${value}`}
+                    returnKeyType="done"
+                    onSubmitEditing={Keyboard.dismiss}
+                />
+            </CustomModal>
+
+
         </View>
 
 
