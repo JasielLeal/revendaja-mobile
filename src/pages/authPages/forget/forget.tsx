@@ -43,7 +43,7 @@ export function Forget() {
     return (
         <>
             <View className="bg-bg w-full flex-1 px-5 items-center justify-center">
-                <Image source={logo} alt="logo do site" className="w-[185px] h-[35px]" />
+                <Image source={logo} alt="logo do site" className="w-[210px] h-[25px]" />
                 <Text className="text-white mb-10">Por favor, insira seu e-mail registrado abaixo</Text>
                 <View className="w-full">
 

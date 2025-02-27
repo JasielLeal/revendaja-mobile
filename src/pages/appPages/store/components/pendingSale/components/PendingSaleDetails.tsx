@@ -138,7 +138,7 @@ export function PedingSaleDetails({ route }: any) {
         mutationFn: () => DeleteSale({ saleId }),
         onSuccess: (response) => {
             Toast.show({
-                type: 'error',
+                type: 'success',
                 text1: 'Sucesso',
                 text2: response.data.message
             });

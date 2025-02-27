@@ -1,7 +1,7 @@
 import CustomModal from "@/components/modal";
 import { InvalidateQueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { ActivityIndicator, Keyboard, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Keyboard, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { DeleteStockItem } from "../services/DeleteStockItem";
 import { AddPromotionInProduct } from "../services/AddPromotionInProduct";
@@ -132,7 +132,7 @@ export function OptionsSwipeable({ id, discount, productId }: OptionsSwipeablePr
                         discount ?
                             ''
                             :
-                            <Text className="text-white">Digite o valor de desconto do produto. Esse valor será refletido na sua loja. Não se preocupe você pode remover se quiser</Text>
+                            <Text className={Platform.OS === 'ios' ? `text-white text-center` : `text-white text-center text-xs`}>Digite o valor de desconto do produto. Esse valor será refletido na sua loja. Não se preocupe você pode remover se quiser</Text>
                     }
                     {
                         discount ?
@@ -158,7 +158,7 @@ export function OptionsSwipeable({ id, discount, productId }: OptionsSwipeablePr
                     onConfirm={DeleteProduct}
                     confirmText="Confirmar"
                 >
-                    <Text className="text-white">Essa ação não pode ser desfeita, você podera adicionar novamente esse item no seu estoque se quiser.</Text>
+                    <Text className={Platform.OS === 'ios' ? `text-white text-center` : `text-white text-center text-xs`}>Essa ação não pode ser desfeita, você podera adicionar novamente esse item no seu estoque se quiser.</Text>
                 </CustomModal>
 
                 <CustomModal
@@ -168,7 +168,7 @@ export function OptionsSwipeable({ id, discount, productId }: OptionsSwipeablePr
                     confirmText="Adicionar"
                     onConfirm={() => onAddStockInProduct()}>
                     <>
-                        <Text className="text-white">
+                        <Text className={Platform.OS === 'ios' ? `text-white text-center` : `text-white text-center text-xs`}>
                             Adicione a quantidade de produtos que você deseja adicionar ao estoque
                         </Text>
                         <QuantityInput onQuantityChange={setQuantity} initialQuantity={quantity} />

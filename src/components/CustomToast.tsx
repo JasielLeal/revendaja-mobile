@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 interface CustomToastProps {
@@ -16,9 +16,11 @@ export function CustomToast({ type, message, description }: CustomToastProps) {
                 <Icon name={isSuccess ? "checkmark" : "close"} size={25} color={"#fff"} />
             </View>
             <View>
-                <Text className="text-black font-bold text-lg">{message}</Text>
-                <Text className="text-black text-sm">{description}</Text>
+                <Text className={Platform.OS === 'ios' ? "text-black font-bold text-lg" : "text-black font-bold text-sm"}>{message}</Text>
+                <Text className={Platform.OS === 'ios' ? "text-black text-sm" : "text-black text-xs"}>{description}</Text>
             </View>
         </View>
     );
 }
+
+

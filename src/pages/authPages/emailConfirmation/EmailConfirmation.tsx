@@ -47,10 +47,7 @@ export function EmailConfirmation() {
 
     async function onSub(data: FieldValues) {
 
-
         const newData = { ...data, email }
-        console.log(newData)
-
         await VerifyCodeFn(newData)
 
     }

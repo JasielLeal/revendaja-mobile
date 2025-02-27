@@ -41,7 +41,7 @@ export function Login() {
             >
                 <ScrollView>
                     <View className="w-full flex items-center justify-center px-5 h-screen">
-                        <Image source={logo} alt="logo do site" className="w-[285px] h-[55px]" />
+                        <Image source={logo} alt="logo do site" className="w-[210px] h-[25px]" />
                         <View className="w-full">
                             <Text className="text-base text-white font-normal mt-7 mb-2 ">
                                 Email

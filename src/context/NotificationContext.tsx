@@ -30,7 +30,7 @@ const NOTIFICATIONS_STORAGE_KEY = "notifications";
 // Provider do contexto
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    console.log(notifications)
+   
     // Carregar notificações do AsyncStorage ao inicializar
     useEffect(() => {
         const loadNotifications = async () => {

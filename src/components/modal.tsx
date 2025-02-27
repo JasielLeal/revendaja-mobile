@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, View, Text, GestureResponderEvent, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { Modal, View, Text, GestureResponderEvent, TouchableOpacity, Platform } from 'react-native';
 
 interface CustomModalProps {
     visible: boolean;
@@ -17,7 +17,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
     children,
     onConfirm,
     confirmText = 'Confirmar',
-    
+
 }) => {
     const handleConfirm = (event: GestureResponderEvent) => {
         if (onConfirm) {
@@ -25,6 +25,11 @@ const CustomModal: React.FC<CustomModalProps> = ({
         }
         onClose();
     };
+    ;
+
+    useEffect(() => {
+        console.log("Estado recebido no CustomModal:", visible, title, confirmText);
+    }, [visible]);
 
     return (
         <Modal
@@ -34,22 +39,28 @@ const CustomModal: React.FC<CustomModalProps> = ({
             onRequestClose={onClose}
         >
             <View className="flex-1 justify-center items-center bg-black/50 px-5">
-                <View className=" bg-forenground rounded-lg p-5">
-                    <Text className="text-lg font-bold text-white">{title}</Text>
-                    <View className="my-2 text-white">{children}</View>
-                    <View className="flex-row justify-between space-x-3 mt-5 gap-5 w-full">
+                <View className="bg-forenground rounded-lg p-5 w-11/12 max-w-md">
+                    <Text
+                        className={Platform.OS == "ios" ?
+                            "text-lg font-bold text-white text-center"
+                            :
+                            "text-sm font-bold text-white text-center"}>
+                        {title}
+                    </Text>
+                    <View className="my-2">{children}</View>
+                    <View className="flex-row justify-between mt-5 gap-3">
                         <TouchableOpacity
-                            className="flex-1 px-4 py-3 bg-gray-300 rounded-md"
+                            className={Platform.OS == "ios" ? "flex-1 px-4 py-3 bg-gray-300 rounded-md" : "flex-1 px-4 py-3 bg-gray-300 rounded-md"}
                             onPress={onClose}
                         >
-                            <Text className="w-full text-center">Cancelar</Text>
+                            <Text className={Platform.OS == "ios" ? "text-center" : "text-center text-sm"}>Cancelar</Text>
                         </TouchableOpacity>
                         {onConfirm && (
                             <TouchableOpacity
                                 className="flex-1 px-4 py-3 bg-primaryPrimary rounded-md"
                                 onPress={handleConfirm}
                             >
-                                <Text className="text-white text-center">{confirmText}</Text>
+                                <Text className={Platform.OS == "ios" ? "text-center text-white" : "text-center text-sm text-white"}>{confirmText}</Text>
                             </TouchableOpacity>
                         )}
                     </View>

@@ -26,8 +26,6 @@ export function Graphic() {
         return
     }
 
-    console.log(`Tamanho do grafico ${bestSelling.lenght}`)
-
     // Garantir que bestSelling é um array antes de processar
     const formattedData = Array.isArray(bestSelling)
         ? bestSelling

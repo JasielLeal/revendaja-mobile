@@ -58,10 +58,10 @@ export function AddBankSlip() {
             displaySuccess()
             setTimeout(() => navigate.navigate('tickets'), 1000)
             queryClient.invalidateQueries(['ListAllStoreByStore'] as InvalidateQueryFilters);
-            console.log("deu certo a criação do boleto")
+        
         },
         onError: () => {
-            console.log("deu errado a criação do boleto")
+         
         }
     })
 

@@ -21,6 +21,7 @@ import { TextInput } from "react-native-gesture-handler";
 import { InsertProductToStock } from "./services/insertProductToStock";
 import Toast from "react-native-toast-message";
 import { CustomToast } from "@/components/CustomToast";
+import { te } from "date-fns/locale";
 
 export function SaleInitiator() {
     const tabBarHeight = useBottomTabBarHeight();
@@ -71,7 +72,7 @@ export function SaleInitiator() {
                 (product) => product.id === productData.id
             );
 
-            if(response.data.quantity  === 0 ){
+            if (response.data.quantity === 0) {
                 Toast.show({
                     type: 'error',
                     text1: 'Produto sem estoque',
@@ -112,9 +113,6 @@ export function SaleInitiator() {
             if (axios.isAxiosError(error)) {
                 const status = error.response?.status;
                 setStatusCode(Number(status))
-                if (statusCode === 404) {
-                    setCustomModal(true)
-                }
                 setCustomModal(true)
             }
         },
@@ -178,8 +176,8 @@ export function SaleInitiator() {
             queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
             Toast.show({
                 type: 'success',
-                text1: 'Produto adicionado com sucesso',
-                text2: 'Seu produto foi adicionado com sucesso ao seu estoque, por padrão com 1 item em estoque.',
+                text1: 'Produto adicionado',
+                text2: 'Seu produto foi adicionado com sucesso',
             });
         },
     })
@@ -202,146 +200,146 @@ export function SaleInitiator() {
         setAddPriceProductModal(false)
     }
 
-
     return (
-        <View className='bg-bg w-full h-screen'>
-            <View className="px-5 flex justify-between flex-1">
-                <View>
-                    <Text className='text-white font-semibold text-center mt-16 text-lg'>Iniciar venda</Text>
-                    <View className="mt-5 mb-5">
-                        <Input
-                            name="Nome do cliente"
-                            placeholder="Nome do Cliente"
-                            value={customerName}
-                            onChangeText={setCustomerName}
+        <>
+            <View className='bg-bg w-full h-screen'>
+                <View className="px-5 flex justify-between flex-1">
+                    <View>
+                        <Text className='text-white font-semibold text-center mt-16 text-lg'>Iniciar venda</Text>
+                        <View className="mt-5 mb-5">
+                            <Input
+                                name="Nome do cliente"
+                                placeholder="Nome do Cliente"
+                                value={customerName}
+                                onChangeText={setCustomerName}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={() => setPaymentModalOpen(!paymentModalOpen)}
+                            className={Platform.OS === 'ios' ? `bg-forenground p-4 rounded-xl mb-5 flex flex-row justify-between items-center` : `bg-forenground p-3 rounded-xl mb-5 flex flex-row justify-between items-center`}
+                        >
+                            <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
+                                {paymentMethod ? paymentMethod : "Selecionar forma de pagamento"}
+                            </Text>
+                            <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
+                                <Icon name="chevron-down" />
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View className="flex flex-row items-center justify-between">
+                            <View className="w-4/5">
+                                <Input name="Codigo de barras" placeholder="Codigo de barras do produto" />
+                            </View>
+                            <ScannerScreen onScan={addProductToList} />
+                        </View>
+
+                        <FlatList
+                            data={productList}
+                            className="mt-10"
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => (
+                                <View className="flex flex-row justify-between mb-5">
+                                    {
+                                        Platform.OS === 'ios' ?
+                                            <View className="flex flex-row gap-2">
+                                                <Image
+                                                    source={item.imgUrl ? { uri: item.imgUrl } : require("@/assets/kaiak.jpg")}
+                                                    className="w-[60px] h-[60px] rounded-xl"
+                                                />
+                                                <View>
+                                                    <Text className="text-white font-semibold w-[200px]" numberOfLines={1} ellipsizeMode="tail">
+                                                        {item.name}
+                                                    </Text>
+                                                    <View className="flex flex-row items-center gap-1">
+                                                        <Text className="text-white text-lg font-semibold">
+                                                            R$ {formatCurrency(item?.price)}
+                                                        </Text>
+                                                    </View>
+                                                    <Text className="text-primaryPrimary">
+                                                        Quantidade: {String(item?.quantity)}
+                                                    </Text>
+                                                </View>
+                                            </View> :
+                                            <View className="flex flex-row gap-2">
+                                                <Image
+                                                    source={item.imgUrl ? { uri: item.imgUrl } : require("@/assets/kaiak.jpg")}
+                                                    className="w-[60px] h-[60px] rounded-xl"
+                                                />
+                                                <View>
+                                                    <Text className="text-white text-sm font-semibold w-[200px]" numberOfLines={1} ellipsizeMode="tail">
+                                                        {item.name}
+                                                    </Text>
+                                                    <View className="flex flex-row items-center gap-1">
+                                                        <Text className="text-white text-sm font-semibold">
+                                                            R$ {formatCurrency(item.price)}
+                                                        </Text>
+                                                    </View>
+                                                    <Text className="text-primaryPrimary text-sm">
+                                                        Quantidade: {String(item.quantity)}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                    }
+                                    <TouchableOpacity onPress={() => removeProduct(item.id, item.barcode)}>
+                                        <Icon name="trash" color={"#dc2626"} size={20} />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                         />
                     </View>
-
-                    <TouchableOpacity
-                        onPress={() => setPaymentModalOpen(!paymentModalOpen)}
-                        className={Platform.OS === 'ios' ? `bg-forenground p-4 rounded-xl mb-5 flex flex-row justify-between items-center` : `bg-forenground p-3 rounded-xl mb-5 flex flex-row justify-between items-center`}
-                    >
-                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
-                            {paymentMethod ? paymentMethod : "Selecionar forma de pagamento"}
-                        </Text>
-                        <Text className={Platform.OS === 'ios' ? ` text-textForenground` : `text-textForenground`}>
-                            <Icon name="chevron-down" />
-                        </Text>
-                    </TouchableOpacity>
-
-                    <View className="flex flex-row items-center justify-between">
-                        <View className="w-4/5">
-                            <Input name="Codigo de barras" placeholder="Codigo de barras do produto" />
+                    <View className={Platform.OS === 'ios' ? `mb-5` : `mb-${insets.bottom || 10}`}>
+                        <View className="flex flex-row mt-5 items-center justify-between mb-3">
+                            <Text className='text-white font-medium text-base'>Valor total</Text>
+                            <Text className='text-white font-medium text-base'>{calculateTotal()}</Text>
                         </View>
-                        <ScannerScreen onScan={addProductToList} />
+                        <Button name="Finalizar Venda" onPress={handleCreateSale} style={{ marginBottom: tabBarHeight }} />
                     </View>
+                    <CustomModal
+                        visible={addPriceProductModal}
+                        onClose={() => setAddPriceProductModal(false)}
+                        title="Adicionar preço ao produto"
+                        onConfirm={() => handleAddPrice(barcode, value)}
+                        confirmText="Adicionar"
+                    >
+                        <Text className={Platform.OS === 'ios' ? `text-white text-center` : `text-white text-center text-sm`}>
+                            Adicione o preço do produto informado para prosseguir com a venda.
+                        </Text>
+                        <TextInput
+                            className="bg-bg text-white p-3 rounded-xl mt-5"
+                            placeholder="Adicione seu valor de venda"
+                            placeholderTextColor="#7D7D7D"
+                            keyboardType="numeric"
+                            onChangeText={(text) => {
+                                const formattedValue = formatCurrency(text);
+                                onChange(formattedValue);
+                            }}
+                            value={`R$ ${value}`}
+                            returnKeyType="done"
+                            onSubmitEditing={Keyboard.dismiss}
+                        />
+                    </CustomModal>
+                    <CustomModal
+                        visible={customModal}
+                        onClose={() => setCustomModal(false)}
+                        title={statusCode == 404 ? "Produto não cadastrado no estoque" : "Produto sem estoque"}
+                        onConfirm={statusCode == 404 ? handleConfirm : handleConfirm}
+                        confirmText={statusCode == 404 ? "Cadastrar" : "Ok"}
+                    >
+                        <Text className={Platform.OS === 'ios' ? `text-white text-center` : `text-white text-center text-sm`}>
+                            {
+                                statusCode == 404 ?
+                                    "Por favor, verifique o código de barras informado e tente novamente."
+                                    :
+                                    "No momento não há unidades disponíveis no estoque para o produto informado. Por favor, verifique a quantidade disponível e tente novamente."
+                            }
+                        </Text>
+                    </CustomModal>
+                </View>
 
-                    <FlatList
-                        data={productList}
-                        className="mt-10"
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <View className="flex flex-row justify-between mb-5">
-                                {
-                                    Platform.OS === 'ios' ?
-                                        <View className="flex flex-row gap-2">
-                                            <Image
-                                                source={item.imgUrl ? { uri: item.imgUrl } : require("@/assets/kaiak.jpg")}
-                                                className="w-[60px] h-[60px] rounded-xl"
-                                            />
-                                            <View>
-                                                <Text className="text-white font-semibold w-[200px]" numberOfLines={1} ellipsizeMode="tail">
-                                                    {item.name}
-                                                </Text>
-                                                <View className="flex flex-row items-center gap-1">
-                                                    <Text className="text-white text-lg font-semibold">
-                                                        R$ {formatCurrency(item?.price)}
-                                                    </Text>
-                                                </View>
-                                                <Text className="text-primaryPrimary">
-                                                    Quantidade: {String(item?.quantity)}
-                                                </Text>
-                                            </View>
-                                        </View> :
-                                        <View className="flex flex-row gap-2">
-                                            <Image
-                                                source={item.imgUrl ? { uri: item.imgUrl } : require("@/assets/kaiak.jpg")}
-                                                className="w-[60px] h-[60px] rounded-xl"
-                                            />
-                                            <View>
-                                                <Text className="text-white text-sm font-semibold w-[200px]" numberOfLines={1} ellipsizeMode="tail">
-                                                    {item.name}
-                                                </Text>
-                                                <View className="flex flex-row items-center gap-1">
-                                                    <Text className="text-white text-sm font-semibold">
-                                                        R$ {formatCurrency(item.price)}
-                                                    </Text>
-                                                </View>
-                                                <Text className="text-primaryPrimary text-sm">
-                                                    Quantidade: {String(item.quantity)}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                }
-                                <TouchableOpacity onPress={() => removeProduct(item.id, item.barcode)}>
-                                    <Icon name="trash" color={"#dc2626"} size={20} />
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    />
-                </View>
-                <View className={Platform.OS === 'ios' ? `mb-5` : `mb-${insets.bottom || 10}`}>
-                    <View className="flex flex-row mt-5 items-center justify-between mb-3">
-                        <Text className='text-white font-medium text-base'>Valor total</Text>
-                        <Text className='text-white font-medium text-base'>{calculateTotal()}</Text>
-                    </View>
-                    <Button name="Finalizar Venda" onPress={handleCreateSale} style={{ marginBottom: tabBarHeight }} />
-                </View>
+                <SelectPaymentMethod open={paymentModalOpen} onSelectPaymentMethod={setPaymentMethod} />
             </View>
-            <SelectPaymentMethod open={paymentModalOpen} onSelectPaymentMethod={setPaymentMethod} />
-            <CustomModal
-                visible={customModal}
-                onClose={() => setCustomModal(false)}
-                title={statusCode == 404 ? "Produto não cadastrado no estoque" : "Produto sem estoque"}
-                onConfirm={statusCode == 404 ? handleConfirm : handleConfirm}
-                confirmText={statusCode == 404 ? "Cadastrar Produto" : "Ok"}
-            >
-                <Text className="text-white">
-                    {
-                        statusCode == 404 ?
-                            "Este produto não está cadastrado no estoque. Por favor, verifique o código de barras informado e tente novamente."
-                            :
-                            "No momento não há unidades disponíveis no estoque para o produto informado. Por favor, verifique a quantidade disponível e tente novamente."
-                    }
-                </Text>
-            </CustomModal>
-            <CustomModal
-                visible={addPriceProductModal}
-                onClose={() => setAddPriceProductModal(false)}
-                title="Adicionar preço ao produto"
-                onConfirm={() => handleAddPrice(barcode, value)}
-                confirmText="Adicionar"
-            >
-                <Text className="text-white">
-                    Adicione o preço do produto informado para prosseguir com a venda.
-                </Text>
-                <TextInput
-                    className="bg-bg text-white p-3 rounded-xl mt-5"
-                    placeholder="Adicione seu valor de venda"
-                    placeholderTextColor="#7D7D7D"
-                    keyboardType="numeric"
-                    onChangeText={(text) => {
-                        const formattedValue = formatCurrency(text);
-                        onChange(formattedValue);
-                    }}
-                    value={`R$ ${value}`}
-                    returnKeyType="done"
-                    onSubmitEditing={Keyboard.dismiss}
-                />
-            </CustomModal>
-
-
-        </View>
+        </>
 
 
     );
