@@ -39,7 +39,8 @@ export function Profile() {
         { id: 1, name: "Gerenciar Minha Assinatura", icon: "card", link: 'MyPlan' },
         { id: 2, name: "Assinaturas Disponíveis", icon: "star", link: 'OurPlans' },
         { id: 3, name: "Seus Dados", icon: "shield-checkmark", link: '/' },
-        { id: 4, name: "Nossos Termos", icon: "reader", link: '/' }
+        { id: 4, name: "Nossos Termos", icon: "reader", link: '/' },
+        { id: 5, name: "Editar Loja", icon: "pencil", link: '/'},
     ]
 
     return (

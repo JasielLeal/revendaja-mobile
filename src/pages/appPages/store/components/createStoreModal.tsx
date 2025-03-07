@@ -9,7 +9,6 @@ import { Controller, FieldValues, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateStoreSchema } from '../schemas/createStoreSchema';
 import AuthContext from '@/context/authContext';
-import { useSuccess } from '@/context/successContext';
 import React from 'react';
 import { phoneNumberMaskDynamic } from '@/utils/formatNumberPhone';
 
@@ -23,7 +22,6 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
     const [numberPhone, setNumberPhone] = useState('');
     const snapPoints = useMemo(() => ["30%", "80%"], []);
     const { updateUserHasStore } = useContext(AuthContext);
-    const { displaySuccess } = useSuccess();
 
     useEffect(() => {
         if (open) {
@@ -41,8 +39,8 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
     const { mutateAsync: createStoreFn } = useMutation({
         mutationFn: CreateStore,
         onSuccess: () => {
-            displaySuccess()
-            updateUserHasStore(true); // Chama a função ao ter sucesso na criação
+           
+            updateUserHasStore(true); 
         },
         onError: (error) => {
             console.log('Error creating store.');
@@ -77,15 +75,15 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
                     <Text className="text-2xl font-medium text-white mb-5 text-center mt-10">
                         Crie sua loja virtual
                     </Text>
-                    <View className="mb-10">
-                        <Text className="text-white mb-2">Nome da loja</Text>
+                    <View className="mb-7">
+                        <Text className="text-white mb-1">Nome da loja</Text>
                         <Controller
                             control={control}
                             name="name"
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <>
                                     <Input
-                                        placeholder="Leal Perfumaria"
+                                        
                                         name="input"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
@@ -96,15 +94,15 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
                             )}
                         />
                     </View>
-                    <View className="mb-10">
-                        <Text className="text-white mb-2">Descrição Pequena</Text>
+                    <View className="mb-7">
+                        <Text className="text-white mb-1">Descrição Pequena</Text>
                         <Controller
                             control={control}
                             name="description"
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <>
                                     <Input
-                                        placeholder="A melhor perfumaria de Baía Formosa / RN"
+                                        
                                         name="input"
                                         onBlur={onBlur}
                                         onChangeText={onChange}
@@ -115,15 +113,15 @@ export default function CreateStoreModal({ open }: CreateStoreModalProps) {
                             )}
                         />
                     </View>
-                    <View className="mb-10">
-                        <Text className="text-white mb-2">Número De Contato</Text>
+                    <View className="mb-7">
+                        <Text className="text-white mb-1">Número De Contato</Text>
                         <Controller
                             control={control}
                             name="numberPhone"
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <>
                                     <Input
-                                        placeholder="84 9 9999 9999"
+                                       
                                         name="input"
                                         onBlur={onBlur}
                                         onChangeText={(text) => {

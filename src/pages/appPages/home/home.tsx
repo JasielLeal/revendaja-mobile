@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
 import { Avatar } from "@/components/avatart";
+import { useSuccess } from "@/context/successContext";
 
 export function Home() {
 
@@ -33,8 +34,14 @@ export function Home() {
         queryFn: () => CalculateMonthlyBalance(month)
     })
 
+    const { displaySuccess } = useSuccess()
+
     const { clearNotifications } = useNotification()
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
+
+    function teste(){
+        displaySuccess()
+    }
 
     return (
         <>
@@ -42,7 +49,7 @@ export function Home() {
                 <View className="pt-16 px-7 bg-primaryPrimary pb-5 rounded-b-3xl ">
                     <View className="flex flex-row justify-between items-center w-full">
                         <View className="flex flex-row items-center gap-2">
-                            <Avatar/>
+                            <Avatar />
                             <View>
                                 <Text className="text-white font-semibold">
                                     {user?.name} {user?.secondName}
@@ -52,7 +59,7 @@ export function Home() {
                                 </Text>
                             </View>
                         </View>
-                        <TouchableOpacity className="flex flex-row items-center gap-5" onPress={clearNotifications}>
+                        <TouchableOpacity className="flex flex-row items-center gap-5">
                             <NotificationsScreen />
                         </TouchableOpacity>
                     </View>
@@ -116,17 +123,17 @@ export function Home() {
                     </View>
                     {
                         Platform.OS == 'ios' ?
-                            <View className="mt-5 bg-secondarySecondary w-[200px] p-2 rounded-full">
+                            <TouchableOpacity className="mt-5 bg-secondarySecondary w-[200px] p-2 rounded-full">
                                 <Text className="text-center text-white font-medium" onPress={() => navigate.navigate("Extract")}>
                                     Ver Extrato
                                 </Text>
-                            </View>
+                            </TouchableOpacity>
                             :
-                            <View className="mt-5 bg-secondarySecondary w-[180px] p-2 rounded-full">
+                            <TouchableOpacity className="mt-5 bg-secondarySecondary w-[180px] p-2 rounded-full" onPress={() => navigate.navigate("Extract")}>
                                 <Text className="text-center text-white font-medium text-sm">
                                     Ver Extrato
                                 </Text>
-                            </View>
+                            </TouchableOpacity>
                     }
                 </View>
                 <ForEveryDayLife />

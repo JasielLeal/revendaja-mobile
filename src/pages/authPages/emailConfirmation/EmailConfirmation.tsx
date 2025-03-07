@@ -56,7 +56,7 @@ export function EmailConfirmation() {
         <>
             <View className="bg-bg w-full h-screen px-5 flex-1">
                 <View className="flex justify-center items-center h-screen">
-                    <Image source={logo} alt="logo do site" className="w-[185px] h-[35px]" />
+                    <Image source={logo} alt="logo do site" className="w-[150px] h-[35px] " />
 
                     <Text className="text-sm text-white font-normal mt-7">
                         Enviamos-te um codigo para

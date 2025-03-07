@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { View, Modal } from 'react-native';
+import { View, Modal, SafeAreaView } from 'react-native';
 import LottieView from 'lottie-react-native';
 
 type SuccessContextProps = {
@@ -22,17 +22,17 @@ export const SuccessProvider = ({ children }: { children: ReactNode }) => {
             <Modal
                 animationType="fade"
                 visible={showSuccess}
-                transparent={false} // Adicione este atributo para evitar problemas no Android
+                transparent={true} // Adicione este atributo para evitar problemas no Android
                 onRequestClose={() => setShowSuccess(false)}
             >
-                <View className="flex-1 flex justify-center items-center bg-[#121214] bg-opacity-50">
+                <SafeAreaView className="flex-1 flex justify-center items-center bg-[#121214] ">
                     <LottieView
                         source={require('@/assets/AnimationSuccess.json')}
                         autoPlay
                         loop={true}
                         style={{ width: 200, height: 200 }}
                     />
-                </View>
+                </SafeAreaView>
             </Modal>
         </SuccessContext.Provider>
     );

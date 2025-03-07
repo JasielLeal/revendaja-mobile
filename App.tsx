@@ -70,7 +70,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView onLayout={onLayoutRootView}>
-      <StripeProvider publishableKey={publishableKey} urlScheme="revendaja">
+      <StripeProvider publishableKey={publishableKey} urlScheme="revendaja" >
         <QueryClientProvider client={client}>
           <NavigationContainer>
             <SuccessProvider>

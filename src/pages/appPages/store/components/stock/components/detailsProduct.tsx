@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types/navigation';
 import { formatCurrency } from '@/utils/formatCurrency';
+import Toast from 'react-native-toast-message';
 
 type FilterModalProps = {
     open: boolean;
@@ -21,7 +22,7 @@ type FilterModalProps = {
 };
 
 export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
-    const { displaySuccess } = useSuccess();
+
     const queryClient = useQueryClient();
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
@@ -29,7 +30,11 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
         mutationFn: InsertProductToStock,
         onSuccess: () => {
             queryClient.invalidateQueries(['GetStock'] as InvalidateQueryFilters);
-            displaySuccess();
+            Toast.show({
+                type: 'success',
+                text1: 'Sucesso',
+                text2: 'Produto adicionado ao estoque',
+            });
             navigate.goBack()
         },
         onError: () => {
@@ -107,7 +112,7 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
                         />
                     </View>
                     <View>
-                        
+
                         <Text className="text-textForenground mt-5">{product.company}</Text>
                         <Text className="font-medium text-2xl text-white">{product.name}</Text>
 
@@ -132,7 +137,7 @@ export function DetailsProduct({ open, onClose, product }: FilterModalProps) {
                                 onChangeText={(text) => {
                                     const formattedValue = formatCurrency(text);
                                     onChange(formattedValue);
-                                  }}
+                                }}
                                 value={value}
                                 returnKeyType="done"
                                 onSubmitEditing={Keyboard.dismiss}

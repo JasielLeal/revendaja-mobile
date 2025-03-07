@@ -3,7 +3,7 @@ import { Button } from "@/components/buttton";
 import AuthContext from "@/context/authContext";
 import { useNavigation } from "@react-navigation/native";
 import { retrievePaymentIntent, useStripe } from "@stripe/stripe-react-native";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useContext, useState } from "react";
 import { Alert, ScrollView, Text, View, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -37,48 +37,68 @@ export function OurPlans() {
             }
 
             setClientSecret(response.data.client_secret);
-            openPaymentSheet(response.data.client_secret, planName, priceId); // Chamar diretamente após obter o clientSecret
+            openPaymentSheet(response.data.client_secret, planName, priceId,); // Chamar diretamente após obter o clientSecret
         } catch (error) {
             Alert.alert("Erro", "Não foi possível iniciar o pagamento.");
         }
     }
 
+    const queryClient = useQueryClient();
+
     async function openPaymentSheet(clientSecret: string, planName: string, priceId: string) {
+        try {
+            // Inicializa o PaymentSheet
+            const { error } = await initPaymentSheet({
+                paymentIntentClientSecret: clientSecret,
+                merchantDisplayName: 'Revendaja',
+            });
 
-        const { error } = await initPaymentSheet({
-            paymentIntentClientSecret: clientSecret,
-            merchantDisplayName: 'Revendaja',
-        });
+            if (error) {
+                console.error("Erro ao inicializar PaymentSheet:", error);
+                Alert.alert("Erro", error.message);
+                return;
+            }
 
-        if (error) {
-            console.error("Erro ao inicializar PaymentSheet:", error);
-            Alert.alert("Erro", error.message);
-            return;
-        }
+            // Apresenta o PaymentSheet
+            const { error: paymentError } = await presentPaymentSheet();
 
-        const { error: paymentError } = await presentPaymentSheet();
+            if (paymentError) {
+                console.error("Erro ao apresentar PaymentSheet:", paymentError);
+                Alert.alert("Erro", paymentError.message);
+                return;
+            }
 
-        if (paymentError) {
-            console.error("Erro ao apresentar PaymentSheet:", paymentError);
-            Alert.alert("Erro", paymentError.message);
-        } else {
-
+            // Recupera o PaymentIntent
             const paymentIntent = await retrievePaymentIntent(clientSecret);
+            const paymentMethodId = paymentIntent?.paymentIntent?.paymentMethodId;
 
-            const paymentMethodId = paymentIntent?.paymentIntent?.paymentMethodId
+            if (!paymentMethodId) {
+                throw new Error("Não foi possível recuperar o ID do método de pagamento.");
+            }
 
-            await CreateSubscription(priceId, paymentMethodId)
+            // Cria a assinatura e atualiza o plano
+            await CreateSubscription(priceId, paymentMethodId);
+            await ActiveStore();
             await UpdatePlanFn(planName); // Atualiza o plano no backend
-            await ActiveStore()
+            
 
+            // Invalida a query para refetch
+            queryClient.invalidateQueries({ queryKey: ["GetPlan"] });
+
+            // Atualiza o estado local do usuário
             setUser((prevUser) => {
                 if (prevUser) {
-                    return { ...prevUser, plan: planName }; // Atualiza o plano do usuário
+                    return { ...prevUser, plan: planName };
                 }
                 return prevUser;
             });
 
+            // Exibe o alerta de sucesso
             Alert.alert("Pagamento realizado com sucesso!", "Em alguns minutos sua loja já estará online.");
+        } catch (error) {
+            console.error("Erro durante o processo de pagamento:", error);
+            console.log(JSON.stringify(error, null, 4))
+            Alert.alert("Erro", "Ocorreu um erro durante o processo de pagamento. Tente novamente.");
         }
     }
 
@@ -127,7 +147,7 @@ export function OurPlans() {
             {/* Lista de Planos */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: "row", gap: 16 }}>
                 {plans.map((plan) => (
-                    <View key={plan.name} className="bg-forenground p-4 rounded-xl shadow-lg mt-5 w-[300] mb-10">
+                    <View key={plan.name} className="bg-forenground p-4 rounded-xl shadow-lg mt-5 w-[300] h-[350] mb-10">
                         <Text className="text-primaryPrimary text-xl font-semibold">{plan.name}</Text>
                         <View className="flex flex-row gap-2 items-center">
                             <Text className="text-white font-medium text-2xl">R$ {plan.price}</Text>
@@ -173,6 +193,7 @@ export function OurPlans() {
                                     <Button name="Adquirir" onPress={() => fetchPaymentIntent(plan.priceId, plan.name)} disabled={loading} />
                             }
                         </View>
+
                     </View>
                 ))}
             </ScrollView>
