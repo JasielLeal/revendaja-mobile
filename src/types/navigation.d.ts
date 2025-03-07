@@ -23,5 +23,6 @@ export type RootStackParamList = {
   PedingSaleDetails: { sale: Sale };
   AddCustomProduct: undefined;
   MyPlan: undefined;
+  Notifications: undefined;
   // Adicione outras rotas aqui se necessário
 };

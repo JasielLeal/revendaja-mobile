@@ -21,7 +21,6 @@ export const ExpoTokenProvider = ({ children }: { children: React.ReactNode }) =
     const registerPushToken = async () => {
         try {
 
-            
             const currentToken = (await Notifications.getExpoPushTokenAsync()).data;
             const savedToken = await AsyncStorage.getItem("pushToken");
 

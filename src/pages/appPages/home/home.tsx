@@ -9,13 +9,12 @@ import { useQuery } from "@tanstack/react-query";
 import { CalculateMonthlyBalance } from "./services/calculateMonthlyBalance";
 import { formatCurrency } from "@/utils/formatCurrency";
 import React from "react";
-import { NotificationsScreen } from "./components/notificationsScreen";
-import { useNotification } from "@/context/NotificationContext";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/navigation";
 import { Avatar } from "@/components/avatart";
 import { useSuccess } from "@/context/successContext";
+import { NotificationsContext } from "@/context/notificationsContext";
 
 export function Home() {
 
@@ -34,15 +33,10 @@ export function Home() {
         queryFn: () => CalculateMonthlyBalance(month)
     })
 
-    const { displaySuccess } = useSuccess()
-
-    const { clearNotifications } = useNotification()
     const navigate = useNavigation<StackNavigationProp<RootStackParamList>>()
 
-    function teste(){
-        displaySuccess()
-    }
-
+    const { unreadCount } = useContext(NotificationsContext);
+    console.log(unreadCount)
     return (
         <>
             <View className="bg-[#121212] h-screen w-full">
@@ -59,8 +53,16 @@ export function Home() {
                                 </Text>
                             </View>
                         </View>
-                        <TouchableOpacity className="flex flex-row items-center gap-5">
-                            <NotificationsScreen />
+                        <TouchableOpacity
+                            className="flex flex-row items-center gap-5"
+                            onPress={() => navigate.navigate("Notifications")}
+                        >
+                            <View className="relative">
+                                <Icon name="notifications" size={25} color={'#fff'} />
+                                <Text className="absolute -top-3 -right-3 bg-secondarySecondary text-white text-lg rounded-full w-[26] h-[26] text-center">
+                                    {unreadCount}
+                                </Text>
+                            </View>
                         </TouchableOpacity>
                     </View>
                     <View className="mt-10">

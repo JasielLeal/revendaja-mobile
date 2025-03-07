@@ -13,11 +13,11 @@ import { ExpoTokenProvider } from "@/context/expoTokenContext";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import Toast, { BaseToast } from 'react-native-toast-message';
-import { NotificationProvider } from "@/context/NotificationContext";
 import { backend } from "@/api/backend";
 import { StripeProvider } from '@stripe/stripe-react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { toastConfig } from "@/utils/toastConfig";
+import { NotificationsProvider } from "@/context/notificationsContext";
 
 export default function App() {
   const client = new QueryClient();
@@ -74,9 +74,9 @@ export default function App() {
         <QueryClientProvider client={client}>
           <NavigationContainer>
             <SuccessProvider>
-              <NotificationProvider>
-                <AuthProvider>
-                  <ExpoTokenProvider>
+              <AuthProvider>
+                <ExpoTokenProvider>
+                  <NotificationsProvider>
                     <SocketProvider>
                       <StatusBar backgroundColor="#000" style="light" />
                       <Routes />
@@ -84,9 +84,9 @@ export default function App() {
                         config={toastConfig}
                       />
                     </SocketProvider>
-                  </ExpoTokenProvider>
-                </AuthProvider>
-              </NotificationProvider>
+                  </NotificationsProvider>
+                </ExpoTokenProvider>
+              </AuthProvider>
             </SuccessProvider>
           </NavigationContainer>
         </QueryClientProvider>

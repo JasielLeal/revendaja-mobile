@@ -46,7 +46,7 @@ export function VerifyCode() {
 
         <View className="bg-bg w-full flex-1 px-5">
             <View className="flex justify-center items-center h-screen">
-                <Image source={logo} alt="logo do site" className="w-[185px] h-[35px]" />
+                <Image source={logo} alt="logo do site" className="w-[150px] h-[35px]" />
 
                 <Text className="text-sm text-white font-normal mt-7">
                     Enviamos-te um codigo para

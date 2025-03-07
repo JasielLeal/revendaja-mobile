@@ -14,9 +14,6 @@ import React from "react";
 
 export function Tickets() {
 
-    const [activeButton, setActiveButton] = useState<string>("Todos");
-    33
-    const buttons = ["Todos", "A vencer", "Vencidos"];
 
     const pageSize = 10
 
