@@ -1,13 +1,13 @@
 import { Stack } from 'expo-router';
 
-export default function StoreLayout() {
+export default function MoreLayout() {
     return (
         <Stack>
             <Stack.Screen
-                name="store"
+                name="more"
                 options={{
                     headerShown: false,
-                    title: 'Loja'
+                    title: 'Mais'
                 }}
             />
         </Stack>
