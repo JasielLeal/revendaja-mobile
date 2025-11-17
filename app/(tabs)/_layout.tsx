@@ -22,14 +22,14 @@ export default function TabLayout() {
         },
       }}>
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Home',
+          title: 'Início',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="(sales)"
+        name="sales"
         options={{
           title: 'Vendas',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="cart.fill" color={color} />,

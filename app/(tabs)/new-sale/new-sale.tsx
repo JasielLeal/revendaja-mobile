@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import template from "../../assets/template.jpg";
+import template from "../../../assets/template.jpg";
 
 // Configurar localização PT-BR
 LocaleConfig.locales['pt-br'] = {
