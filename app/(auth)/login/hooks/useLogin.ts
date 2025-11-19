@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { LoginFormData } from "../schemas/schema";
 
 interface LoginResponse {
-  token: string;
+  tokenAcess: string;
   user: {
     id: string;
     email: string;

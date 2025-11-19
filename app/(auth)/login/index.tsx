@@ -1,3 +1,4 @@
+import { authService } from '@/app/services/auth';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,8 +44,9 @@ export default function LoginScreen() {
 
     const onSubmit = async (data: LoginFormData) => {
         loginMutation.mutate(data, {
-            onSuccess: (response) => {
-                // Salvar token no AsyncStorage ou SecureStore aqui
+            onSuccess: async (response) => {
+                // Salvar token no AsyncStorage
+                await authService.saveToken(response.tokenAcess);
                 console.log('Login successful:', response);
                 router.replace('/(tabs)/home/home');
             },

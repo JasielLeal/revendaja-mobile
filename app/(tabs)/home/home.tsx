@@ -1,18 +1,24 @@
 import { Avatar } from '@/components/ui/avatar';
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
     ScrollView,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useDashboardMetrics } from './hooks/useDashboardMetrics';
+import { useRecentSales } from './hooks/useRecentSales';
+
+type TabType = 'lucro' | 'vendas' | 'despesas';
 
 export default function HomePage() {
     const colors = useThemeColors();
-
-    console.log('Current Colors:', colors.foreground);
+    const [selectedTab, setSelectedTab] = useState<TabType>('vendas');
+    const [isBalanceVisible, setIsBalanceVisible] = useState(true);
 
     const categories = [
         { id: 1, name: 'Iniciar uma venda', icon: 'storefront-outline', screen: 'Vender' },
@@ -22,11 +28,10 @@ export default function HomePage() {
         { id: 6, name: 'Mais', icon: 'apps-outline', screen: 'Mais' },
     ];
 
-    const sales = [
-        { id: 1, name: "Jasiel", paymentMethod: "Cartão de Crédito", amount: 150.75, date: "13/nov" },
-        { id: 2, name: "Maria", paymentMethod: "Pix", amount: 89.90, date: "12/nov" },
-        { id: 3, name: "Carlos", paymentMethod: "Dinheiro", amount: 45.00, date: "12/nov" },
-    ];
+    const router = useRouter();
+
+    const { data: sales } = useRecentSales();
+    const { data: metrics } = useDashboardMetrics();
 
     return (
         <View className="flex-1">
@@ -99,41 +104,161 @@ export default function HomePage() {
                     >
                         {/* Abas */}
                         <View className="flex-row" style={{ backgroundColor: colors.muted }}>
-                            <TouchableOpacity className="flex-1 py-3" style={{ backgroundColor: colors.card }}>
-                                <Text className="text-center font-bold" style={{ color: colors.cardForeground }}>Saldo</Text>
+                            <TouchableOpacity
+                                className="flex-1 py-3"
+                                style={{ backgroundColor: selectedTab === 'vendas' ? colors.card : 'transparent' }}
+                                onPress={() => setSelectedTab('vendas')}
+                            >
+                                <Text
+                                    className="text-center"
+                                    style={{
+                                        color: selectedTab === 'vendas' ? colors.cardForeground : colors.mutedForeground,
+                                        fontWeight: selectedTab === 'vendas' ? 'bold' : 'normal'
+                                    }}
+                                >
+                                    Vendas
+                                </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity className="flex-1 py-3">
-                                <Text className="text-center text-muted-foreground" style={{ color: colors.mutedForeground }}>Lucro</Text>
+                            <TouchableOpacity
+                                className="flex-1 py-3"
+                                style={{ backgroundColor: selectedTab === 'lucro' ? colors.card : 'transparent' }}
+                                onPress={() => setSelectedTab('lucro')}
+                            >
+                                <Text
+                                    className="text-center"
+                                    style={{
+                                        color: selectedTab === 'lucro' ? colors.cardForeground : colors.mutedForeground,
+                                        fontWeight: selectedTab === 'lucro' ? 'bold' : 'normal'
+                                    }}
+                                >
+                                    Lucro
+                                </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity className="flex-1 py-3">
-                                <Text className="text-center text-muted-foreground" style={{ color: colors.mutedForeground }}>Vendas</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity className="flex-1 py-3">
-                                <Text className="text-center text-muted-foreground" style={{ color: colors.mutedForeground }}>Despesas</Text>
+                            <TouchableOpacity
+                                className="flex-1 py-3"
+                                style={{ backgroundColor: selectedTab === 'despesas' ? colors.card : 'transparent' }}
+                                onPress={() => setSelectedTab('despesas')}
+                            >
+                                <Text
+                                    className="text-center"
+                                    style={{
+                                        color: selectedTab === 'despesas' ? colors.cardForeground : colors.mutedForeground,
+                                        fontWeight: selectedTab === 'despesas' ? 'bold' : 'normal'
+                                    }}
+                                >
+                                    Despesas
+                                </Text>
                             </TouchableOpacity>
                         </View>
 
-                        {/* Conteúdo do Saldo */}
+                        {/* Conteúdo dinâmico baseado na aba selecionada */}
                         <View className="p-5">
-                            <View className="flex-row items-start mb-2">
-                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                    R$ 752
-                                </Text>
-                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
-                                    ,91
-                                </Text>
-                                <TouchableOpacity className="ml-3 mt-2">
-                                    <Ionicons name="eye-outline" size={20} color={colors.mutedForeground} />
-                                </TouchableOpacity>
-                            </View>
 
-                            <View className="flex-row items-center mb-4">
-                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>Rendeu </Text>
-                                <Ionicons name="trending-up" size={12} color="#34A853" />
-                                <Text className="text-green-600 text-sm font-semibold"> R$ 96,95</Text>
-                                <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
-                            </View>
+                            {selectedTab === 'lucro' && (
+                                <>
+                                    <View className="flex-row items-start mb-2">
+                                        {isBalanceVisible ? (
+                                            <>
+                                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                    {formatCurrency(metrics?.estimatedProfit || 0).split(',')[0]}
+                                                </Text>
+                                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                    ,{formatCurrency(metrics?.estimatedProfit || 0).split(',')[1]}
+                                                </Text>
+                                            </>
+                                        ) : (
+                                            <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                R$ ••••
+                                            </Text>
+                                        )}
+                                        <TouchableOpacity className="ml-3 mt-2" onPress={() => setIsBalanceVisible(!isBalanceVisible)}>
+                                            <Ionicons name={isBalanceVisible ? "eye-outline" : "eye-off-outline"} size={20} color={colors.mutedForeground} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View className="flex-row items-center mb-4" style={{ opacity: isBalanceVisible ? 1 : 0 }}>
+                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                            {metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? 'Cresceu ' : 'Reduziu '}
+                                        </Text>
+                                        <Ionicons
+                                            name={metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? "trending-up" : "trending-down"}
+                                            size={12}
+                                            color={metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? "#34A853" : "#EA4335"}
+                                        />
+                                        <Text className={metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? "text-green-600 text-sm font-semibold" : "text-red-600 text-sm font-semibold"}>
+                                            {' '}{formatCurrency(Math.abs(metrics?.percentageChange.profit || 0))}
+                                        </Text>
+                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
+                                    </View>
+                                </>
+                            )}
 
+                            {selectedTab === 'vendas' && (
+                                <>
+                                    <View className="flex-row items-start mb-2">
+                                        {isBalanceVisible ? (
+                                            <>
+                                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                    {formatCurrency(metrics?.totalRevenue || 0).split(',')[0]}
+                                                </Text>
+                                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                    ,{formatCurrency(metrics?.totalRevenue || 0).split(',')[1]}
+                                                </Text>
+                                            </>
+                                        ) : (
+                                            <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                R$ ••••
+                                            </Text>
+                                        )}
+                                        <TouchableOpacity className="ml-3 mt-2" onPress={() => setIsBalanceVisible(!isBalanceVisible)}>
+                                            <Ionicons name={isBalanceVisible ? "eye-outline" : "eye-off-outline"} size={20} color={colors.mutedForeground} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View className="flex-row items-center mb-4" style={{ opacity: isBalanceVisible ? 1 : 0 }}>
+                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                            {metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? 'Cresceu ' : 'Reduziu '}
+                                        </Text>
+                                        <Ionicons
+                                            name={metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? "trending-up" : "trending-down"}
+                                            size={12}
+                                            color={metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? "#34A853" : "#EA4335"}
+                                        />
+                                        <Text className={metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? "text-green-600 text-sm font-semibold" : "text-red-600 text-sm font-semibold"}>
+                                            {' '}{formatCurrency(Math.abs(metrics?.percentageChange.revenue || 0))}
+                                        </Text>
+                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
+                                    </View>
+                                </>
+                            )}
+
+                            {selectedTab === 'despesas' && (
+                                <>
+                                    <View className="flex-row items-start mb-2">
+                                        {isBalanceVisible ? (
+                                            <>
+                                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                    R$ 3.152
+                                                </Text>
+                                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                    ,80
+                                                </Text>
+                                            </>
+                                        ) : (
+                                            <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                R$ ••••
+                                            </Text>
+                                        )}
+                                        <TouchableOpacity className="ml-3 mt-2" onPress={() => setIsBalanceVisible(!isBalanceVisible)}>
+                                            <Ionicons name={isBalanceVisible ? "eye-outline" : "eye-off-outline"} size={20} color={colors.mutedForeground} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View className="flex-row items-center mb-4" style={{ opacity: isBalanceVisible ? 1 : 0 }}>
+                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>Reduziu </Text>
+                                        <Ionicons name="trending-down" size={12} color="#34A853" />
+                                        <Text className="text-green-600 text-sm font-semibold"> 8%</Text>
+                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </View>
                 </View>
@@ -143,7 +268,7 @@ export default function HomePage() {
                         <Text className="font-bold text-xl" style={{ color: colors.foreground }}>
                             Últimas vendas
                         </Text>
-                        <TouchableOpacity className="flex-row items-center">
+                        <TouchableOpacity className="flex-row items-center" onPress={() => router.push("/(tabs)/sales/sales")}>
                             <Text className=" text-sm font-semibold mr-1" style={{ color: colors.primary }} >
                                 Conferir todas
                             </Text>
@@ -153,7 +278,7 @@ export default function HomePage() {
 
                     {/* Lista de Vendas */}
                     <View className="space-y-3">
-                        {sales.map((sale) => (
+                        {sales?.map((sale) => (
                             <TouchableOpacity
                                 key={sale.id}
                                 className="rounded-xl pb-4"
@@ -177,7 +302,7 @@ export default function HomePage() {
                                                     className="font-semibold text-base"
                                                     style={{ color: colors.foreground }}
                                                 >
-                                                    {sale.name}
+                                                    {sale.customerName}
                                                 </Text>
                                                 <Text
                                                     className="text-sm mb-2"
@@ -207,10 +332,10 @@ export default function HomePage() {
 
                                     <View className="items-end">
                                         <Text className="text-green-600 font-bold text-lg">
-                                            R$ {sale.amount.toFixed(2).replace('.', ',')}
+                                            +{formatCurrency(sale.total)}
                                         </Text>
                                         <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                                            {sale.date}
+                                            {formatDate(sale.createdAt)}
                                         </Text>
                                     </View>
                                 </View>
