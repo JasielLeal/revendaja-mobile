@@ -4,7 +4,7 @@ export default function HomeLayout() {
     return (
         <Stack>
             <Stack.Screen
-                name="home"
+                name="index"
                 options={{
                     headerShown: false,
                     title: 'Início'

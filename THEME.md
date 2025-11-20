@@ -93,7 +93,7 @@ const buttonClass = cn(
 
 // Acessando cores programaticamente
 const colors = getThemeColors();
-console.log(colors.primary); // 'var(--primary)'
+ // 'var(--primary)'
 ```
 
 ## 🌙 Modo Escuro

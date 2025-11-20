@@ -1,8 +1,10 @@
+import { useAuth } from '@/app/providers/AuthProvider';
+import { authService } from '@/app/services/auth';
 import { Avatar } from '@/components/ui/avatar';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import {
     ScrollView,
@@ -19,13 +21,14 @@ export default function HomePage() {
     const colors = useThemeColors();
     const [selectedTab, setSelectedTab] = useState<TabType>('vendas');
     const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+    const { user } = useAuth()
 
-    const categories = [
-        { id: 1, name: 'Iniciar uma venda', icon: 'storefront-outline', screen: 'Vender' },
-        { id: 2, name: 'Gerenciar estoque', icon: 'cube-outline', screen: 'Estoque' },
-        { id: 3, name: 'Meus pedidos', icon: 'receipt-outline', screen: 'Pedidos' },
-        { id: 5, name: 'Relatório financeiro', icon: 'bar-chart-outline', screen: 'Relatórios' },
-        { id: 6, name: 'Mais', icon: 'apps-outline', screen: 'Mais' },
+    const categories: { id: number; name: string; icon: string; screen: Href }[] = [
+        { id: 1, name: 'Iniciar uma venda', icon: 'storefront-outline', screen: '/(tabs)/new-sale/new-sale' },
+        { id: 2, name: 'Gerenciar estoque', icon: 'cube-outline', screen: '/(tabs)/store/store' },
+        { id: 3, name: 'Meus pedidos', icon: 'receipt-outline', screen: '/(tabs)/sales/sales' },
+        { id: 5, name: 'Relatório financeiro', icon: 'bar-chart-outline', screen: '/(tabs)/sales/sales' },
+        { id: 6, name: 'Mais', icon: 'apps-outline', screen: '/(tabs)/more/more' },
     ];
 
     const router = useRouter();
@@ -83,7 +86,7 @@ export default function HomePage() {
                                     textColor={colors.foreground}
                                 />
                                 <Text className='text-primary-foreground font-bold text-xl'>
-                                    Olá, Jasiel
+                                    Olá, {user?.name}
                                 </Text>
                             </View>
                         </View>
@@ -92,6 +95,16 @@ export default function HomePage() {
                             <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center">
                                 <Text className="text-white text-xs font-bold">26</Text>
                             </View>
+                        </TouchableOpacity>
+                        {/* Botão temporário para testar expiração do token */}
+                        <TouchableOpacity
+                            className="bg-red-500 rounded-full p-2 ml-2"
+                            onPress={async () => {
+                                await authService.saveToken('token_invalido_teste');
+                                alert('Token corrompido! Tente fazer uma requisição agora.');
+                            }}
+                        >
+                            <Ionicons name="bug" size={20} color="#fff" />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -361,6 +374,7 @@ export default function HomePage() {
                                     marginRight: 12,
                                     backgroundColor: colors.card,
                                 }}
+                                onPress={() => router.push(category.screen)}
                             >
                                 <Ionicons
                                     name={category.icon as any}

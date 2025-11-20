@@ -1,4 +1,5 @@
 import axios from "axios";
+import { router } from "expo-router";
 import { authService } from "../services/auth";
 
 export const api = axios.create({
@@ -25,9 +26,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Token inválido ou expirado, remover token
+      // Token inválido ou expirado, remover token e redirecionar
       await authService.removeToken();
-      // Aqui você pode redirecionar para login se necessário
+      router.replace("/(auth)/login");
     }
     return Promise.reject(error);
   }

@@ -1,4 +1,4 @@
-import { authService } from '@/app/services/auth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +20,7 @@ import { LoginFormData, loginSchema } from './schemas/schema';
 export default function LoginScreen() {
     const colors = useThemeColors();
     const router = useRouter();
+    const { signIn } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const loginMutation = useLogin();
 
@@ -45,10 +46,9 @@ export default function LoginScreen() {
     const onSubmit = async (data: LoginFormData) => {
         loginMutation.mutate(data, {
             onSuccess: async (response) => {
-                // Salvar token no AsyncStorage
-                await authService.saveToken(response.tokenAcess);
+                await signIn(response.tokenAcess, response.user);
                 console.log('Login successful:', response);
-                router.replace('/(tabs)/home/home');
+                router.replace('/(tabs)/home');
             },
         });
     };

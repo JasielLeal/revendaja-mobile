@@ -58,7 +58,7 @@ export default function OTPScreen() {
         // Simular verificação
         setTimeout(() => {
             setLoading(false);
-            router.replace('/(tabs)/home/home');
+            router.replace('/(tabs)/home');
         }, 1500);
     };
 

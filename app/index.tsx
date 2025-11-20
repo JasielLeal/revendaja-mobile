@@ -1,13 +1,28 @@
-import { Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from './providers/AuthProvider';
 
 export default function Index() {
-    // Aqui você pode adicionar lógica para verificar se o usuário está logado
-    // Por enquanto, vamos sempre redirecionar para login
-    const isLoggedIn = false;
+    const router = useRouter();
+    const { isAuthenticated, isLoading } = useAuth();
 
-    if (isLoggedIn) {
-        return <Redirect href="/(tabs)/home/home" />;
-    }
+    console.log('Auth Status:', { isAuthenticated, isLoading });
 
-    return <Redirect href="/(auth)/login" />;
+    useEffect(() => {
+        if (isLoading) return;
+
+        if (isAuthenticated) {
+            router.replace('/(tabs)/home');
+        } else {
+            router.replace('/(auth)/login');
+        }
+    }, [isAuthenticated, isLoading, router]);
+
+    return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" />
+        </View>
+    );
 }
+
