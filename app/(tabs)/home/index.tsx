@@ -336,7 +336,7 @@ export default function HomePage() {
                                                             color: colors.isDark ? '#4ade80' : '#166534'
                                                         }}
                                                     >
-                                                        Pago
+                                                        {sale.status === 'approved' ? 'Concluída' : 'Pendente'}
                                                     </Text>
                                                 </View>
                                             </View>

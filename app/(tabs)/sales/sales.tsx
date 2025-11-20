@@ -1,82 +1,142 @@
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
-import { Modal, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, Modal, RefreshControl, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { useSalesPagination } from './hooks/useSalesPagination';
 
 interface SalesPageProps {
     navigation?: any;
 }
 
-// Dados mockados de vendas (fora do componente para evitar re-criação)
-const salesData = [
-    {
-        id: 1,
-        customerName: "Maria Silva",
-        amount: 250.50,
-        date: "13/nov",
-        time: "14:30",
-        status: "Concluída",
-        paymentMethod: "Pix",
-        products: ["Perfume Chanel", "Hidratante"]
-    },
-    {
-        id: 2,
-        customerName: "João Santos",
-        amount: 180.00,
-        date: "13/nov",
-        time: "12:15",
-        status: "Pendente",
-        paymentMethod: "Cartão",
-        products: ["Perfume Masculino"]
-    },
-    {
-        id: 3,
-        customerName: "Ana Costa",
-        amount: 320.75,
-        date: "12/nov",
-        time: "16:45",
-        status: "Concluída",
-        paymentMethod: "Dinheiro",
-        products: ["Kit Presente", "Perfume Importado"]
-    },
-    {
-        id: 4,
-        customerName: "Pedro Lima",
-        amount: 95.00,
-        date: "12/nov",
-        time: "10:20",
-        status: "Cancelada",
-        paymentMethod: "Pix",
-        products: ["Perfume Nacional"]
-    },
-];
-
 export default function SalesPage({ navigation }: SalesPageProps) {
     const colors = useThemeColors();
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('Todos');
-    const [refreshing, setRefreshing] = useState(false);
-    const [selectedDateFilter, setSelectedDateFilter] = useState('Todos');
+    const [selectedDateFilter, setSelectedDateFilter] = useState('Este mês');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedStartDate, setSelectedStartDate] = useState('');
     const [selectedEndDate, setSelectedEndDate] = useState('');
     const [markedDates, setMarkedDates] = useState({});
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        // Simular carregamento de dados
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setRefreshing(false);
-    };
+    // Debounce para busca - aguarda 500ms após parar de digitar
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Calcular datas com base no filtro selecionado
+    const dateRange = useMemo(() => {
+        const now = new Date();
+        let from = '';
+        let to = '';
+
+        switch (selectedDateFilter) {
+            case 'Todos':
+                // Não define from/to para buscar todas as vendas
+                from = '';
+                to = '';
+                break;
+            case 'Hoje':
+                from = now.toISOString().split('T')[0];
+                to = from;
+                break;
+            case 'Esta semana':
+                const startOfWeek = new Date(now);
+                startOfWeek.setDate(now.getDate() - now.getDay());
+                from = startOfWeek.toISOString().split('T')[0];
+                to = now.toISOString().split('T')[0];
+                break;
+            case 'Este mês':
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                from = startOfMonth.toISOString().split('T')[0];
+                to = now.toISOString().split('T')[0];
+                break;
+            default:
+                // Personalizado
+                if (selectedStartDate && selectedEndDate) {
+                    from = selectedStartDate;
+                    to = selectedEndDate;
+                } else if (selectedStartDate) {
+                    from = selectedStartDate;
+                    to = selectedStartDate;
+                }
+                break;
+        }
+
+        return { from, to };
+    }, [selectedDateFilter, selectedStartDate, selectedEndDate]);
+
+    // Hook de paginação com filtros (incluindo status)
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        refetch,
+        isRefetching
+    } = useSalesPagination({
+        from: dateRange.from,
+        to: dateRange.to,
+        search: debouncedSearch,
+        status: selectedFilter === 'Todos' ? undefined : selectedFilter,
+        limit: 20
+    });
+
+    // Uma única requisição para obter todas as vendas e fazer contagens
+    const { data: allSalesData } = useSalesPagination({
+        from: dateRange.from,
+        to: dateRange.to,
+        search: '',
+        status: undefined,
+        limit: 9999 // Busca todas para contagem correta
+    });
+
+    // Combinar todas as páginas em uma lista única
+    const allOrders = useMemo(() => {
+        return data?.pages.flatMap(page => page.orders) ?? [];
+    }, [data]);
+
+    // Pega todas as vendas para fazer as contagens
+    const allSalesForCounting = useMemo(() => {
+        return allSalesData?.pages.flatMap(page => page.orders) ?? [];
+    }, [allSalesData]);
+
+    // Estatísticas sempre sem filtro de status
+    const stats = useMemo(() => {
+        if (!allSalesData?.pages[0]) return { totalOrders: 0, totalRevenue: 0, estimatedProfit: 0 };
+        return {
+            totalOrders: allSalesData.pages[0].totalOrders,
+            totalRevenue: allSalesData.pages[0].totalRevenue,
+            estimatedProfit: allSalesData.pages[0].estimatedProfit
+        };
+    }, [allSalesData]);
+
+    // Contar vendas por status baseado nas vendas carregadas
+    const ordersByStatus = useMemo(() => {
+        const approved = allSalesForCounting.filter(order => order.status === 'approved').length;
+        const pending = allSalesForCounting.filter(order => order.status === 'pending').length;
+
+        return {
+            total: allSalesForCounting.length,
+            approved,
+            pending
+        };
+    }, [allSalesForCounting]);
 
     // Função para lidar com seleção de datas no calendário
     const onDayPress = (day: any) => {
         const dateString = day.dateString;
 
         if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-            // Primeira seleção ou nova seleção
+            // Primeira seleção ou nova seleçãof
             setSelectedStartDate(dateString);
             setSelectedEndDate('');
             setMarkedDates({
@@ -166,69 +226,34 @@ export default function SalesPage({ navigation }: SalesPageProps) {
         setShowCalendar(false);
     };
 
-    const filters = ['Todos', 'Concluída', 'Pendente', 'Cancelada'];
+    const filters = ['Todos', 'approved', 'pending'];
+
+    // Função para traduzir status
+    const getStatusLabel = (status: string) => {
+        const statusMap: { [key: string]: string } = {
+            'approved': 'Aprovados',
+            'pending': 'Pendentes',
+            'Todos': 'Todos'
+        };
+        return statusMap[status] || status;
+    };
+
+    // Função para obter cor do status
+    const getStatusColor = (status: string) => {
+        const colorMap: { [key: string]: { bg: string, text: string } } = {
+            'approved': {
+                bg: colors.isDark ? '#166534' : '#dcfce7',
+                text: colors.isDark ? '#4ade80' : '#166534'
+            },
+            'pending': {
+                bg: colors.isDark ? '#854d0e' : '#fef3c7',
+                text: colors.isDark ? '#fbbf24' : '#854d0e'
+            }
+        };
+        return colorMap[status] || colorMap['approved'];
+    };
 
     const dateFilters = ['Todos', 'Hoje', 'Esta semana', 'Este mês', 'Personalizado'];
-
-    const filteredSales = useMemo(() => {
-        return salesData.filter(sale => {
-            const matchesSearch = sale.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                sale.products.some(product => product.toLowerCase().includes(searchQuery.toLowerCase()));
-            const matchesFilter = selectedFilter === 'Todos' || sale.status === selectedFilter;
-
-            // Filtro de data aprimorado para intervalos
-            let matchesDate = true;
-            if (selectedDateFilter !== 'Todos') {
-                const saleDate = sale.date;
-
-                switch (selectedDateFilter) {
-                    case 'Hoje':
-                        matchesDate = saleDate === '13/nov';
-                        break;
-                    case 'Esta semana':
-                        matchesDate = saleDate === '13/nov' || saleDate === '12/nov';
-                        break;
-                    case 'Este mês':
-                        matchesDate = saleDate.includes('nov');
-                        break;
-                    default:
-                        // Para intervalos de datas personalizadas
-                        if (selectedDateFilter.includes(' - ')) {
-                            // Formato: "dd/mmm - dd/mmm"
-                            const [startStr, endStr] = selectedDateFilter.split(' - ');
-
-                            // Função para converter "13/nov" para Date
-                            const parseDate = (dateStr: string) => {
-                                const [day, month] = dateStr.split('/');
-                                const monthMap: { [key: string]: number } = {
-                                    'jan': 0, 'fev': 1, 'mar': 2, 'abr': 3,
-                                    'mai': 4, 'jun': 5, 'jul': 6, 'ago': 7,
-                                    'set': 8, 'out': 9, 'nov': 10, 'dez': 11
-                                };
-                                return new Date(2024, monthMap[month], parseInt(day));
-                            };
-
-                            const startDate = parseDate(startStr);
-                            const endDate = parseDate(endStr);
-                            const saleDateObj = parseDate(saleDate);
-
-                            matchesDate = saleDateObj >= startDate && saleDateObj <= endDate;
-                        } else if (!selectedDateFilter.startsWith('Data:')) {
-                            // Para data única personalizada
-                            matchesDate = saleDate.includes(selectedDateFilter);
-                        } else {
-                            // Formato antigo "Data: dd/mmm"
-                            const customDate = selectedDateFilter.replace('Data: ', '');
-                            matchesDate = saleDate.includes(customDate);
-                        }
-                }
-            }
-            return matchesSearch && matchesFilter && matchesDate;
-        });
-    }, [searchQuery, selectedFilter, selectedDateFilter]);
-
-    const totalSales = salesData.filter(s => s.status === 'Concluída').reduce((sum, s) => sum + s.amount, 0);
-    const todaySales = salesData.filter(s => s.date === '13/nov' && s.status === 'Concluída').length;
 
     return (
         <View className="flex-1">
@@ -259,6 +284,228 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                     elevation: 5,
                 }}
             />
+
+            {/* Conteúdo fixo (header, cards, search, filters) */}
+            <View>
+                {/* Header */}
+                <View className="px-4 pt-12 pb-6">
+                    <View className="flex-row items-center justify-between mb-6 mt-5">
+                        <View className="flex-1">
+                            <Text
+                                className="text-lg font-medium mb-1"
+                                style={{ color: colors.primaryForeground + '80' }}
+                            >
+                                Gestão de vendas
+                            </Text>
+                            <Text
+                                className="text-3xl font-black tracking-tight"
+                                style={{ color: colors.primaryForeground }}
+                            >
+                                Vendas
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity
+                            className="flex-row items-center bg-white/20 rounded-2xl px-4 py-2"
+                            style={{
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 4,
+                                elevation: 3,
+                            }}
+                            onPress={() => setShowDatePicker(!showDatePicker)}
+                        >
+                            <Ionicons name="calendar" size={20} color={colors.primaryForeground} />
+                            <Text
+                                className="ml-2 text-sm font-semibold"
+                                style={{ color: colors.primaryForeground }}
+                            >
+                                {selectedDateFilter}
+                            </Text>
+                            <Ionicons
+                                name={showDatePicker ? "chevron-up" : "chevron-down"}
+                                size={16}
+                                color={colors.primaryForeground}
+                                className="ml-1"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Cards de Resumo */}
+                <View className="px-4 mb-6 relative z-10" style={{ marginTop: -30 }}>
+                    <View className="flex-row gap-3 mb-4">
+                        {/* Total de Vendas */}
+                        <View
+                            className="flex-1 rounded-3xl p-5"
+                            style={{
+                                backgroundColor: colors.card,
+                                borderColor: colors.border,
+                                borderWidth: 1,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.05,
+                                shadowRadius: 8,
+                                elevation: 2,
+                            }}
+                        >
+                            <View className="flex-row items-center justify-between mb-2">
+                                <View
+                                    className="w-10 h-10 rounded-2xl items-center justify-center"
+                                    style={{ backgroundColor: colors.primary + '20' }}
+                                >
+                                    <Ionicons name="trending-up" size={20} color={colors.primary} />
+                                </View>
+                                <Text
+                                    className="text-xs font-semibold px-2 py-1 rounded-full"
+                                    style={{
+                                        backgroundColor: '#10b981' + '20',
+                                        color: '#10b981'
+                                    }}
+                                >
+                                    +12%
+                                </Text>
+                            </View>
+                            <Text
+                                className="text-2xl font-black"
+                                style={{ color: colors.foreground }}
+                            >
+                                {formatCurrency(stats.totalRevenue)}
+                            </Text>
+                            <Text
+                                className="text-sm font-medium"
+                                style={{ color: colors.mutedForeground }}
+                            >
+                                Total em vendas
+                            </Text>
+                        </View>
+
+                        {/* Vendas Hoje */}
+                        <View
+                            className="flex-1 rounded-3xl p-5"
+                            style={{
+                                backgroundColor: colors.card,
+                                borderColor: colors.border,
+                                borderWidth: 1,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.05,
+                                shadowRadius: 8,
+                                elevation: 2,
+                            }}
+                        >
+                            <View className="flex-row items-center justify-between mb-2">
+                                <View
+                                    className="w-10 h-10 rounded-2xl items-center justify-center"
+                                    style={{ backgroundColor: '#3b82f6' + '20' }}
+                                >
+                                    <Ionicons name="calendar" size={20} color="#3b82f6" />
+                                </View>
+                                <Text
+                                    className="text-xs font-semibold px-2 py-1 rounded-full"
+                                    style={{
+                                        backgroundColor: '#3b82f6' + '20',
+                                        color: '#3b82f6'
+                                    }}
+                                >
+                                    {selectedDateFilter}
+                                </Text>
+                            </View>
+                            <Text
+                                className="text-2xl font-black"
+                                style={{ color: colors.foreground }}
+                            >
+                                {stats.totalOrders}
+                            </Text>
+                            <Text
+                                className="text-sm font-medium"
+                                style={{ color: colors.mutedForeground }}
+                            >
+                                Vendas realizadas
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Barra de Pesquisa */}
+                <View className="px-4 mb-4">
+                    <View
+                        className="flex-row items-center rounded-2xl px-4 py-3"
+                        style={{
+                            backgroundColor: colors.card,
+                            borderColor: colors.border,
+                            borderWidth: 1,
+                        }}
+                    >
+                        <Ionicons name="search" size={20} color={colors.mutedForeground} />
+                        <TextInput
+                            className="flex-1 ml-3 text-base"
+                            placeholder="Buscar por cliente ou produto..."
+                            placeholderTextColor={colors.mutedForeground}
+                            style={{ color: colors.foreground }}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                        {searchQuery !== '' && (
+                            <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                <Ionicons name="close-circle" size={20} color={colors.mutedForeground} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+
+                {/* Filtros */}
+                <View className="px-4 mb-6">
+                    <View className="flex-row justify-between">
+                        {filters.map((filter) => {
+                            const isSelected = selectedFilter === filter;
+                            const filterCount = filter === 'Todos'
+                                ? ordersByStatus.total
+                                : filter === 'approved'
+                                    ? ordersByStatus.approved
+                                    : ordersByStatus.pending;
+
+                            return (
+                                <TouchableOpacity
+                                    key={filter}
+                                    className="flex-row items-center px-4 py-2 rounded-2xl"
+                                    style={{
+                                        backgroundColor: isSelected ? colors.primary : colors.card,
+                                        borderColor: isSelected ? colors.primary : colors.border,
+                                        borderWidth: 1,
+                                    }}
+                                    onPress={() => setSelectedFilter(filter)}
+                                >
+                                    <Text
+                                        className="font-semibold"
+                                        style={{
+                                            color: isSelected ? colors.primaryForeground : colors.foreground,
+                                        }}
+                                    >
+                                        {getStatusLabel(filter)}
+                                    </Text>
+                                    <View
+                                        className="ml-2 px-2 py-1 rounded-full"
+                                        style={{
+                                            backgroundColor: isSelected ? colors.primaryForeground + '20' : colors.muted,
+                                        }}
+                                    >
+                                        <Text
+                                            className="text-xs font-bold"
+                                            style={{
+                                                color: isSelected ? colors.primaryForeground : colors.mutedForeground,
+                                            }}
+                                        >
+                                            {filterCount}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                </View>
+            </View>
 
             {/* Backdrop para fechar dropdown */}
             {showDatePicker && (
@@ -464,285 +711,79 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                 </View>
             </Modal>
 
-            <ScrollView
-                className="flex-1"
+            {/* Lista de vendas - SOMENTE isso scrolla */}
+            <FlatList
+                data={allOrders}
+                keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1 }}
                 refreshControl={
                     <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
+                        refreshing={isRefetching}
+                        onRefresh={() => refetch()}
                         colors={[colors.primary]}
                         tintColor={colors.primary}
                         progressBackgroundColor={colors.background}
                     />
                 }
-            >
-                {/* Header */}
-                <View className="px-4 pt-12 pb-6">
-                    <View className="flex-row items-center justify-between mb-6 mt-5">
-                        <View className="flex-1">
-                            <Text
-                                className="text-lg font-medium mb-1"
-                                style={{ color: colors.primaryForeground + '80' }}
-                            >
-                                Gestão de vendas
-                            </Text>
-                            <Text
-                                className="text-3xl font-black tracking-tight"
-                                style={{ color: colors.primaryForeground }}
-                            >
-                                Vendas
-                            </Text>
+                onEndReached={() => {
+                    if (hasNextPage && !isFetchingNextPage) {
+                        fetchNextPage();
+                    }
+                }}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={() => (
+                    isFetchingNextPage ? (
+                        <View className="py-4">
+                            <ActivityIndicator size="small" color={colors.primary} />
                         </View>
-
-                        <TouchableOpacity
-                            className="flex-row items-center bg-white/20 rounded-2xl px-4 py-2"
-                            style={{
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            }}
-                            onPress={() => setShowDatePicker(!showDatePicker)}
-                        >
-                            <Ionicons name="calendar" size={20} color={colors.primaryForeground} />
-                            <Text
-                                className="ml-2 text-sm font-semibold"
-                                style={{ color: colors.primaryForeground }}
-                            >
-                                {selectedDateFilter}
-                            </Text>
-                            <Ionicons
-                                name={showDatePicker ? "chevron-up" : "chevron-down"}
-                                size={16}
-                                color={colors.primaryForeground}
-                                className="ml-1"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* Cards de Resumo */}
-                <View className="px-4 mb-6 relative z-10" style={{ marginTop: -30 }}>
-                    <View className="flex-row gap-3 mb-4">
-                        {/* Total de Vendas */}
-                        <View
-                            className="flex-1 rounded-3xl p-5"
-                            style={{
-                                backgroundColor: colors.card,
-                                borderColor: colors.border,
-                                borderWidth: 1,
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.05,
-                                shadowRadius: 8,
-                                elevation: 2,
-                            }}
-                        >
-                            <View className="flex-row items-center justify-between mb-2">
-                                <View
-                                    className="w-10 h-10 rounded-2xl items-center justify-center"
-                                    style={{ backgroundColor: colors.primary + '20' }}
-                                >
-                                    <Ionicons name="trending-up" size={20} color={colors.primary} />
-                                </View>
-                                <Text
-                                    className="text-xs font-semibold px-2 py-1 rounded-full"
-                                    style={{
-                                        backgroundColor: '#10b981' + '20',
-                                        color: '#10b981'
-                                    }}
-                                >
-                                    +12%
-                                </Text>
-                            </View>
-                            <Text
-                                className="text-2xl font-black"
-                                style={{ color: colors.foreground }}
-                            >
-                                R$ {totalSales.toFixed(2).replace('.', ',')}
-                            </Text>
-                            <Text
-                                className="text-sm font-medium"
-                                style={{ color: colors.mutedForeground }}
-                            >
-                                Total em vendas
-                            </Text>
-                        </View>
-
-                        {/* Vendas Hoje */}
-                        <View
-                            className="flex-1 rounded-3xl p-5"
-                            style={{
-                                backgroundColor: colors.card,
-                                borderColor: colors.border,
-                                borderWidth: 1,
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.05,
-                                shadowRadius: 8,
-                                elevation: 2,
-                            }}
-                        >
-                            <View className="flex-row items-center justify-between mb-2">
-                                <View
-                                    className="w-10 h-10 rounded-2xl items-center justify-center"
-                                    style={{ backgroundColor: '#3b82f6' + '20' }}
-                                >
-                                    <Ionicons name="calendar" size={20} color="#3b82f6" />
-                                </View>
-                                <Text
-                                    className="text-xs font-semibold px-2 py-1 rounded-full"
-                                    style={{
-                                        backgroundColor: '#3b82f6' + '20',
-                                        color: '#3b82f6'
-                                    }}
-                                >
-                                    Hoje
-                                </Text>
-                            </View>
-                            <Text
-                                className="text-2xl font-black"
-                                style={{ color: colors.foreground }}
-                            >
-                                {todaySales}
-                            </Text>
-                            <Text
-                                className="text-sm font-medium"
-                                style={{ color: colors.mutedForeground }}
-                            >
-                                Vendas realizadas
-                            </Text>
-                        </View>
-                    </View>
-
-
-                </View>
-
-                {/* Barra de Pesquisa */}
-                <View className="px-4 mb-4">
-                    <View
-                        className="flex-row items-center rounded-2xl px-4 py-3"
-                        style={{
-                            backgroundColor: colors.card,
-                            borderColor: colors.border,
-                            borderWidth: 1,
-                        }}
-                    >
-                        <Ionicons name="search" size={20} color={colors.mutedForeground} />
-                        <TextInput
-                            className="flex-1 ml-3 text-base"
-                            placeholder="Buscar por cliente ou produto..."
-                            placeholderTextColor={colors.mutedForeground}
-                            style={{ color: colors.foreground }}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                        {searchQuery !== '' && (
-                            <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                <Ionicons name="close-circle" size={20} color={colors.mutedForeground} />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
-
-                {/* Filtros */}
-                <View className="px-4 mb-6">
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        <View className="flex-row gap-2">
-                            {filters.map((filter) => {
-                                const isSelected = selectedFilter === filter;
-                                const filterCount = filter === 'Todos' ? salesData.length : salesData.filter(s => s.status === filter).length;
-
-                                return (
-                                    <TouchableOpacity
-                                        key={filter}
-                                        className="flex-row items-center px-4 py-2 rounded-2xl"
-                                        style={{
-                                            backgroundColor: isSelected ? colors.primary : colors.card,
-                                            borderColor: isSelected ? colors.primary : colors.border,
-                                            borderWidth: 1,
-                                        }}
-                                        onPress={() => setSelectedFilter(filter)}
-                                    >
-                                        <Text
-                                            className="font-semibold"
-                                            style={{
-                                                color: isSelected ? colors.primaryForeground : colors.foreground,
-                                            }}
-                                        >
-                                            {filter}
-                                        </Text>
-                                        <View
-                                            className="ml-2 px-2 py-1 rounded-full"
-                                            style={{
-                                                backgroundColor: isSelected ? colors.primaryForeground + '20' : colors.muted,
-                                            }}
-                                        >
-                                            <Text
-                                                className="text-xs font-bold"
-                                                style={{
-                                                    color: isSelected ? colors.primaryForeground : colors.mutedForeground,
-                                                }}
-                                            >
-                                                {filterCount}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </View>
-                    </ScrollView>
-                </View>
-
-                {/* Feedback para lista vazia */}
-                {filteredSales.length === 0 && (
-                    <View className="px-4 py-16 items-center">
-                        <View
-                            className="w-24 h-24 rounded-full items-center justify-center mb-6"
-                            style={{ backgroundColor: colors.muted + '40' }}
-                        >
-                            <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} />
-                        </View>
-                        <Text
-                            className="text-xl font-bold mb-2 text-center"
-                            style={{ color: colors.foreground }}
-                        >
-                            Nenhuma venda encontrada
-                        </Text>
-                        <Text
-                            className="text-base text-center mb-6 px-8"
-                            style={{ color: colors.mutedForeground }}
-                        >
-                            {searchQuery
-                                ? "Tente ajustar os filtros ou termo de busca"
-                                : "Que tal começar registrando sua primeira venda?"
-                            }
-                        </Text>
-                        {!searchQuery && (
-                            <TouchableOpacity
-                                className="flex-row items-center px-6 py-3 rounded-2xl"
-                                style={{ backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1 }}
-                                onPress={() => {/* Navegar para nova venda */ }}
-                            >
-                                <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-                                <Text
-                                    className="ml-2 font-semibold"
-                                    style={{ color: colors.primary }}
-                                >
-                                    Criar primeira venda
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
+                    ) : null
                 )}
-
-                {/* Lista de Vendas */}
-                <View className="px-4 mb-6">
-                    {filteredSales.map((sale) => (
+                ListEmptyComponent={() => (
+                    !isLoading && allOrders.length === 0 && (
+                        <View className="px-4 py-16 items-center">
+                            <View
+                                className="w-24 h-24 rounded-full items-center justify-center mb-6"
+                                style={{ backgroundColor: colors.muted + '40' }}
+                            >
+                                <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} />
+                            </View>
+                            <Text
+                                className="text-xl font-bold mb-2 text-center"
+                                style={{ color: colors.foreground }}
+                            >
+                                Nenhuma venda encontrada
+                            </Text>
+                            <Text
+                                className="text-base text-center mb-6 px-8"
+                                style={{ color: colors.mutedForeground }}
+                            >
+                                {searchQuery
+                                    ? "Tente ajustar os filtros ou termo de busca"
+                                    : "Que tal começar registrando sua primeira venda?"
+                                }
+                            </Text>
+                            {!searchQuery && (
+                                <TouchableOpacity
+                                    className="flex-row items-center px-6 py-3 rounded-2xl"
+                                    style={{ backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1 }}
+                                    onPress={() => {/* Navegar para nova venda */ }}
+                                >
+                                    <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+                                    <Text
+                                        className="ml-2 font-semibold"
+                                        style={{ color: colors.primary }}
+                                    >
+                                        Criar primeira venda
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )
+                )}
+                renderItem={({ item: order }) => (
+                    <View className="px-4 mb-4">
                         <TouchableOpacity
-                            key={sale.id}
                             className="rounded-xl pb-4"
                             style={{ borderColor: colors.border }}
                         >
@@ -764,28 +805,28 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                                                 className="font-semibold text-base"
                                                 style={{ color: colors.foreground }}
                                             >
-                                                {sale.customerName}
+                                                {order.customerName}
                                             </Text>
                                             <Text
                                                 className="text-sm mb-2"
                                                 style={{ color: colors.mutedForeground }}
                                             >
-                                                {sale.paymentMethod}
+                                                {order.paymentMethod}
                                             </Text>
                                             <View
                                                 className="rounded-full px-3 py-1"
                                                 style={{
-                                                    backgroundColor: colors.isDark ? '#166534' : '#dcfce7',
+                                                    backgroundColor: getStatusColor(order.status).bg,
                                                     alignSelf: 'flex-start'
                                                 }}
                                             >
                                                 <Text
                                                     className="text-xs font-medium"
                                                     style={{
-                                                        color: colors.isDark ? '#4ade80' : '#166534'
+                                                        color: getStatusColor(order.status).text
                                                     }}
                                                 >
-                                                    Pago
+                                                    {getStatusLabel(order.status)}
                                                 </Text>
                                             </View>
                                         </View>
@@ -793,19 +834,20 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                                 </View>
 
                                 <View className="items-end">
-                                    <Text className="text-green-600 font-bold text-lg">
-                                        R$ {sale.amount.toFixed(2).replace('.', ',')}
+                                    <Text className={order.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
+                                        {
+                                            order.status === 'approved' ? <Text>+{formatCurrency(order.total)}</Text> : <Text>{formatCurrency(order.total)}</Text>
+                                        }
                                     </Text>
                                     <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                                        {sale.date}
+                                        {formatDate(order.createdAt)}
                                     </Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
-                    ))}
-                </View>
-
-            </ScrollView>
+                    </View>
+                )}
+            />
         </View>
     );
 }
