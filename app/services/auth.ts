@@ -15,10 +15,10 @@ export const authService = {
   async getToken() {
     try {
       const token = await AsyncStorage.getItem(TOKEN_KEY);
-      console.log('Token carregado do getToken:', token);
+  
       return token;
     } catch (error) {
-      console.error("Erro ao buscar token:", error);
+
       return null;
     }
   },

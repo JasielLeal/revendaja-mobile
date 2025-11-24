@@ -56,8 +56,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     };
                 }>('/verify-token');
 
-                console.log("response.data", response.data);
-
                 if (response.data.valid && response.data.user) {
                     setUser(response.data.user);
                 } else {

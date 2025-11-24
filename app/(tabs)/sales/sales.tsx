@@ -1,10 +1,43 @@
 import { useThemeColors } from '@/hooks/use-theme-colors';
-import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, RefreshControl, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
+import {
+    CustomDatePicker,
+    DateFilterDropdown,
+    OrderDetailsModal,
+    SalesHeader,
+    SalesItem,
+    SalesStatsCards,
+    SearchBar,
+    StatusFilters
+} from './components';
 import { useSalesPagination } from './hooks/useSalesPagination';
+
+interface OrderItem {
+    id: string;
+    name: string;
+    quantity: number;
+    imgUrl: string;
+    price: number;
+    storeProductId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface Order {
+    id: string;
+    orderNumber: string;
+    status: string;
+    total: number;
+    paymentMethod: string;
+    customerName: string;
+    customerPhone: string;
+    storeId: string;
+    createdAt: string;
+    updatedAt: string;
+    items: OrderItem[];
+}
 
 interface SalesPageProps {
     navigation?: any;
@@ -21,6 +54,8 @@ export default function SalesPage({ navigation }: SalesPageProps) {
     const [selectedStartDate, setSelectedStartDate] = useState('');
     const [selectedEndDate, setSelectedEndDate] = useState('');
     const [markedDates, setMarkedDates] = useState({});
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [showOrderDetails, setShowOrderDetails] = useState(false);
 
     // Debounce para busca - aguarda 500ms após parar de digitar
     useEffect(() => {
@@ -39,7 +74,6 @@ export default function SalesPage({ navigation }: SalesPageProps) {
 
         switch (selectedDateFilter) {
             case 'Todos':
-                // Não define from/to para buscar todas as vendas
                 from = '';
                 to = '';
                 break;
@@ -96,7 +130,7 @@ export default function SalesPage({ navigation }: SalesPageProps) {
         to: dateRange.to,
         search: '',
         status: undefined,
-        limit: 9999 // Busca todas para contagem correta
+        limit: 9999
     });
 
     // Combinar todas as páginas em uma lista única
@@ -136,7 +170,6 @@ export default function SalesPage({ navigation }: SalesPageProps) {
         const dateString = day.dateString;
 
         if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-            // Primeira seleção ou nova seleçãof
             setSelectedStartDate(dateString);
             setSelectedEndDate('');
             setMarkedDates({
@@ -148,12 +181,10 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                 }
             });
         } else if (selectedStartDate && !selectedEndDate) {
-            // Segunda seleção - definir intervalo
             const start = new Date(selectedStartDate);
             const end = new Date(dateString);
 
             if (end < start) {
-                // Se data final é anterior, inverter
                 setSelectedStartDate(dateString);
                 setSelectedEndDate(selectedStartDate);
             } else {
@@ -204,7 +235,7 @@ export default function SalesPage({ navigation }: SalesPageProps) {
             const startDate = new Date(selectedStartDate);
             const endDate = new Date(selectedEndDate);
 
-            const formatDate = (date: Date) => {
+            const formatDateLabel = (date: Date) => {
                 return date.toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'short'
@@ -214,7 +245,7 @@ export default function SalesPage({ navigation }: SalesPageProps) {
             const finalStart = startDate < endDate ? startDate : endDate;
             const finalEnd = startDate < endDate ? endDate : startDate;
 
-            setSelectedDateFilter(`${formatDate(finalStart)} - ${formatDate(finalEnd)}`);
+            setSelectedDateFilter(`${formatDateLabel(finalStart)} - ${formatDateLabel(finalEnd)}`);
         } else if (selectedStartDate) {
             const date = new Date(selectedStartDate);
             const formattedDate = date.toLocaleDateString('pt-BR', {
@@ -226,9 +257,17 @@ export default function SalesPage({ navigation }: SalesPageProps) {
         setShowCalendar(false);
     };
 
-    const filters = ['Todos', 'approved', 'pending'];
+    const cancelDateSelection = () => {
+        setShowCalendar(false);
+        setSelectedStartDate('');
+        setSelectedEndDate('');
+        setMarkedDates({});
+    };
 
-    // Função para traduzir status
+    const filters = ['Todos', 'approved', 'pending'];
+    const dateFilters = ['Todos', 'Hoje', 'Esta semana', 'Este mês', 'Personalizado'];
+
+    // Funções helper
     const getStatusLabel = (status: string) => {
         const statusMap: { [key: string]: string } = {
             'approved': 'Aprovados',
@@ -238,7 +277,6 @@ export default function SalesPage({ navigation }: SalesPageProps) {
         return statusMap[status] || status;
     };
 
-    // Função para obter cor do status
     const getStatusColor = (status: string) => {
         const colorMap: { [key: string]: { bg: string, text: string } } = {
             'approved': {
@@ -252,8 +290,6 @@ export default function SalesPage({ navigation }: SalesPageProps) {
         };
         return colorMap[status] || colorMap['approved'];
     };
-
-    const dateFilters = ['Todos', 'Hoje', 'Esta semana', 'Este mês', 'Personalizado'];
 
     return (
         <View className="flex-1">
@@ -287,429 +323,56 @@ export default function SalesPage({ navigation }: SalesPageProps) {
 
             {/* Conteúdo fixo (header, cards, search, filters) */}
             <View>
-                {/* Header */}
-                <View className="px-4 pt-12 pb-6">
-                    <View className="flex-row items-center justify-between mb-6 mt-5">
-                        <View className="flex-1">
-                            <Text
-                                className="text-lg font-medium mb-1"
-                                style={{ color: colors.primaryForeground + '80' }}
-                            >
-                                Gestão de vendas
-                            </Text>
-                            <Text
-                                className="text-3xl font-black tracking-tight"
-                                style={{ color: colors.primaryForeground }}
-                            >
-                                Vendas
-                            </Text>
-                        </View>
+                <SalesHeader
+                    selectedDateFilter={selectedDateFilter}
+                    showDatePicker={showDatePicker}
+                    onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
+                />
 
-                        <TouchableOpacity
-                            className="flex-row items-center bg-white/20 rounded-2xl px-4 py-2"
-                            style={{
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            }}
-                            onPress={() => setShowDatePicker(!showDatePicker)}
-                        >
-                            <Ionicons name="calendar" size={20} color={colors.primaryForeground} />
-                            <Text
-                                className="ml-2 text-sm font-semibold"
-                                style={{ color: colors.primaryForeground }}
-                            >
-                                {selectedDateFilter}
-                            </Text>
-                            <Ionicons
-                                name={showDatePicker ? "chevron-up" : "chevron-down"}
-                                size={16}
-                                color={colors.primaryForeground}
-                                className="ml-1"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <SalesStatsCards
+                    totalRevenue={stats.totalRevenue}
+                    totalOrders={stats.totalOrders}
+                    selectedDateFilter={selectedDateFilter}
+                />
 
-                {/* Cards de Resumo */}
-                <View className="px-4 mb-6 relative z-10" style={{ marginTop: -30 }}>
-                    <View className="flex-row gap-3 mb-4">
-                        {/* Total de Vendas */}
-                        <View
-                            className="flex-1 rounded-3xl p-5"
-                            style={{
-                                backgroundColor: colors.card,
-                                borderColor: colors.border,
-                                borderWidth: 1,
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.05,
-                                shadowRadius: 8,
-                                elevation: 2,
-                            }}
-                        >
-                            <View className="flex-row items-center justify-between mb-2">
-                                <View
-                                    className="w-10 h-10 rounded-2xl items-center justify-center"
-                                    style={{ backgroundColor: colors.primary + '20' }}
-                                >
-                                    <Ionicons name="trending-up" size={20} color={colors.primary} />
-                                </View>
-                                <Text
-                                    className="text-xs font-semibold px-2 py-1 rounded-full"
-                                    style={{
-                                        backgroundColor: '#10b981' + '20',
-                                        color: '#10b981'
-                                    }}
-                                >
-                                    +12%
-                                </Text>
-                            </View>
-                            <Text
-                                className="text-2xl font-black"
-                                style={{ color: colors.foreground }}
-                            >
-                                {formatCurrency(stats.totalRevenue)}
-                            </Text>
-                            <Text
-                                className="text-sm font-medium"
-                                style={{ color: colors.mutedForeground }}
-                            >
-                                Total em vendas
-                            </Text>
-                        </View>
+                <SearchBar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                />
 
-                        {/* Vendas Hoje */}
-                        <View
-                            className="flex-1 rounded-3xl p-5"
-                            style={{
-                                backgroundColor: colors.card,
-                                borderColor: colors.border,
-                                borderWidth: 1,
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.05,
-                                shadowRadius: 8,
-                                elevation: 2,
-                            }}
-                        >
-                            <View className="flex-row items-center justify-between mb-2">
-                                <View
-                                    className="w-10 h-10 rounded-2xl items-center justify-center"
-                                    style={{ backgroundColor: '#3b82f6' + '20' }}
-                                >
-                                    <Ionicons name="calendar" size={20} color="#3b82f6" />
-                                </View>
-                                <Text
-                                    className="text-xs font-semibold px-2 py-1 rounded-full"
-                                    style={{
-                                        backgroundColor: '#3b82f6' + '20',
-                                        color: '#3b82f6'
-                                    }}
-                                >
-                                    {selectedDateFilter}
-                                </Text>
-                            </View>
-                            <Text
-                                className="text-2xl font-black"
-                                style={{ color: colors.foreground }}
-                            >
-                                {stats.totalOrders}
-                            </Text>
-                            <Text
-                                className="text-sm font-medium"
-                                style={{ color: colors.mutedForeground }}
-                            >
-                                Vendas realizadas
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Barra de Pesquisa */}
-                <View className="px-4 mb-4">
-                    <View
-                        className="flex-row items-center rounded-2xl px-4 py-3"
-                        style={{
-                            backgroundColor: colors.card,
-                            borderColor: colors.border,
-                            borderWidth: 1,
-                        }}
-                    >
-                        <Ionicons name="search" size={20} color={colors.mutedForeground} />
-                        <TextInput
-                            className="flex-1 ml-3 text-base"
-                            placeholder="Buscar por cliente ou produto..."
-                            placeholderTextColor={colors.mutedForeground}
-                            style={{ color: colors.foreground }}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                        {searchQuery !== '' && (
-                            <TouchableOpacity onPress={() => setSearchQuery('')}>
-                                <Ionicons name="close-circle" size={20} color={colors.mutedForeground} />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
-
-                {/* Filtros */}
-                <View className="px-4 mb-6">
-                    <View className="flex-row justify-between">
-                        {filters.map((filter) => {
-                            const isSelected = selectedFilter === filter;
-                            const filterCount = filter === 'Todos'
-                                ? ordersByStatus.total
-                                : filter === 'approved'
-                                    ? ordersByStatus.approved
-                                    : ordersByStatus.pending;
-
-                            return (
-                                <TouchableOpacity
-                                    key={filter}
-                                    className="flex-row items-center px-4 py-2 rounded-2xl"
-                                    style={{
-                                        backgroundColor: isSelected ? colors.primary : colors.card,
-                                        borderColor: isSelected ? colors.primary : colors.border,
-                                        borderWidth: 1,
-                                    }}
-                                    onPress={() => setSelectedFilter(filter)}
-                                >
-                                    <Text
-                                        className="font-semibold"
-                                        style={{
-                                            color: isSelected ? colors.primaryForeground : colors.foreground,
-                                        }}
-                                    >
-                                        {getStatusLabel(filter)}
-                                    </Text>
-                                    <View
-                                        className="ml-2 px-2 py-1 rounded-full"
-                                        style={{
-                                            backgroundColor: isSelected ? colors.primaryForeground + '20' : colors.muted,
-                                        }}
-                                    >
-                                        <Text
-                                            className="text-xs font-bold"
-                                            style={{
-                                                color: isSelected ? colors.primaryForeground : colors.mutedForeground,
-                                            }}
-                                        >
-                                            {filterCount}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                </View>
+                <StatusFilters
+                    filters={filters}
+                    selectedFilter={selectedFilter}
+                    ordersByStatus={ordersByStatus}
+                    onFilterSelect={setSelectedFilter}
+                    getStatusLabel={getStatusLabel}
+                />
             </View>
 
-            {/* Backdrop para fechar dropdown */}
-            {showDatePicker && (
-                <TouchableOpacity
-                    className="absolute inset-0 z-10"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-                    onPress={() => setShowDatePicker(false)}
-                    activeOpacity={1}
-                />
-            )}
+            <DateFilterDropdown
+                visible={showDatePicker}
+                dateFilters={dateFilters}
+                selectedDateFilter={selectedDateFilter}
+                onClose={() => setShowDatePicker(false)}
+                onFilterSelect={(filter) => {
+                    setSelectedDateFilter(filter);
+                    setShowDatePicker(false);
+                }}
+                onCustomDatePress={() => {
+                    setShowCalendar(true);
+                    setShowDatePicker(false);
+                }}
+            />
 
-            {/* Dropdown de Filtro de Data */}
-            {showDatePicker && (
-                <View className="absolute top-[100px] left-4 right-4 z-20">
-                    <View
-                        className="rounded-3xl p-4"
-                        style={{
-                            backgroundColor: colors.card,
-                            borderColor: colors.border,
-                            borderWidth: 1,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 4 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 8,
-                            elevation: 8,
-                        }}
-                    >
-                        <Text
-                            className="text-lg font-bold mb-3"
-                            style={{ color: colors.foreground }}
-                        >
-                            Filtrar por período
-                        </Text>
-                        {dateFilters.map((filter) => {
-                            const isSelected = selectedDateFilter === filter;
-                            return (
-                                <TouchableOpacity
-                                    key={filter}
-                                    className="flex-row items-center justify-between py-3 px-2"
-                                    onPress={() => {
-                                        if (filter === 'Personalizado') {
-                                            setShowCalendar(true);
-                                            setShowDatePicker(false);
-                                        } else {
-                                            setSelectedDateFilter(filter);
-                                            setShowDatePicker(false);
-                                        }
-                                    }}
-                                    style={{
-                                        backgroundColor: isSelected ? colors.primary + '10' : 'transparent',
-                                        borderRadius: 12,
-                                    }}
-                                >
-                                    <View className="flex-row items-center">
-                                        <Ionicons
-                                            name={filter === 'Hoje' ? 'today' :
-                                                filter === 'Esta semana' ? 'calendar' :
-                                                    filter === 'Este mês' ? 'calendar-outline' :
-                                                        filter === 'Personalizado' ? 'calendar-sharp' : 'time'}
-                                            size={20}
-                                            color={isSelected ? colors.primary : colors.mutedForeground}
-                                        />
-                                        <Text
-                                            className="ml-3 text-base font-medium"
-                                            style={{
-                                                color: isSelected ? colors.primary : colors.foreground
-                                            }}
-                                        >
-                                            {filter}
-                                        </Text>
-                                    </View>
-                                    {isSelected && (
-                                        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-                                    )}
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                </View>
-            )}
-
-            {/* Modal de Calendário para Seleção de Intervalo */}
-            <Modal
+            <CustomDatePicker
                 visible={showCalendar}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setShowCalendar(false)}
-            >
-                <View
-                    className="flex-1 justify-center items-center"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-                >
-                    <View
-                        className="m-4 rounded-3xl p-6 max-w-md w-full"
-                        style={{
-                            backgroundColor: colors.card,
-                            borderColor: colors.border,
-                            borderWidth: 1,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 4 },
-                            shadowOpacity: 0.15,
-                            shadowRadius: 12,
-                            elevation: 10,
-                        }}
-                    >
-                        <Text
-                            className="text-xl font-bold mb-4 text-center"
-                            style={{ color: colors.foreground }}
-                        >
-                            Selecionar Período
-                        </Text>
-
-                        <Text
-                            className="text-sm mb-4 text-center"
-                            style={{ color: colors.mutedForeground }}
-                        >
-                            Toque para selecionar data inicial e final
-                        </Text>
-
-                        <Calendar
-                            onDayPress={onDayPress}
-                            markingType={'period'}
-                            markedDates={markedDates}
-                            theme={{
-                                backgroundColor: colors.card,
-                                calendarBackground: colors.card,
-                                textSectionTitleColor: colors.foreground,
-                                selectedDayBackgroundColor: '#3b82f6',
-                                selectedDayTextColor: '#ffffff',
-                                todayTextColor: '#3b82f6',
-                                dayTextColor: colors.foreground,
-                                textDisabledColor: colors.mutedForeground,
-                                dotColor: '#3b82f6',
-                                selectedDotColor: '#ffffff',
-                                arrowColor: colors.foreground,
-                                monthTextColor: colors.foreground,
-                                indicatorColor: '#3b82f6',
-                                textDayFontWeight: '500',
-                                textMonthFontWeight: 'bold',
-                                textDayHeaderFontWeight: '600',
-                                textDayFontSize: 16,
-                                textMonthFontSize: 18,
-                                textDayHeaderFontSize: 14
-                            }}
-                        />
-
-                        {(selectedStartDate || selectedEndDate) && (
-                            <View className="mt-4 p-3 rounded-2xl" style={{ backgroundColor: colors.muted }}>
-                                <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
-                                    Selecionado:
-                                </Text>
-                                {selectedStartDate && (
-                                    <Text className="text-xs mt-1" style={{ color: colors.mutedForeground }}>
-                                        Início: {new Date(selectedStartDate).toLocaleDateString('pt-BR')}
-                                    </Text>
-                                )}
-                                {selectedEndDate && (
-                                    <Text className="text-xs mt-1" style={{ color: colors.mutedForeground }}>
-                                        Fim: {new Date(selectedEndDate).toLocaleDateString('pt-BR')}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-
-                        <View className="flex-row justify-between gap-3 mt-6">
-                            <TouchableOpacity
-                                className="flex-1 py-3 rounded-2xl"
-                                style={{
-                                    backgroundColor: colors.muted,
-                                    borderColor: colors.border,
-                                    borderWidth: 1,
-                                }}
-                                onPress={() => {
-                                    setShowCalendar(false);
-                                    setSelectedStartDate('');
-                                    setSelectedEndDate('');
-                                    setMarkedDates({});
-                                }}
-                            >
-                                <Text
-                                    className="text-center font-semibold"
-                                    style={{ color: colors.mutedForeground }}
-                                >
-                                    Cancelar
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                className="flex-1 py-3 rounded-2xl"
-                                style={{ backgroundColor: colors.primary }}
-                                onPress={confirmDateRange}
-                                disabled={!selectedStartDate}
-                            >
-                                <Text
-                                    className="text-center font-bold"
-                                    style={{ color: colors.primaryForeground }}
-                                >
-                                    Confirmar
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+                selectedStartDate={selectedStartDate}
+                selectedEndDate={selectedEndDate}
+                markedDates={markedDates}
+                onDayPress={onDayPress}
+                onConfirm={confirmDateRange}
+                onCancel={cancelDateSelection}
+            />
 
             {/* Lista de vendas - SOMENTE isso scrolla */}
             <FlatList
@@ -782,71 +445,25 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                     )
                 )}
                 renderItem={({ item: order }) => (
-                    <View className="px-4 mb-4">
-                        <TouchableOpacity
-                            className="rounded-xl pb-4"
-                            style={{ borderColor: colors.border }}
-                        >
-                            <View className="flex-row items-center justify-between">
-                                <View className="flex-1">
-                                    <View className="flex-row items-center mb-1">
-                                        <View>
-                                            <Ionicons
-                                                name="bag-check-outline"
-                                                size={20}
-                                                color={colors.primary}
-                                                borderWidth={1}
-                                                borderColor={colors.border}
-                                                className={`border border-${colors.border} p-4 rounded-xl mr-3`}
-                                            />
-                                        </View>
-                                        <View className="flex-1">
-                                            <Text
-                                                className="font-semibold text-base"
-                                                style={{ color: colors.foreground }}
-                                            >
-                                                {order.customerName}
-                                            </Text>
-                                            <Text
-                                                className="text-sm mb-2"
-                                                style={{ color: colors.mutedForeground }}
-                                            >
-                                                {order.paymentMethod}
-                                            </Text>
-                                            <View
-                                                className="rounded-full px-3 py-1"
-                                                style={{
-                                                    backgroundColor: getStatusColor(order.status).bg,
-                                                    alignSelf: 'flex-start'
-                                                }}
-                                            >
-                                                <Text
-                                                    className="text-xs font-medium"
-                                                    style={{
-                                                        color: getStatusColor(order.status).text
-                                                    }}
-                                                >
-                                                    {getStatusLabel(order.status)}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-
-                                <View className="items-end">
-                                    <Text className={order.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
-                                        {
-                                            order.status === 'approved' ? <Text>+{formatCurrency(order.total)}</Text> : <Text>{formatCurrency(order.total)}</Text>
-                                        }
-                                    </Text>
-                                    <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                                        {formatDate(order.createdAt)}
-                                    </Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
+                    <SalesItem
+                        order={order}
+                        onPress={() => {
+                            setSelectedOrder(order);
+                            setShowOrderDetails(true);
+                        }}
+                        getStatusLabel={getStatusLabel}
+                        getStatusColor={getStatusColor}
+                    />
                 )}
+            />
+
+            <OrderDetailsModal
+                visible={showOrderDetails}
+                order={selectedOrder}
+                onClose={() => setShowOrderDetails(false)}
+                onRefresh={refetch}
+                getStatusLabel={getStatusLabel}
+                getStatusColor={getStatusColor}
             />
         </View>
     );

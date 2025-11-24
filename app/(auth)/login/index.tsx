@@ -47,7 +47,6 @@ export default function LoginScreen() {
         loginMutation.mutate(data, {
             onSuccess: async (response) => {
                 await signIn(response.tokenAcess, response.user);
-                console.log('Login successful:', response);
                 router.replace('/(tabs)/home');
             },
         });
