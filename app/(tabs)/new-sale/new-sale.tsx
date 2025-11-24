@@ -1,10 +1,15 @@
+import { api } from '@/app/backend/api';
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { formatCurrency } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
-import React, { useState } from 'react';
-import { Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import template from "../../../assets/template.jpg";
+import { useCreateSale } from './hooks/useCreateSale';
 
 // Configurar localização PT-BR
 LocaleConfig.locales['pt-br'] = {
@@ -41,6 +46,22 @@ export default function NewSalePage() {
     const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [showCamera, setShowCamera] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
+    const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+    const [permission, requestPermission] = useCameraPermissions();
+    const lastScannedRef = useRef<string>('');
+    const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const { mutate: createSale, isPending } = useCreateSale();
+
+    // Buscar produto quando atingir 13 dígitos
+    useEffect(() => {
+        if (barcode.length === 13) {
+            searchProductByBarcode(barcode.trim());
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [barcode]);
 
     const getCurrentDate = () => {
         const day = selectedDate.getDate().toString().padStart(2, '0');
@@ -57,43 +78,100 @@ export default function NewSalePage() {
         { id: 'pix', label: 'PIX', icon: 'phone-portrait-outline' },
     ];
 
-    // Simulação de produtos do estoque
-    const stockProducts: Product[] = [
-        { id: '1', name: 'Perfume Chanel Nº5', price: 450.00, barcode: '1', img: template },
-        { id: '2', name: 'Perfume Hugo Boss', price: 280.00, barcode: '2', img: template },
-        { id: '3', name: 'Hidratante Corporal', price: 85.00, barcode: '3', img: template },
-        { id: '4', name: 'Perfume Feminino Importado', price: 380.00, barcode: '4', img: template },
-        { id: '5', name: 'Kit Presente Masculino', price: 320.00, barcode: '5', img: template },
-        { id: '6', name: 'Loção Pós-Barba', price: 120.00, barcode: '6', img: template },
-        { id: '7', name: 'Desodorante Aerosol', price: 45.00, barcode: '7', img: template },
-    ];
+    const searchProductByBarcode = async (barcodeValue: string) => {
+        if (!barcodeValue) return;
 
-    const handleBarcodeSubmit = () => {
-        if (!barcode.trim()) {
-            Alert.alert('Erro', 'Digite o código de barras');
-            return;
-        }
+        setIsLoadingProduct(true);
+        try {
+            const response = await api.get(`/store-product/barcode/${barcodeValue}`);
+            const productData = response.data;
 
-        const product = stockProducts.find(p => p.barcode === barcode.trim());
+            // Verificar se o produto tem estoque disponível
+            if (productData.quantity <= 0) {
+                Alert.alert('Produto sem estoque', `${productData.name} não tem unidades disponíveis`);
+                setBarcode('');
+                setIsLoadingProduct(false);
+                return;
+            }
 
-        if (product) {
+            const product: Product = {
+                id: productData.id,
+                name: productData.name,
+                price: productData.price,
+                barcode: barcodeValue,
+                img: productData.imgUrl || template,
+                quantity: 1
+            };
+
             const existingProductIndex = products.findIndex(p => p.id === product.id);
             if (existingProductIndex >= 0) {
                 // Produto já existe, aumentar quantidade
-                const updatedProducts = [...products];
-                updatedProducts[existingProductIndex].quantity = (updatedProducts[existingProductIndex].quantity || 1) + 1;
-                setProducts(updatedProducts);
-                setBarcode('');
-                Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+                const currentQty = products[existingProductIndex].quantity || 1;
+                if (currentQty >= productData.quantity) {
+                    Alert.alert('Estoque insuficiente', `Apenas ${productData.quantity} unidades disponíveis`);
+                } else {
+                    const updatedProducts = [...products];
+                    updatedProducts[existingProductIndex].quantity = currentQty + 1;
+                    setProducts(updatedProducts);
+                    Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+                }
             } else {
                 // Novo produto, adicionar com quantidade 1
-                setProducts([...products, { ...product, quantity: 1 }]);
-                setBarcode('');
+                setProducts([...products, product]);
                 Alert.alert('Sucesso', `${product.name} adicionado à venda`);
             }
-        } else {
-            Alert.alert('Produto não encontrado');
+            setBarcode('');
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                Alert.alert('Produto não encontrado', 'Código de barras não cadastrado no sistema');
+            } else {
+                Alert.alert('Erro', 'Erro ao buscar produto. Tente novamente.');
+            }
+            console.error('Error fetching product:', error);
+        } finally {
+            setIsLoadingProduct(false);
         }
+    };
+
+    const handleBarcodeScanned = ({ data }: { data: string }) => {
+        // Prevenir múltiplos scans do mesmo código
+        if (isScanning || lastScannedRef.current === data) {
+            return;
+        }
+
+        // Marca como escaneando e armazena o código
+        setIsScanning(true);
+        lastScannedRef.current = data;
+        setShowCamera(false);
+
+        // Faz a requisição
+        searchProductByBarcode(data);
+
+        // Limpa o timeout anterior se existir
+        if (scanTimeoutRef.current) {
+            clearTimeout(scanTimeoutRef.current);
+        }
+
+        // Reseta após 2 segundos
+        scanTimeoutRef.current = setTimeout(() => {
+            setIsScanning(false);
+            lastScannedRef.current = '';
+        }, 2000);
+    }; const openCamera = async () => {
+        if (!permission?.granted) {
+            const { granted } = await requestPermission();
+            if (!granted) {
+                Alert.alert('Permissão negada', 'É necessário permitir o acesso à câmera para escanear códigos de barras');
+                return;
+            }
+        }
+        // Reset todos os estados e refs ao abrir
+        setIsScanning(false);
+        lastScannedRef.current = '';
+        if (scanTimeoutRef.current) {
+            clearTimeout(scanTimeoutRef.current);
+        }
+        setShowCamera(true);
     };
 
     const getTotalAmount = () => {
@@ -103,6 +181,8 @@ export default function NewSalePage() {
     const getTotalItems = () => {
         return products.reduce((sum, product) => sum + (product.quantity || 1), 0);
     };
+
+    const queryClient = useQueryClient();
 
     const handleFinalizeSale = () => {
         if (!customerName.trim()) {
@@ -115,11 +195,43 @@ export default function NewSalePage() {
             return;
         }
 
-        Alert.alert(
-            'Venda Finalizada',
-            `Cliente: ${customerName}\nTotal: R$ ${getTotalAmount().toFixed(2).replace('.', ',')}\nPagamento: ${paymentMethod}`,
-            [{ text: 'OK', onPress: resetForm }]
-        );
+        const saleData = {
+            customerName,
+            status: "approved",
+            paymentMethod,
+            createdAt: selectedDate.toISOString(),
+            items: products.map(p => ({
+                storeProductId: p.id,
+                quantity: p.quantity || 1
+            }))
+        };
+
+        createSale(saleData, {
+            onSuccess: () => {
+                // Invalida todas as queries relacionadas
+                queryClient.invalidateQueries({ queryKey: ["orders"] });
+                queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+                queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
+                resetForm();
+                // Feedback de sucesso
+                Alert.alert(
+                    'Sucesso! 🎉',
+                    `Venda finalizada com sucesso!\n\nCliente: ${customerName}\nTotal: R$ ${getTotalAmount().toFixed(2).replace('.', ',')}\nItens: ${getTotalItems()}`,
+                    [
+                        {
+                            text: 'OK',
+                        }
+                    ]
+                );
+            },
+            onError: (error: any) => {
+                Alert.alert(
+                    'Erro ao finalizar venda',
+                    error?.response?.data?.message || 'Ocorreu um erro ao processar a venda. Tente novamente.'
+                );
+            }
+        });
     };
 
     const resetForm = () => {
@@ -127,6 +239,7 @@ export default function NewSalePage() {
         setBarcode('');
         setProducts([]);
         setPaymentMethod('Dinheiro');
+        setSelectedDate(new Date());
     };
 
     return (
@@ -348,8 +461,8 @@ export default function NewSalePage() {
                 </View>
             </View>
 
-            <ScrollView className="flex-1 px-4 relative z-10" style={{ marginTop: -30 }}>
-                {/* Formulário Principal */}
+            {/* Formulário Fixo */}
+            <View className="px-4 relative z-10" style={{ marginTop: -30 }}>
                 <View className="mb-6">
                     {/* Nome do Cliente */}
                     <TextInput
@@ -423,7 +536,7 @@ export default function NewSalePage() {
                                 {paymentMethods.map((method) => (
                                     <TouchableOpacity
                                         key={method.id}
-                                        className="flex-row items-center px-4 py-3"
+                                        className="flex-row items-center px-4 py-4"
                                         style={{
                                             backgroundColor: method.label === paymentMethod ? colors.primary + '10' : 'transparent',
                                             borderBottomWidth: method.id !== paymentMethods[paymentMethods.length - 1].id ? 1 : 0,
@@ -456,22 +569,29 @@ export default function NewSalePage() {
 
                     {/* Código de Barras */}
                     <View className="flex-row">
-                        <TextInput
-                            className="flex-1 border rounded-xl px-4 py-4 text-base mr-3"
-                            style={{
-                                borderColor: colors.border,
-                                backgroundColor: colors.card,
-                                color: colors.foreground,
-                                fontSize: 16
-                            }}
-                            placeholder="Código de barras do produto"
-                            placeholderTextColor={colors.mutedForeground}
-                            value={barcode}
-                            onChangeText={setBarcode}
-                            onSubmitEditing={handleBarcodeSubmit}
-                        />
+                        <View className="flex-1 relative">
+                            <TextInput
+                                className="flex-1 border rounded-xl px-4 py-4 text-base mr-3"
+                                style={{
+                                    borderColor: colors.border,
+                                    backgroundColor: colors.card,
+                                    color: colors.foreground,
+                                    fontSize: 16
+                                }}
+                                placeholder="Código de barras do produto"
+                                placeholderTextColor={colors.mutedForeground}
+                                value={barcode}
+                                onChangeText={setBarcode}
+                                editable={!isLoadingProduct}
+                            />
+                            {isLoadingProduct && (
+                                <View className="absolute right-6 top-0 bottom-0 justify-center">
+                                    <ActivityIndicator size="small" color={colors.primary} />
+                                </View>
+                            )}
+                        </View>
                         <TouchableOpacity
-                            className="rounded-xl px-4 justify-center"
+                            className="rounded-xl px-4 py-4 justify-center"
                             style={{
                                 backgroundColor: colors.primary,
                                 shadowColor: colors.primary,
@@ -480,18 +600,20 @@ export default function NewSalePage() {
                                 shadowRadius: 4,
                                 elevation: 3,
                             }}
-                            onPress={handleBarcodeSubmit}
+                            onPress={openCamera}
+                            disabled={isLoadingProduct}
                         >
                             <Ionicons name="camera" size={24} color="white" />
                         </TouchableOpacity>
                     </View>
                 </View>
+            </View>
 
-                {/* Área de Produtos */}
+            {/* Lista de Produtos Scrollável */}
+            <ScrollView className="flex-1 px-4">
                 <View
-                    className="rounded-xl  mb-6 min-h-[200px]"
+                    className="rounded-xl mb-6 min-h-[200px]"
                     style={{
-
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 4 },
                         shadowOpacity: 0.05,
@@ -500,7 +622,7 @@ export default function NewSalePage() {
                     }}
                 >
                     {products.length === 0 ? (
-                        <View className="flex-1 items-center justify-center">
+                        <View className="flex-1 items-center justify-center py-12">
                             <Ionicons
                                 name="basket-outline"
                                 size={48}
@@ -549,7 +671,7 @@ export default function NewSalePage() {
                                                     className="text-base font-bold mb-1"
                                                     style={{ color: colors.primary }}
                                                 >
-                                                    R$ {product.price.toFixed(2).replace('.', ',')}
+                                                    {formatCurrency(product.price)}
                                                 </Text>
                                                 <View className="flex-row items-center">
                                                     <Text
@@ -605,7 +727,7 @@ export default function NewSalePage() {
                             Total da Venda
                         </Text>
                         <Text className="text-xl font-bold" style={{ color: '#ff6b35' }}>
-                            R$ {getTotalAmount().toFixed(2).replace('.', ',')}
+                            R$ {formatCurrency(getTotalAmount())}
                         </Text>
                     </View>
                 )}
@@ -622,16 +744,97 @@ export default function NewSalePage() {
                     onPress={handleFinalizeSale}
                     disabled={!customerName || products.length === 0}
                 >
-                    <Text
-                        className="text-center text-lg font-bold"
-                        style={{
-                            color: customerName && products.length > 0 ? 'white' : colors.mutedForeground
-                        }}
-                    >
-                        Finalizar Venda {products.length > 0 && `• ${getTotalItems()} ${getTotalItems() === 1 ? 'item' : 'itens'}`}
-                    </Text>
+                    {
+                        isPending ?
+
+                            <ActivityIndicator size={25} color="white" className='' />
+                            :
+                            <>
+
+                                <Text
+                                    className="text-center text-lg font-bold"
+                                    style={{
+                                        color: customerName && products.length > 0 ? 'white' : colors.mutedForeground
+                                    }}
+                                >
+                                    Finalizar Venda {products.length > 0 && `• ${getTotalItems()} ${getTotalItems() === 1 ? 'item' : 'itens'}`}
+                                </Text>
+                            </>
+
+                    }
                 </TouchableOpacity>
             </View>
+
+            {/* Modal da Câmera */}
+            <Modal
+                visible={showCamera}
+                transparent={false}
+                animationType="slide"
+                onRequestClose={() => setShowCamera(false)}
+            >
+                <View className="flex-1" style={{ backgroundColor: '#000' }}>
+                    <CameraView
+                        className="flex-1"
+                        facing="back"
+                        onBarcodeScanned={isScanning ? undefined : handleBarcodeScanned}
+                        barcodeScannerSettings={{
+                            barcodeTypes: [
+                                'ean13',
+                                'ean8',
+                                'upc_a',
+                                'upc_e',
+                                'code128',
+                                'code39',
+                                'code93',
+                                'codabar',
+                                'itf14',
+                                'pdf417',
+                            ],
+                        }}
+                    >
+                        {/* Overlay com guia de scanner */}
+                        <View className="flex justify-center items-center h-screen">
+                            {/* Header com botão de fechar */}
+                            <View className="absolute top-0 left-0 right-0  flex-row justify-between items-center z-10 mt-20 px-4">
+                               <Ionicons name="help-circle" size={24} color="white" />
+                                <Text className="text-white text-lg font-bold">Escanear Código de Barras</Text>
+                                <TouchableOpacity
+                                    onPress={() => setShowCamera(false)}
+                                    className="w-15 h-15 rounded-full items-center justify-center"
+                                    style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                                >
+                                    <Ionicons name="close" size={24} color="white" />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Guia de scanner */}
+                            <View className="relative">
+                                <View
+                                    className="border-2 border-white rounded-2xl"
+                                    style={{
+                                        width: 280,
+                                        height: 180,
+                                        backgroundColor: 'rgba(255,255,255,0.1)'
+                                    }}
+                                />
+                                <View className="absolute -top-2 -left-2 w-8 h-8 border-l-4 border-t-4 border-white rounded-tl-xl" />
+                                <View className="absolute -top-2 -right-2 w-8 h-8 border-r-4 border-t-4 border-white rounded-tr-xl" />
+                                <View className="absolute -bottom-2 -left-2 w-8 h-8 border-l-4 border-b-4 border-white rounded-bl-xl" />
+                                <View className="absolute -bottom-2 -right-2 w-8 h-8 border-r-4 border-b-4 border-white rounded-br-xl" />
+                            </View>
+
+                            {/* Instrução */}
+                            <Text className="text-white text-center mt-8 px-8 text-base">
+                                {isScanning ? 'Processando...' : 'Posicione o código de barras dentro da área'}
+                            </Text>
+
+                            {isScanning && (
+                                <ActivityIndicator size="large" color="white" style={{ marginTop: 20 }} />
+                            )}
+                        </View>
+                    </CameraView>
+                </View>
+            </Modal>
         </View>
     );
 }
