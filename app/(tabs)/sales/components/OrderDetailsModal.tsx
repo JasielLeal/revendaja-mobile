@@ -205,7 +205,7 @@ export function OrderDetailsModal({
                                                     Telefone
                                                 </Text>
                                                 <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
-                                                    {order?.customerPhone}
+                                                    {order?.customerPhone ? order.customerPhone : 'Não informado'}
                                                 </Text>
                                             </View>
                                         </View>
@@ -290,43 +290,47 @@ export function OrderDetailsModal({
 
                             {/* Confirmar Venda (se pending) */}
                             {order?.status === 'pending' && (
-                                <TouchableOpacity
-                                    onPress={handleConfirmSale}
-                                    activeOpacity={0.85}
-                                    className="flex-row items-center justify-center rounded-2xl py-4 flex-1 gap-2"
-                                    style={{
-                                        shadowColor: '#000',
-                                        shadowOffset: { width: 0, height: 3 },
-                                        shadowOpacity: 0.15,
-                                        shadowRadius: 6,
-                                        elevation: 4,
-                                        backgroundColor: colors.primary,
-                                    }}
-                                >
+                                <>
+                                    <TouchableOpacity
+                                        onPress={handleConfirmSale}
+                                        activeOpacity={0.85}
+                                        className="flex-row items-center justify-center rounded-2xl py-4 flex-1 gap-2"
+                                        style={{
+                                            shadowColor: '#000',
+                                            shadowOffset: { width: 0, height: 3 },
+                                            shadowOpacity: 0.15,
+                                            shadowRadius: 6,
+                                            elevation: 4,
+                                            backgroundColor: colors.primary,
+                                        }}
+                                    >
 
-                                    <Text className="text-white font-bold ">
-                                        Confirmar venda
-                                    </Text>
-                                    <Ionicons name="checkmark-circle" size={26} color="#fff" />
-                                </TouchableOpacity>
+                                        <Text className="text-white font-bold ">
+                                            Confirmar venda
+                                        </Text>
+                                        <Ionicons name="checkmark-circle" size={26} color="#fff" />
+                                    </TouchableOpacity>
+
+                                    {/* WhatsApp */}
+                                    <TouchableOpacity
+                                        className="w-16 h-16 rounded-2xl items-center justify-center"
+                                        style={{
+                                            backgroundColor: '#25D366',
+                                            shadowColor: '#000',
+                                            shadowOffset: { width: 0, height: 2 },
+                                            shadowOpacity: 0.1,
+                                            shadowRadius: 4,
+                                            elevation: 3,
+                                        }}
+                                        onPress={handleWhatsApp}
+                                    >
+                                        <Ionicons name="logo-whatsapp" size={28} color="#fff" />
+                                    </TouchableOpacity>
+                                </>
 
                             )}
 
-                            {/* WhatsApp */}
-                            <TouchableOpacity
-                                className="w-16 h-16 rounded-2xl items-center justify-center"
-                                style={{
-                                    backgroundColor: '#25D366',
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.1,
-                                    shadowRadius: 4,
-                                    elevation: 3,
-                                }}
-                                onPress={handleWhatsApp}
-                            >
-                                <Ionicons name="logo-whatsapp" size={28} color="#fff" />
-                            </TouchableOpacity>
+
 
 
 

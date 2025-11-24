@@ -12,15 +12,43 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { useDashboardMetrics } from './hooks/useDashboardMetrics';
 import { useRecentSales } from './hooks/useRecentSales';
 
 type TabType = 'lucro' | 'vendas' | 'despesas';
 
+interface OrderItem {
+    id: string;
+    name: string;
+    quantity: number;
+    imgUrl: string;
+    price: number;
+    storeProductId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface Order {
+    id: string;
+    orderNumber: string;
+    status: string;
+    total: number;
+    paymentMethod: string;
+    customerName: string;
+    customerPhone: string;
+    storeId?: string;
+    createdAt: string;
+    updatedAt?: string;
+    items: OrderItem[];
+}
+
 export default function HomePage() {
     const colors = useThemeColors();
     const [selectedTab, setSelectedTab] = useState<TabType>('vendas');
     const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+    const [showOrderDetails, setShowOrderDetails] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const { user } = useAuth()
 
     const categories: { id: number; name: string; icon: string; screen: Href }[] = [
@@ -33,7 +61,30 @@ export default function HomePage() {
 
     const router = useRouter();
 
-    const { data: sales } = useRecentSales();
+    const { data: sales, refetch: refetchSales } = useRecentSales();
+    const getStatusLabel = (status: string) => {
+        const statusMap: { [key: string]: string } = {
+            'approved': 'Aprovados',
+            'pending': 'Pendentes',
+            'Todos': 'Todos'
+        };
+        return statusMap[status] || status;
+    };
+
+    const getStatusColor = (status: string) => {
+        const colorMap: { [key: string]: { bg: string, text: string } } = {
+            'approved': {
+                bg: colors.isDark ? '#166534' : '#dcfce7',
+                text: colors.isDark ? '#4ade80' : '#166534'
+            },
+            'pending': {
+                bg: colors.isDark ? '#854d0e' : '#fef3c7',
+                text: colors.isDark ? '#fbbf24' : '#854d0e'
+            }
+        };
+        return colorMap[status] || colorMap['approved'];
+    };
+
     const { data: metrics } = useDashboardMetrics();
 
     return (
@@ -289,72 +340,104 @@ export default function HomePage() {
                         </TouchableOpacity>
                     </View>
 
-                    {/* Lista de Vendas */}
-                    <View className="space-y-3">
-                        {sales?.map((sale) => (
-                            <TouchableOpacity
-                                key={sale.id}
-                                className="rounded-xl pb-4"
-                                style={{ borderColor: colors.border }}
-                            >
-                                <View className="flex-row items-center justify-between">
-                                    <View className="flex-1">
-                                        <View className="flex-row items-center mb-1">
-                                            <View>
-                                                <Ionicons
-                                                    name="bag-check-outline"
-                                                    size={20}
-                                                    color={colors.primary}
-                                                    borderWidth={1}
-                                                    borderColor={colors.border}
-                                                    className={`border border-${colors.border} p-4 rounded-xl mr-3`}
-                                                />
-                                            </View>
-                                            <View className="flex-1">
-                                                <Text
-                                                    className="font-semibold text-base"
-                                                    style={{ color: colors.foreground }}
-                                                >
-                                                    {sale.customerName}
-                                                </Text>
-                                                <Text
-                                                    className="text-sm mb-2"
-                                                    style={{ color: colors.mutedForeground }}
-                                                >
-                                                    {sale.paymentMethod}
-                                                </Text>
-                                                <View
-                                                    className="rounded-full px-3 py-1"
-                                                    style={{
-                                                        backgroundColor: colors.isDark ? '#166534' : '#dcfce7',
-                                                        alignSelf: 'flex-start'
-                                                    }}
-                                                >
+                    <OrderDetailsModal
+                        visible={showOrderDetails}
+                        order={selectedOrder}
+                        onClose={() => {
+                            setShowOrderDetails(false);
+                            refetchSales();
+                        }}
+                        getStatusLabel={getStatusLabel}
+                        getStatusColor={getStatusColor}
+                    />
+
+                    {/* Lista de Vendas Recentes */}
+                    {sales && sales.length > 0 ? (
+                        <View className="gap-3">
+                            {sales.slice(0, 3).map((sale) => (
+                                <TouchableOpacity
+                                    key={sale.id}
+                                    onPress={() => {
+                                        setSelectedOrder({
+                                            ...sale,
+                                            items: sale.items.map(item => ({
+                                                ...item,
+                                                storeProductId: '',
+                                                createdAt: '',
+                                                updatedAt: ''
+                                            }))
+                                        });
+                                        setShowOrderDetails(true);
+                                    }}
+                                >
+                                    <View className="flex-row items-center justify-between">
+                                        <View className="flex-1">
+                                            <View className="flex-row items-center mb-1">
+                                                <View>
+                                                    <Ionicons
+                                                        name="bag-check-outline"
+                                                        size={20}
+                                                        color={colors.primary}
+                                                        borderWidth={1}
+                                                        borderColor={colors.border}
+                                                        className={`border border-${colors.border} p-4 rounded-xl mr-3`}
+                                                    />
+                                                </View>
+                                                <View className="flex-1">
                                                     <Text
-                                                        className="text-xs font-medium"
+                                                        className="font-semibold text-base"
+                                                        style={{ color: colors.foreground }}
+                                                    >
+                                                        {sale.customerName}
+                                                    </Text>
+                                                    <Text
+                                                        className="text-sm mb-2"
+                                                        style={{ color: colors.mutedForeground }}
+                                                    >
+                                                        {sale.paymentMethod}
+                                                    </Text>
+                                                    <View
+                                                        className="rounded-full px-3 py-1"
                                                         style={{
-                                                            color: colors.isDark ? '#4ade80' : '#166534'
+                                                            backgroundColor: getStatusColor(sale.status).bg,
+                                                            alignSelf: 'flex-start'
                                                         }}
                                                     >
-                                                        {sale.status === 'approved' ? 'Concluída' : 'Pendente'}
-                                                    </Text>
+                                                        <Text
+                                                            className="text-xs font-medium"
+                                                            style={{
+                                                                color: getStatusColor(sale.status).text
+                                                            }}
+                                                        >
+                                                            {getStatusLabel(sale.status)}
+                                                        </Text>
+                                                    </View>
                                                 </View>
                                             </View>
                                         </View>
-                                    </View>
 
-                                    <View className="items-end">
-                                        <Text className="text-green-600 font-bold text-lg">
-                                            +{formatCurrency(sale.total)}
-                                        </Text>
-                                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                                            {formatDate(sale.createdAt)}
-                                        </Text>
+                                        <View className="items-end">
+                                            <Text className={sale.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
+                                                {
+                                                    sale.status === 'approved' ? <Text>+{formatCurrency(sale.total)}</Text> : <Text>{formatCurrency(sale.total)}</Text>
+                                                }
+                                            </Text>
+                                            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                {formatDate(sale.createdAt)}
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    ) : (
+                        <View className="rounded-xl p-8 items-center" style={{ backgroundColor: colors.card }}>
+                            <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} style={{ marginBottom: 12 }} />
+                            <Text className="text-base text-center" style={{ color: colors.mutedForeground }}>
+                                Nenhuma venda recente
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Ações Rápidas - Estilo Mercado Pago */}
