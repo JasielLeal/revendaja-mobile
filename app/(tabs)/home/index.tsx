@@ -15,6 +15,8 @@ import {
 import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { useDashboardMetrics } from './hooks/useDashboardMetrics';
 import { useRecentSales } from './hooks/useRecentSales';
+import Skeleton from '@/components/skeleton';
+import { MetricsCardSkeleton } from './components/MetricsCardSkeleton';
 
 type TabType = 'lucro' | 'vendas' | 'despesas';
 
@@ -61,7 +63,7 @@ export default function HomePage() {
 
     const router = useRouter();
 
-    const { data: sales, refetch: refetchSales } = useRecentSales();
+    const { data: sales, refetch: refetchSales, isLoading: isSalesLoading } = useRecentSales();
     const getStatusLabel = (status: string) => {
         const statusMap: { [key: string]: string } = {
             'approved': 'Aprovados',
@@ -85,7 +87,7 @@ export default function HomePage() {
         return colorMap[status] || colorMap['approved'];
     };
 
-    const { data: metrics } = useDashboardMetrics();
+    const { data: metrics, isLoading: isMetricsLoading } = useDashboardMetrics();
 
     return (
         <View className="flex-1">
@@ -198,132 +200,139 @@ export default function HomePage() {
                                     Lucro
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                className="flex-1 py-3"
-                                style={{ backgroundColor: selectedTab === 'despesas' ? colors.card : 'transparent' }}
-                                onPress={() => setSelectedTab('despesas')}
-                            >
-                                <Text
-                                    className="text-center"
-                                    style={{
-                                        color: selectedTab === 'despesas' ? colors.cardForeground : colors.mutedForeground,
-                                        fontWeight: selectedTab === 'despesas' ? 'bold' : 'normal'
-                                    }}
-                                >
-                                    Despesas
-                                </Text>
-                            </TouchableOpacity>
                         </View>
 
                         {/* Conteúdo dinâmico baseado na aba selecionada */}
                         <View className="p-5">
-
-                            {selectedTab === 'lucro' && (
+                            {isMetricsLoading ? (
+                                <MetricsCardSkeleton />
+                            ) : (
                                 <>
-                                    <View className="flex-row items-start mb-2">
-                                        {isBalanceVisible ? (
-                                            <>
-                                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                                    {formatCurrency(metrics?.estimatedProfit || 0).split(',')[0]}
-                                                </Text>
-                                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
-                                                    ,{formatCurrency(metrics?.estimatedProfit || 0).split(',')[1]}
-                                                </Text>
-                                            </>
-                                        ) : (
-                                            <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                                R$ ••••
-                                            </Text>
-                                        )}
-                                        <TouchableOpacity className="ml-3 mt-2" onPress={() => setIsBalanceVisible(!isBalanceVisible)}>
-                                            <Ionicons name={isBalanceVisible ? "eye-outline" : "eye-off-outline"} size={20} color={colors.mutedForeground} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View className="flex-row items-center mb-4" style={{ opacity: isBalanceVisible ? 1 : 0 }}>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>
-                                            {metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? 'Cresceu ' : 'Reduziu '}
-                                        </Text>
-                                        <Ionicons
-                                            name={metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? "trending-up" : "trending-down"}
-                                            size={12}
-                                            color={metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? "#34A853" : "#EA4335"}
-                                        />
-                                        <Text className={metrics?.percentageChange.profit && metrics.percentageChange.profit > 0 ? "text-green-600 text-sm font-semibold" : "text-red-600 text-sm font-semibold"}>
-                                            {' '}{formatCurrency(Math.abs(metrics?.percentageChange.profit || 0))}
-                                        </Text>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
-                                    </View>
-                                </>
-                            )}
+                                    {selectedTab === 'lucro' && (
+                                        <>
+                                            <View className="flex-row items-start mb-2">
+                                                {isBalanceVisible ? (
+                                                    <>
+                                                        <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                            {formatCurrency(metrics?.estimatedProfit || 0).split(',')[0]}
+                                                        </Text>
+                                                        <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                            ,{formatCurrency(metrics?.estimatedProfit || 0).split(',')[1]}
+                                                        </Text>
+                                                    </>
+                                                ) : (
+                                                    <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                        R$ ••••
+                                                    </Text>
+                                                )}
 
-                            {selectedTab === 'vendas' && (
-                                <>
-                                    <View className="flex-row items-start mb-2">
-                                        {isBalanceVisible ? (
-                                            <>
-                                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                                    {formatCurrency(metrics?.totalRevenue || 0).split(',')[0]}
-                                                </Text>
-                                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
-                                                    ,{formatCurrency(metrics?.totalRevenue || 0).split(',')[1]}
-                                                </Text>
-                                            </>
-                                        ) : (
-                                            <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                                R$ ••••
-                                            </Text>
-                                        )}
-                                        <TouchableOpacity className="ml-3 mt-2" onPress={() => setIsBalanceVisible(!isBalanceVisible)}>
-                                            <Ionicons name={isBalanceVisible ? "eye-outline" : "eye-off-outline"} size={20} color={colors.mutedForeground} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View className="flex-row items-center mb-4" style={{ opacity: isBalanceVisible ? 1 : 0 }}>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>
-                                            {metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? 'Cresceu ' : 'Reduziu '}
-                                        </Text>
-                                        <Ionicons
-                                            name={metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? "trending-up" : "trending-down"}
-                                            size={12}
-                                            color={metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? "#34A853" : "#EA4335"}
-                                        />
-                                        <Text className={metrics?.percentageChange.revenue && metrics.percentageChange.revenue > 0 ? "text-green-600 text-sm font-semibold" : "text-red-600 text-sm font-semibold"}>
-                                            {' '}{formatCurrency(Math.abs(metrics?.percentageChange.revenue || 0))}
-                                        </Text>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
-                                    </View>
-                                </>
-                            )}
+                                                <TouchableOpacity
+                                                    className="ml-3 mt-2"
+                                                    onPress={() => setIsBalanceVisible(!isBalanceVisible)}
+                                                >
+                                                    <Ionicons
+                                                        name={isBalanceVisible ? 'eye-outline' : 'eye-off-outline'}
+                                                        size={20}
+                                                        color={colors.mutedForeground}
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
 
-                            {selectedTab === 'despesas' && (
-                                <>
-                                    <View className="flex-row items-start mb-2">
-                                        {isBalanceVisible ? (
-                                            <>
-                                                <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                                    R$ 3.152
+                                            <View
+                                                className="flex-row items-center mb-4"
+                                                style={{ opacity: isBalanceVisible ? 1 : 0 }}
+                                            >
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                    {(metrics?.percentageChange.profit ?? 0) > 0 ? 'Cresceu ' : 'Reduziu '}
                                                 </Text>
-                                                <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
-                                                    ,80
+                                                <Ionicons
+                                                    name={(metrics?.percentageChange.profit ?? 0) > 0 ? 'trending-up' : 'trending-down'}
+                                                    size={12}
+                                                    color={(metrics?.percentageChange.profit ?? 0) > 0 ? '#34A853' : '#EA4335'}
+                                                />
+                                                <Text
+                                                    className={
+                                                        (metrics?.percentageChange.profit ?? 0) > 0
+                                                            ? 'text-green-600 text-sm font-semibold'
+                                                            : 'text-red-600 text-sm font-semibold'
+                                                    }
+                                                >
+                                                    {' '}
+                                                    {formatCurrency(Math.abs(metrics?.percentageChange.profit || 0))}
                                                 </Text>
-                                            </>
-                                        ) : (
-                                            <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
-                                                R$ ••••
-                                            </Text>
-                                        )}
-                                        <TouchableOpacity className="ml-3 mt-2" onPress={() => setIsBalanceVisible(!isBalanceVisible)}>
-                                            <Ionicons name={isBalanceVisible ? "eye-outline" : "eye-off-outline"} size={20} color={colors.mutedForeground} />
-                                        </TouchableOpacity>
-                                    </View>
-                                    <View className="flex-row items-center mb-4" style={{ opacity: isBalanceVisible ? 1 : 0 }}>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>Reduziu </Text>
-                                        <Ionicons name="trending-down" size={12} color="#34A853" />
-                                        <Text className="text-green-600 text-sm font-semibold"> 8%</Text>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}> no último mês</Text>
-                                    </View>
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                    {' '}
+                                                    no último mês
+                                                </Text>
+                                            </View>
+                                        </>
+                                    )}
+
+                                    {selectedTab === 'vendas' && (
+                                        <>
+                                            <View className="flex-row items-start mb-2">
+                                                {isBalanceVisible ? (
+                                                    <>
+                                                        <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                            {formatCurrency(metrics?.totalRevenue || 0).split(',')[0]}
+                                                        </Text>
+                                                        <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                            ,{formatCurrency(metrics?.totalRevenue || 0).split(',')[1]}
+                                                        </Text>
+                                                    </>
+                                                ) : (
+                                                    <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                        R$ ••••
+                                                    </Text>
+                                                )}
+
+                                                <TouchableOpacity
+                                                    className="ml-3 mt-2"
+                                                    onPress={() => setIsBalanceVisible(!isBalanceVisible)}
+                                                >
+                                                    <Ionicons
+                                                        name={isBalanceVisible ? 'eye-outline' : 'eye-off-outline'}
+                                                        size={20}
+                                                        color={colors.mutedForeground}
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
+
+                                            <View
+                                                className="flex-row items-center mb-4"
+                                                style={{ opacity: isBalanceVisible ? 1 : 0 }}
+                                            >
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                    {(metrics?.percentageChange.revenue ?? 0) > 0 ? 'Cresceu ' : 'Reduziu '}
+                                                </Text>
+                                                <Ionicons
+                                                    name={(metrics?.percentageChange.revenue ?? 0) > 0 ? 'trending-up' : 'trending-down'}
+                                                    size={12}
+                                                    color={(metrics?.percentageChange.revenue ?? 0) > 0 ? '#34A853' : '#EA4335'}
+                                                />
+                                                <Text
+                                                    className={
+                                                        (metrics?.percentageChange.revenue ?? 0) > 0
+                                                            ? 'text-green-600 text-sm font-semibold'
+                                                            : 'text-red-600 text-sm font-semibold'
+                                                    }
+                                                >
+                                                    {' '}
+                                                    {formatCurrency(Math.abs(metrics?.percentageChange.revenue || 0))}
+                                                </Text>
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                    {' '}
+                                                    no último mês
+                                                </Text>
+                                            </View>
+                                        </>
+                                    )}
+
+                                    
                                 </>
                             )}
                         </View>
+
                     </View>
                 </View>
 
@@ -340,105 +349,143 @@ export default function HomePage() {
                         </TouchableOpacity>
                     </View>
 
-                    <OrderDetailsModal
-                        visible={showOrderDetails}
-                        order={selectedOrder}
-                        onClose={() => {
-                            setShowOrderDetails(false);
-                            refetchSales();
-                        }}
-                        getStatusLabel={getStatusLabel}
-                        getStatusColor={getStatusColor}
-                    />
-
-                    {/* Lista de Vendas Recentes */}
-                    {sales && sales.length > 0 ? (
+                    {isSalesLoading ?
                         <View className="gap-3">
-                            {sales.slice(0, 3).map((sale) => (
-                                <TouchableOpacity
-                                    key={sale.id}
-                                    onPress={() => {
-                                        setSelectedOrder({
-                                            ...sale,
-                                            items: sale.items.map(item => ({
-                                                ...item,
-                                                storeProductId: '',
-                                                createdAt: '',
-                                                updatedAt: ''
-                                            }))
-                                        });
-                                        setShowOrderDetails(true);
-                                    }}
+                            {[...Array(3)].map((_, index) => (
+                                <View
+                                    key={index}
+                                    className="flex-row items-center justify-between"
                                 >
-                                    <View className="flex-row items-center justify-between">
-                                        <View className="flex-1">
-                                            <View className="flex-row items-center mb-1">
-                                                <View>
-                                                    <Ionicons
-                                                        name="bag-check-outline"
-                                                        size={20}
-                                                        color={colors.primary}
-                                                        borderWidth={1}
-                                                        borderColor={colors.border}
-                                                        className={`border border-${colors.border} p-4 rounded-xl mr-3`}
-                                                    />
-                                                </View>
-                                                <View className="flex-1">
-                                                    <Text
-                                                        className="font-semibold text-base"
-                                                        style={{ color: colors.foreground }}
-                                                    >
-                                                        {sale.customerName}
-                                                    </Text>
-                                                    <Text
-                                                        className="text-sm mb-2"
-                                                        style={{ color: colors.mutedForeground }}
-                                                    >
-                                                        {sale.paymentMethod}
-                                                    </Text>
-                                                    <View
-                                                        className="rounded-full px-3 py-1"
-                                                        style={{
-                                                            backgroundColor: getStatusColor(sale.status).bg,
-                                                            alignSelf: 'flex-start'
-                                                        }}
-                                                    >
+                                    {/* ESQUERDA */}
+                                    <View className="flex-1">
+                                        <View className="flex-row items-center mb-1">
+                                            {/* ÍCONE */}
+                                            <View className="mr-3">
+                                                <Skeleton borderRadius={12} height={44} width={44} />
+                                            </View>
+
+                                            {/* TEXTO */}
+                                            <View className="flex-1">
+                                                <Skeleton borderRadius={6} height={14} width={140} />
+                                                <Skeleton
+                                                    borderRadius={6}
+                                                    height={12}
+                                                    width={100}
+                                                    style={{ marginTop: 6 }}
+                                                />
+                                                <Skeleton
+                                                    borderRadius={999}
+                                                    height={20}
+                                                    width={80}
+                                                    style={{ marginTop: 8 }}
+                                                />
+                                            </View>
+                                        </View>
+                                    </View>
+
+                                    {/* DIREITA */}
+                                    <View className="items-end">
+                                        <Skeleton borderRadius={6} height={18} width={90} />
+                                        <Skeleton
+                                            borderRadius={6}
+                                            height={12}
+                                            width={70}
+                                            style={{ marginTop: 6 }}
+                                        />
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+
+                        :
+                        sales && sales.length > 0 ? (
+                            <View className="gap-3">
+                                {sales.slice(0, 3).map((sale) => (
+                                    <TouchableOpacity
+                                        key={sale.id}
+                                        onPress={() => {
+                                            setSelectedOrder({
+                                                ...sale,
+                                                items: sale.items.map(item => ({
+                                                    ...item,
+                                                    storeProductId: '',
+                                                    createdAt: '',
+                                                    updatedAt: ''
+                                                }))
+                                            });
+                                            setShowOrderDetails(true);
+                                        }}
+                                    >
+                                        <View className="flex-row items-center justify-between">
+                                            <View className="flex-1">
+                                                <View className="flex-row items-center mb-1">
+                                                    <View>
+                                                        <Ionicons
+                                                            name="bag-check-outline"
+                                                            size={20}
+                                                            color={colors.primary}
+                                                            borderWidth={1}
+                                                            borderColor={colors.border}
+                                                            className={`border border-${colors.border} p-4 rounded-xl mr-3`}
+                                                        />
+                                                    </View>
+                                                    <View className="flex-1">
                                                         <Text
-                                                            className="text-xs font-medium"
+                                                            className="font-semibold text-base"
+                                                            style={{ color: colors.foreground }}
+                                                        >
+                                                            {sale.customerName}
+                                                        </Text>
+                                                        <Text
+                                                            className="text-sm mb-2"
+                                                            style={{ color: colors.mutedForeground }}
+                                                        >
+                                                            {sale.paymentMethod}
+                                                        </Text>
+                                                        <View
+                                                            className="rounded-full px-3 py-1"
                                                             style={{
-                                                                color: getStatusColor(sale.status).text
+                                                                backgroundColor: getStatusColor(sale.status).bg,
+                                                                alignSelf: 'flex-start'
                                                             }}
                                                         >
-                                                            {getStatusLabel(sale.status)}
-                                                        </Text>
+                                                            <Text
+                                                                className="text-xs font-medium"
+                                                                style={{
+                                                                    color: getStatusColor(sale.status).text
+                                                                }}
+                                                            >
+                                                                {getStatusLabel(sale.status)}
+                                                            </Text>
+                                                        </View>
                                                     </View>
                                                 </View>
                                             </View>
-                                        </View>
 
-                                        <View className="items-end">
-                                            <Text className={sale.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
-                                                {
-                                                    sale.status === 'approved' ? <Text>+{formatCurrency(sale.total)}</Text> : <Text>{formatCurrency(sale.total)}</Text>
-                                                }
-                                            </Text>
-                                            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                                                {formatDate(sale.createdAt)}
-                                            </Text>
+                                            <View className="items-end">
+                                                <Text className={sale.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
+                                                    {
+                                                        sale.status === 'approved' ? <Text>+{formatCurrency(sale.total)}</Text> : <Text>{formatCurrency(sale.total)}</Text>
+                                                    }
+                                                </Text>
+                                                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                    {formatDate(sale.createdAt)}
+                                                </Text>
+                                            </View>
                                         </View>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    ) : (
-                        <View className="rounded-xl p-8 items-center" style={{ backgroundColor: colors.card }}>
-                            <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} style={{ marginBottom: 12 }} />
-                            <Text className="text-base text-center" style={{ color: colors.mutedForeground }}>
-                                Nenhuma venda recente
-                            </Text>
-                        </View>
-                    )}
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        ) : (
+                            <View className="rounded-xl p-8 items-center" style={{ backgroundColor: colors.card }}>
+                                <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} style={{ marginBottom: 12 }} />
+                                <Text className="text-base text-center" style={{ color: colors.mutedForeground }}>
+                                    Nenhuma venda recente
+                                </Text>
+                            </View>
+                        )}
                 </View>
+
 
                 {/* Ações Rápidas - Estilo Mercado Pago */}
                 <View className="pt-6 pb-8 px-4" style={{ backgroundColor: colors.background }}>
@@ -473,6 +520,16 @@ export default function HomePage() {
                     </ScrollView>
                 </View>
 
+                <OrderDetailsModal
+                    visible={showOrderDetails}
+                    order={selectedOrder}
+                    onClose={() => {
+                        setShowOrderDetails(false);
+                        refetchSales();
+                    }}
+                    getStatusLabel={getStatusLabel}
+                    getStatusColor={getStatusColor}
+                />
             </ScrollView>
         </View>
     );
