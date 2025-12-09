@@ -156,8 +156,6 @@ export function EditProduct(props: EditProductProps) {
                 console.error("Erro ao atualizar o produto:", error);
             }
         });
-
-        console.log("Payload enviado:", formatted);
     }
 
 

@@ -1,8 +1,10 @@
+import { registerPushToken } from '@/lib/registerPushToken';
+import { connectToStore, disconnectSocket } from '@/lib/socket/socket';
+import { useQueryClient } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { api } from '../backend/api';
 import { authService } from '../services/auth';
-import { registerPushToken } from '@/lib/registerPushToken';
-import * as Notifications from 'expo-notifications';
 
 interface User {
     id: string;
@@ -26,26 +28,38 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         loadStorageData();
         requestNotificationPermissions();
+
+        // Configurar como notificações devem ser exibidas quando app está em primeiro plano
+        Notifications.setNotificationHandler({
+            handleNotification: async () => ({
+                shouldShowAlert: true,
+                shouldPlaySound: true,
+                shouldSetBadge: true,
+                shouldShowBanner: true,
+                shouldShowList: true,
+            }),
+        });
     }, []);
 
     async function requestNotificationPermissions() {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
-        
+
         if (existingStatus !== 'granted') {
             const { status } = await Notifications.requestPermissionsAsync();
             finalStatus = status;
         }
-        
+
         if (finalStatus !== 'granted') {
             console.log('⚠️ Permissão de notificação negada');
             return;
         }
-        
+
         console.log('✅ Permissão de notificação concedida');
     }
 
@@ -56,6 +70,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
             registerPushToken(user.id);
         }
     }, [user?.id]);
+
+    // Conectar socket para receber eventos de venda online e invalidar queries
+    useEffect(() => {
+        if (!user?.id) return;
+
+        console.log('Conectando socket para userId:', user.id);
+        connectToStore(user.id, queryClient);
+
+        return () => {
+            console.log('Desconectando socket da loja:', user.id);
+            disconnectSocket();
+        };
+    }, [user?.id, queryClient]);
 
     async function loadStorageData() {
         try {

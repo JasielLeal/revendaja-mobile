@@ -76,7 +76,10 @@ export function OrderDetailsModal({
 
         mutationConfirmSale.mutate({ id: order.id, status: 'approved' }, {
             onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
                 queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
+                queryClient.invalidateQueries({ queryKey: ["sales"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
                 onClose();
                 onRefresh();
                 Alert.alert('Sucesso', 'Venda confirmada!');

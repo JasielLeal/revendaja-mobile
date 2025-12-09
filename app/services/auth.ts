@@ -5,7 +5,6 @@ const TOKEN_KEY = "@revendaja:token";
 export const authService = {
   async saveToken(tokenAccess: string) {
     try {
-      console.log('Salvando token:', tokenAccess);
       await AsyncStorage.setItem(TOKEN_KEY, tokenAccess);
     } catch (error) {
       console.error("Erro ao salvar token:", error);

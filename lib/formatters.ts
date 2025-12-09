@@ -19,12 +19,16 @@ export const formatCurrency = (value: number): string => {
 export const formatDate = (date: string | Date): string => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
-  const day = dateObj.getDate();
-  const month = dateObj
-    .toLocaleDateString("pt-BR", { month: "short" })
-    .replace(".", "");
+  const day = String(dateObj.getDate()).padStart(2, "0");
 
-  return `${day}/${month}`;
+  const month = dateObj.toLocaleDateString("pt-BR", {
+    month: "long",
+  });
+
+  // deixa a primeira letra maiúscula
+  const monthCapitalized = month.charAt(0).toUpperCase() + month.slice(1);
+
+  return `${day} de ${monthCapitalized}`;
 };
 
 /**

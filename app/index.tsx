@@ -7,8 +7,6 @@ export default function Index() {
     const router = useRouter();
     const { isAuthenticated, isLoading } = useAuth();
 
-    console.log('Auth Status:', { isAuthenticated, isLoading });
-
     useEffect(() => {
         if (isLoading) return;
 

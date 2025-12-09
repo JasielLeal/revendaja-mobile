@@ -39,9 +39,6 @@ export default function StorePage() {
             setDebouncedQuery(searchQuery);
         }, 500);
 
-        console.log('Search Query:', searchQuery);
-        console.log('Debounced Query:', debouncedQuery);
-
         return () => clearTimeout(timeout);
     }, [searchQuery]);
 
@@ -346,7 +343,11 @@ export default function StorePage() {
                                 renderItem={({ item }) => (
                                     <TouchableOpacity
                                         onPress={() => {
-                                            setSelectedProduct(item);
+                                            setSelectedProduct({
+                                                ...item,
+                                                costPrice: item.costPrice ?? 0,
+                                                status: item.status as "Active" | "Inactive"
+                                            });
                                             setShowEditModal(true);
                                         }}
                                         className="flex-row items-center p-3.5 mb-2.5 rounded-xl"

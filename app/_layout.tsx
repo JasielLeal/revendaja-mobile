@@ -27,10 +27,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <QueryProvider>
+    <QueryProvider>
+      <AuthProvider>
         <RootLayoutNav />
-      </QueryProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryProvider>
   );
 }

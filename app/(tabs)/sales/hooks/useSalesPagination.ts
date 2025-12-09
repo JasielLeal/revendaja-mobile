@@ -70,16 +70,6 @@ export function useSalesPagination({
         `/dashboard/pagination?${params.toString()}`
       );
 
-      console.log("Sales pagination params:", {
-        from,
-        to,
-        search,
-        status,
-        page: pageParam,
-        limit,
-        url: `/dashboard/pagination?${params.toString()}`
-      });
-
       return response.data;
     },
     getNextPageParam: (lastPage) => {
