@@ -1,19 +1,13 @@
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React, { useState } from 'react';
-import { Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import template from "../../../assets/template.jpg";
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useInfiniteStoreProducts } from './hooks/useInfiniteStoreProducts';
+import { EditProduct, productType } from './components/edit-product';
+import { ConfigScreen } from './components/config-screen';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
-interface Product {
-    id: string;
-    name: string;
-    price: number;
-    stock: number;
-    category: string;
-    barcode: string;
-    img: any;
-}
 
 interface StoreConfig {
     storeName: string;
@@ -33,17 +27,34 @@ export default function StorePage() {
     const colors = useThemeColors();
     const [activeTab, setActiveTab] = useState<'stock' | 'config'>('stock');
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [showConfigModal, setShowConfigModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<productType | null>(null);
+    const [showEditModal, setShowEditModal] = useState(false);
 
-    const [products, setProducts] = useState<Product[]>([
-        { id: '1', name: 'Perfume Chanel Nº5', price: 450.00, stock: 12, category: 'Perfumes', barcode: '7891000123456', img: template },
-        { id: '2', name: 'Perfume Hugo Boss', price: 280.00, stock: 8, category: 'Perfumes', barcode: '7891000123457', img: template },
-        { id: '3', name: 'Hidratante Corporal', price: 85.00, stock: 25, category: 'Cuidados', barcode: '7891000123458', img: template },
-        { id: '4', name: 'Perfume Feminino Importado', price: 380.00, stock: 5, category: 'Perfumes', barcode: '7891000123459', img: template },
-        { id: '5', name: 'Kit Presente Masculino', price: 320.00, stock: 15, category: 'Kits', barcode: '7891000123460', img: template },
-    ]);
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 500);
+
+        console.log('Search Query:', searchQuery);
+        console.log('Debounced Query:', debouncedQuery);
+
+        return () => clearTimeout(timeout);
+    }, [searchQuery]);
+
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        refetch,
+    } = useInfiniteStoreProducts(debouncedQuery ? 50 : 20, debouncedQuery);
+
+    const products = data?.pages.flatMap(page => page.data) ?? [];
 
     const [storeConfig, setStoreConfig] = useState<StoreConfig>({
         storeName: 'Leal Perfumaria',
@@ -70,59 +81,11 @@ export default function StorePage() {
 
     const categories = ['Todos', 'Perfumes', 'Cuidados', 'Kits', 'Maquiagem'];
 
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === 'Todos' || product.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
+    const getTotalProducts = () => products.length;
+    const getLowStockProducts = () => products.filter(product => product.quantity <= 5).length;
 
-    const getTotalProducts = () => products.reduce((sum, product) => sum + product.stock, 0);
-    const getLowStockProducts = () => products.filter(product => product.stock <= 5).length;
+    const tabBarHeight = useBottomTabBarHeight();
 
-    const handleAddProduct = () => {
-        if (!newProduct.name || !newProduct.price || !newProduct.stock || !newProduct.barcode) {
-            Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
-            return;
-        }
-
-        const product: Product = {
-            id: Date.now().toString(),
-            name: newProduct.name,
-            price: parseFloat(newProduct.price),
-            stock: parseInt(newProduct.stock),
-            category: newProduct.category,
-            barcode: newProduct.barcode,
-            img: template
-        };
-
-        setProducts([...products, product]);
-        setNewProduct({ name: '', price: '', stock: '', category: 'Perfumes', barcode: '' });
-        setShowAddProduct(false);
-        Alert.alert('Sucesso', 'Produto adicionado ao estoque');
-    };
-
-    const updateStock = (productId: string, newStock: number) => {
-        setProducts(products.map(product =>
-            product.id === productId
-                ? { ...product, stock: Math.max(0, newStock) }
-                : product
-        ));
-    };
-
-    const removeProduct = (productId: string) => {
-        Alert.alert(
-            'Remover Produto',
-            'Tem certeza que deseja remover este produto do estoque?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Remover',
-                    style: 'destructive',
-                    onPress: () => setProducts(products.filter(p => p.id !== productId))
-                }
-            ]
-        );
-    };
 
     return (
         <View style={{ flex: 1 }}>
@@ -283,7 +246,7 @@ export default function StorePage() {
                 </View>
             </View>
 
-            <ScrollView className="flex-1 px-5 relative z-10" style={{ marginTop: -10 }}>
+            <View className="flex-1 px-5 relative z-10" style={{ marginTop: -10 }}>
                 {activeTab === 'stock' ? (
                     <>
                         {/* Estatísticas do Estoque */}
@@ -346,7 +309,7 @@ export default function StorePage() {
                         {/* Busca e Filtros */}
                         <View className="mb-4">
                             {/* Campo de busca */}
-                            <View className="mb-3">
+                            <View className="">
                                 <View
                                     className="flex-row items-center rounded-xl px-4 py-3.5"
                                     style={{
@@ -372,135 +335,89 @@ export default function StorePage() {
                                 </View>
                             </View>
 
-                            {/* Categorias */}
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1">
-                                <View className="flex-row space-x-2 px-1 gap-2">
-                                    {categories.map((category) => (
-                                        <TouchableOpacity
-                                            key={category}
-                                            className="px-4 py-2.5 rounded-xl"
-                                            style={{
-                                                backgroundColor: selectedCategory === category ? colors.primary : colors.card,
-                                                borderColor: selectedCategory === category ? colors.primary : colors.border + '30',
-                                                borderWidth: 1,
-                                                shadowColor: '#000',
-                                                shadowOffset: { width: 0, height: 1 },
-                                                shadowOpacity: selectedCategory === category ? 0.1 : 0.03,
-                                                shadowRadius: 2,
-                                                elevation: selectedCategory === category ? 2 : 1,
-                                            }}
-                                            onPress={() => setSelectedCategory(category)}
-                                        >
-                                            <Text
-                                                className="font-semibold text-sm"
-                                                style={{
-                                                    color: selectedCategory === category ? 'white' : colors.foreground
-                                                }}
-                                            >
-                                                {category}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </ScrollView>
                         </View>
 
                         {/* Lista de Produtos */}
                         <View className="mb-5">
-
-
-                            {filteredProducts.map((product) => (
-                                <View
-                                    key={product.id}
-                                    className="flex-row items-center p-3.5 mb-2.5 rounded-xl"
-                                    style={{
-                                        backgroundColor: colors.card,
-                                        shadowColor: '#000',
-                                        shadowOffset: { width: 0, height: 1 },
-                                        shadowOpacity: 0.06,
-                                        shadowRadius: 4,
-                                        elevation: 2,
-                                        borderColor: colors.border + '20',
-                                        borderWidth: 1,
-                                    }}
-                                >
-                                    <Image
-                                        source={product.img}
-                                        style={{
-                                            width: 56,
-                                            height: 56,
-                                            borderRadius: 10,
-                                            marginRight: 12
+                            <FlatList
+                                data={products}
+                                contentContainerStyle={{ paddingBottom: tabBarHeight + 80 }}
+                                keyExtractor={item => item.id}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setSelectedProduct(item);
+                                            setShowEditModal(true);
                                         }}
-                                        contentFit="cover"
-                                    />
-
-                                    <View className="flex-1">
-                                        <View className="flex-row items-start justify-between mb-1">
-                                            <View className="flex-1 mr-2">
-                                                <Text className="font-bold text-base" style={{ color: colors.foreground }}>
-                                                    {product.name}
-                                                </Text>
-                                                <Text className="text-sm mt-0.5" style={{ color: colors.mutedForeground }}>
-                                                    {product.category} • {product.barcode}
-                                                </Text>
-                                            </View>
-                                            <TouchableOpacity
-                                                onPress={() => removeProduct(product.id)}
-                                                className="p-1.5"
-                                                style={{
-                                                    backgroundColor: '#ef444410',
-                                                    borderRadius: 6
-                                                }}
-                                            >
-                                                <Ionicons name="trash-outline" size={14} color="#ef4444" />
-                                            </TouchableOpacity>
-                                        </View>
-
-                                        <View className="flex-row items-center justify-between mt-2">
-                                            <Text className="font-bold text-lg" style={{ color: colors.primary }}>
-                                                R$ {product.price.toFixed(2).replace('.', ',')}
-                                            </Text>
-
-                                            <View className="flex-row items-center">
-                                                <TouchableOpacity
-                                                    onPress={() => updateStock(product.id, product.stock - 1)}
-                                                    className="w-7 h-7 rounded-lg items-center justify-center"
-                                                    style={{ backgroundColor: colors.muted }}
-                                                >
-                                                    <Ionicons name="remove" size={12} color={colors.foreground} />
-                                                </TouchableOpacity>
-
-                                                <View
-                                                    className="mx-3 px-2.5 py-1.5 rounded-lg min-w-12 items-center"
-                                                    style={{
-                                                        backgroundColor: product.stock <= 5 ? '#ef444415' : colors.primary + '15'
-                                                    }}
-                                                >
-                                                    <Text
-                                                        className="font-bold text-sm"
-                                                        style={{
-                                                            color: product.stock <= 5 ? '#ef4444' : colors.primary
-                                                        }}
-                                                    >
-                                                        {product.stock}
+                                        className="flex-row items-center p-3.5 mb-2.5 rounded-xl"
+                                        style={{
+                                            backgroundColor: colors.card,
+                                            shadowColor: '#000',
+                                            shadowOffset: { width: 0, height: 1 },
+                                            shadowOpacity: 0.06,
+                                            shadowRadius: 4,
+                                            elevation: 2,
+                                            borderColor: colors.border + '20',
+                                            borderWidth: 1,
+                                        }}
+                                    >
+                                        <Image
+                                            source={{ uri: item.imgUrl }}
+                                            style={{
+                                                width: 56,
+                                                height: 56,
+                                                borderRadius: 10,
+                                                marginRight: 12
+                                            }}
+                                            contentFit="cover"
+                                        />
+                                        <View className="flex-1">
+                                            <View className="flex-row items-start justify-between mb-1">
+                                                <View className="flex-1 mr-2" style={{ minHeight: 58 }}>
+                                                    <Text className="font-bold text-base" style={{ color: colors.foreground }}>
+                                                        {item.name}
+                                                    </Text>
+                                                    <Text className="text-sm mt-0.5" style={{ color: colors.mutedForeground }}>
+                                                        {item.company} • {item.barcode}
                                                     </Text>
                                                 </View>
-
-                                                <TouchableOpacity
-                                                    onPress={() => updateStock(product.id, product.stock + 1)}
-                                                    className="w-7 h-7 rounded-lg items-center justify-center"
-                                                    style={{ backgroundColor: colors.primary }}
-                                                >
-                                                    <Ionicons name="add" size={12} color="white" />
-                                                </TouchableOpacity>
+                                            </View>
+                                            <View className="flex-row items-center justify-between mt-2">
+                                                <Text className="font-bold text-lg" style={{ color: colors.primary }}>
+                                                    R$ {(item.price / 100).toFixed(2).replace('.', ',')}
+                                                </Text>
+                                                <View className="flex-row items-center">
+                                                    <View
+                                                        className="px-2 py-1.5 rounded-lg min-w-12 items-center"
+                                                        style={{
+                                                            backgroundColor: item.quantity <= 5 ? '#ef444415' : colors.primary + '15'
+                                                        }}
+                                                    >
+                                                        <Text
+                                                            className="font-bold text-sm"
+                                                            style={{
+                                                                color: item.quantity <= 5 ? '#ef4444' : colors.primary
+                                                            }}
+                                                        >
+                                                            {item.quantity}
+                                                        </Text>
+                                                    </View>
+                                                </View>
                                             </View>
                                         </View>
-                                    </View>
-                                </View>
-                            ))}
-
-                            {filteredProducts.length === 0 && (
+                                    </TouchableOpacity>
+                                )}
+                                onEndReached={() => {
+                                    if (hasNextPage && !isFetchingNextPage) {
+                                        fetchNextPage();
+                                    }
+                                }}
+                                onEndReachedThreshold={0.2}
+                                ListFooterComponent={isFetchingNextPage ? <ActivityIndicator size="small" /> : null}
+                                refreshing={isLoading}
+                                onRefresh={refetch}
+                            />
+                            {products.length === 0 && (
                                 <View
                                     className="items-center py-12 px-6 rounded-xl"
                                     style={{ backgroundColor: colors.card + '50' }}
@@ -524,237 +441,10 @@ export default function StorePage() {
                 ) : (
                     <>
                         {/* Seção de Configurações */}
-                        <View className="mb-4 mt-1">
-                            {/* Informações da Loja */}
-                            <View
-                                className="p-4 rounded-xl mb-3"
-                                style={{
-                                    backgroundColor: colors.card,
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 1 },
-                                    shadowOpacity: 0.06,
-                                    shadowRadius: 4,
-                                    elevation: 2,
-                                    borderColor: colors.border + '20',
-                                    borderWidth: 1,
-                                }}
-                            >
-                                <View className="flex-row items-center mb-3">
-                                    <View
-                                        className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                                        style={{ backgroundColor: colors.primary + '15' }}
-                                    >
-                                        <Ionicons name="storefront" size={20} color={colors.primary} />
-                                    </View>
-                                    <View className="flex-1">
-                                        <Text className="text-lg font-bold" style={{ color: colors.foreground }}>
-                                            {storeConfig.storeName}
-                                        </Text>
-                                        <Text className="text-sm" style={{ color: colors.mutedForeground }}>
-                                            {storeConfig.storeDescription}
-                                        </Text>
-                                    </View>
-                                    <TouchableOpacity
-                                        onPress={() => setShowConfigModal(true)}
-                                        className="p-2 rounded-lg"
-                                        style={{ backgroundColor: colors.primary + '10' }}
-                                    >
-                                        <Ionicons name="pencil" size={16} color={colors.primary} />
-                                    </TouchableOpacity>
-                                </View>
-
-                                <View className="space-y-2">
-                                    <View className="flex-row items-center py-1">
-                                        <Ionicons name="call" size={16} color={colors.mutedForeground} style={{ marginRight: 10, width: 20 }} />
-                                        <Text className="text-sm" style={{ color: colors.foreground }}>{storeConfig.phone}</Text>
-                                    </View>
-                                    <View className="flex-row items-center py-1">
-                                        <Ionicons name="mail" size={16} color={colors.mutedForeground} style={{ marginRight: 10, width: 20 }} />
-                                        <Text className="text-sm" style={{ color: colors.foreground }}>{storeConfig.email}</Text>
-                                    </View>
-                                    <View className="flex-row items-center py-1">
-                                        <Ionicons name="location" size={16} color={colors.mutedForeground} style={{ marginRight: 10, width: 20 }} />
-                                        <Text className="text-sm" style={{ color: colors.foreground }}>{storeConfig.address}</Text>
-                                    </View>
-                                    <View className="flex-row items-center py-1">
-                                        <Ionicons name="time" size={16} color={colors.mutedForeground} style={{ marginRight: 10, width: 20 }} />
-                                        <Text className="text-sm" style={{ color: colors.foreground }}>{storeConfig.workingHours}</Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            {/* Configurações do Sistema */}
-                            <View
-                                className="p-4 rounded-xl mb-3"
-                                style={{
-                                    backgroundColor: colors.card,
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 1 },
-                                    shadowOpacity: 0.06,
-                                    shadowRadius: 4,
-                                    elevation: 2,
-                                    borderColor: colors.border + '20',
-                                    borderWidth: 1,
-                                }}
-                            >
-                                <Text className="text-lg font-bold mb-3" style={{ color: colors.foreground }}>
-                                    Configurações do Sistema
-                                </Text>
-
-                                {/* Notificações */}
-                                <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
-                                    <View className="flex-row items-center flex-1">
-                                        <Ionicons name="notifications" size={20} color={colors.primary} style={{ marginRight: 12 }} />
-                                        <View>
-                                            <Text className="font-medium" style={{ color: colors.foreground }}>
-                                                Notificações
-                                            </Text>
-                                            <Text className="text-sm" style={{ color: colors.mutedForeground }}>
-                                                Receber alertas do sistema
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity
-                                        className={`w-12 h-6 rounded-full ${storeConfig.notifications ? 'bg-green-500' : 'bg-gray-300'}`}
-                                        onPress={() => setStoreConfig({ ...storeConfig, notifications: !storeConfig.notifications })}
-                                        style={{ justifyContent: 'center' }}
-                                    >
-                                        <View
-                                            className={`w-5 h-5 rounded-full bg-white transform ${storeConfig.notifications ? 'translate-x-6' : 'translate-x-1'}`}
-                                            style={{
-                                                shadowColor: '#000',
-                                                shadowOffset: { width: 0, height: 1 },
-                                                shadowOpacity: 0.2,
-                                                shadowRadius: 2,
-                                                elevation: 2,
-                                            }}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-
-                                {/* Alerta de Estoque Baixo */}
-                                <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
-                                    <View className="flex-row items-center flex-1">
-                                        <Ionicons name="alert-circle" size={20} color={colors.primary} style={{ marginRight: 12 }} />
-                                        <View>
-                                            <Text className="font-medium" style={{ color: colors.foreground }}>
-                                                Alerta de Estoque Baixo
-                                            </Text>
-                                            <Text className="text-sm" style={{ color: colors.mutedForeground }}>
-                                                Notificar quando estoque ≤ 5
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity
-                                        className={`w-12 h-6 rounded-full ${storeConfig.lowStockAlert ? 'bg-green-500' : 'bg-gray-300'}`}
-                                        onPress={() => setStoreConfig({ ...storeConfig, lowStockAlert: !storeConfig.lowStockAlert })}
-                                        style={{ justifyContent: 'center' }}
-                                    >
-                                        <View
-                                            className={`w-5 h-5 rounded-full bg-white transform ${storeConfig.lowStockAlert ? 'translate-x-6' : 'translate-x-1'}`}
-                                            style={{
-                                                shadowColor: '#000',
-                                                shadowOffset: { width: 0, height: 1 },
-                                                shadowOpacity: 0.2,
-                                                shadowRadius: 2,
-                                                elevation: 2,
-                                            }}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-
-                                {/* Backup Automático */}
-                                <View className="flex-row items-center justify-between py-3">
-                                    <View className="flex-row items-center flex-1">
-                                        <Ionicons name="cloud-upload" size={20} color={colors.primary} style={{ marginRight: 12 }} />
-                                        <View>
-                                            <Text className="font-medium" style={{ color: colors.foreground }}>
-                                                Backup Automático
-                                            </Text>
-                                            <Text className="text-sm" style={{ color: colors.mutedForeground }}>
-                                                Sincronizar dados na nuvem
-                                            </Text>
-                                        </View>
-                                    </View>
-                                    <TouchableOpacity
-                                        className={`w-12 h-6 rounded-full ${storeConfig.autoBackup ? 'bg-green-500' : 'bg-gray-300'}`}
-                                        onPress={() => setStoreConfig({ ...storeConfig, autoBackup: !storeConfig.autoBackup })}
-                                        style={{ justifyContent: 'center' }}
-                                    >
-                                        <View
-                                            className={`w-5 h-5 rounded-full bg-white transform ${storeConfig.autoBackup ? 'translate-x-6' : 'translate-x-1'}`}
-                                            style={{
-                                                shadowColor: '#000',
-                                                shadowOffset: { width: 0, height: 1 },
-                                                shadowOpacity: 0.2,
-                                                shadowRadius: 2,
-                                                elevation: 2,
-                                            }}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-
-                            {/* Ações Rápidas */}
-                            <View
-                                className="p-4 rounded-xl"
-                                style={{
-                                    backgroundColor: colors.card,
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 1 },
-                                    shadowOpacity: 0.06,
-                                    shadowRadius: 4,
-                                    elevation: 2,
-                                    borderColor: colors.border + '20',
-                                    borderWidth: 1,
-                                }}
-                            >
-                                <Text className="text-lg font-bold mb-3" style={{ color: colors.foreground }}>
-                                    Ações Rápidas
-                                </Text>
-
-                                <View className="flex-row space-x-2 mb-3">
-                                    <TouchableOpacity
-                                        className="flex-1 p-3 rounded-lg items-center"
-                                        style={{ backgroundColor: colors.primary + '10' }}
-                                        onPress={() => Alert.alert('Backup', 'Fazendo backup dos dados...')}
-                                    >
-                                        <Ionicons name="cloud-download" size={20} color={colors.primary} />
-                                        <Text className="text-xs font-semibold mt-1.5" style={{ color: colors.primary }}>
-                                            Backup
-                                        </Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        className="flex-1 p-3 rounded-lg items-center"
-                                        style={{ backgroundColor: colors.primary + '10' }}
-                                        onPress={() => Alert.alert('Relatórios', 'Gerando relatórios...')}
-                                    >
-                                        <Ionicons name="bar-chart" size={20} color={colors.primary} />
-                                        <Text className="text-xs font-semibold mt-1.5" style={{ color: colors.primary }}>
-                                            Relatórios
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-
-                                <TouchableOpacity
-                                    className="p-3 rounded-lg items-center"
-                                    style={{ backgroundColor: '#ef444410' }}
-                                    onPress={() => Alert.alert('Limpar Dados', 'Esta ação não pode ser desfeita!', [
-                                        { text: 'Cancelar', style: 'cancel' },
-                                        { text: 'Confirmar', style: 'destructive' }
-                                    ])}
-                                >
-                                    <Ionicons name="trash" size={20} color="#ef4444" />
-                                    <Text className="text-xs font-semibold mt-1.5" style={{ color: '#ef4444' }}>
-                                        Limpar Dados
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <ConfigScreen />
                     </>
                 )}
-            </ScrollView>
+            </View>
 
             {/* Modal Adicionar Produto */}
             <Modal
@@ -899,7 +589,7 @@ export default function StorePage() {
                         <TouchableOpacity
                             className="rounded-xl py-4 mt-4"
                             style={{ backgroundColor: colors.primary }}
-                            onPress={handleAddProduct}
+
                         >
                             <Text className="text-center text-lg font-bold text-white">
                                 Adicionar ao Estoque
@@ -1077,6 +767,14 @@ export default function StorePage() {
                     </View>
                 </View>
             </Modal>
+
+            <EditProduct
+                visible={showEditModal}
+                product={selectedProduct}
+                onClose={() => {
+                    setShowEditModal(false)
+                }}
+            />
         </View>
     );
 }

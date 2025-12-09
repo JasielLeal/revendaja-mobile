@@ -213,6 +213,7 @@ export default function NewSalePage() {
                 queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
                 queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
                 queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
+                queryClient.invalidateQueries({ queryKey: ["store-products"] });
                 resetForm();
                 // Feedback de sucesso
                 Alert.alert(

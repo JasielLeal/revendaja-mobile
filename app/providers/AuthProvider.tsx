@@ -1,6 +1,8 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { api } from '../backend/api';
 import { authService } from '../services/auth';
+import { registerPushToken } from '@/lib/registerPushToken';
+import * as Notifications from 'expo-notifications';
 
 interface User {
     id: string;
@@ -27,7 +29,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     useEffect(() => {
         loadStorageData();
+        requestNotificationPermissions();
     }, []);
+
+    async function requestNotificationPermissions() {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        
+        if (finalStatus !== 'granted') {
+            console.log('⚠️ Permissão de notificação negada');
+            return;
+        }
+        
+        console.log('✅ Permissão de notificação concedida');
+    }
+
+    // Registrar token de push quando usuário estiver autenticado
+    useEffect(() => {
+        if (user?.id) {
+            console.log('📱 Registrando token de push...');
+            registerPushToken(user.id);
+        }
+    }, [user?.id]);
 
     async function loadStorageData() {
         try {

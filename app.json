@@ -8,6 +8,7 @@
     "scheme": "lealperfumariamobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "projectId": "e7761393-cd05-460f-a7ad-7ab840b34d85",
     "ios": {
       "supportsTablet": true
     },
@@ -38,6 +39,14 @@
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff",
+          "sounds": []
         }
       ]
     ],

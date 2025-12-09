@@ -3,7 +3,9 @@ import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useConfirmSale } from '../hooks/useconfirmSale';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface OrderItem {
     id: string;
@@ -66,29 +68,45 @@ export function OrderDetailsModal({
         Linking.openURL(url);
     };
 
+    const mutationConfirmSale = useConfirmSale()
+    const queryClient = useQueryClient();
+
     const handleConfirmSale = async () => {
         if (!order) return;
 
-        Alert.alert(
-            'Confirmar Venda',
-            'Deseja confirmar esta venda?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Confirmar',
-                    onPress: async () => {
-                        try {
-                            await api.patch(`/orders/${order.id}/status`, { status: 'approved' });
-                            onClose();
-                            onRefresh();
-                            Alert.alert('Sucesso', 'Venda confirmada!');
-                        } catch {
-                            Alert.alert('Erro', 'Erro ao confirmar venda');
-                        }
-                    }
-                }
-            ]
-        );
+        mutationConfirmSale.mutate({ id: order.id, status: 'approved' }, {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
+                onClose();
+                onRefresh();
+                Alert.alert('Sucesso', 'Venda confirmada!');
+            },
+            onError: () => {
+                Alert.alert('Erro', 'Erro ao confirmar venda');
+            }
+        });
+
+
+        // Alert.alert(
+        //     'Confirmar Venda',
+        //     'Deseja confirmar esta venda?',
+        //     [
+        //         { text: 'Cancelar', style: 'cancel' },
+        //         {
+        //             text: 'Confirmar',
+        //             onPress: async () => {
+        //                 try {
+        //                     await api.patch(`/orders/${order.id}/status`, { status: 'approved' });
+        //                     onClose();
+        //                     onRefresh();
+        //                     Alert.alert('Sucesso', 'Venda confirmada!');
+        //                 } catch {
+        //                     Alert.alert('Erro', 'Erro ao confirmar venda');
+        //                 }
+        //             }
+        //         }
+        //     ]
+        // );
     };
 
     const handleDeleteSale = () => {
@@ -294,6 +312,7 @@ export function OrderDetailsModal({
                                     <TouchableOpacity
                                         onPress={handleConfirmSale}
                                         activeOpacity={0.85}
+                                        disabled={mutationConfirmSale.isPending}
                                         className="flex-row items-center justify-center rounded-2xl py-4 flex-1 gap-2"
                                         style={{
                                             shadowColor: '#000',
@@ -301,14 +320,19 @@ export function OrderDetailsModal({
                                             shadowOpacity: 0.15,
                                             shadowRadius: 6,
                                             elevation: 4,
-                                            backgroundColor: colors.primary,
+                                            backgroundColor: mutationConfirmSale.isPending ? colors.primary + "80" : colors.primary, // deixa mais claro
                                         }}
                                     >
-
-                                        <Text className="text-white font-bold ">
-                                            Confirmar venda
-                                        </Text>
-                                        <Ionicons name="checkmark-circle" size={26} color="#fff" />
+                                        {mutationConfirmSale.isPending ? (
+                                            <ActivityIndicator size="small" color="#fff" />
+                                        ) : (
+                                            <>
+                                                <Text className="text-white font-bold">
+                                                    Confirmar venda
+                                                </Text>
+                                                <Ionicons name="checkmark-circle" size={26} color="#fff" />
+                                            </>
+                                        )}
                                     </TouchableOpacity>
 
                                     {/* WhatsApp */}
