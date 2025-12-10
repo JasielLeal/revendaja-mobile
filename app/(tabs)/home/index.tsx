@@ -1,5 +1,7 @@
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useNotificationsContext } from '@/app/providers/NotificationsProvider';
 import { authService } from '@/app/services/auth';
+import Skeleton from '@/components/skeleton';
 import { Avatar } from '@/components/ui/avatar';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -12,11 +14,11 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { MetricsCardSkeleton } from './components/MetricsCardSkeleton';
+import { NotificationsCenter } from './components/NotificationsCenter';
 import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { useDashboardMetrics } from './hooks/useDashboardMetrics';
 import { useRecentSales } from './hooks/useRecentSales';
-import Skeleton from '@/components/skeleton';
-import { MetricsCardSkeleton } from './components/MetricsCardSkeleton';
 
 type TabType = 'lucro' | 'vendas' | 'despesas';
 
@@ -47,9 +49,11 @@ interface Order {
 
 export default function HomePage() {
     const colors = useThemeColors();
+    const { unreadCount } = useNotificationsContext();
     const [selectedTab, setSelectedTab] = useState<TabType>('vendas');
     const [isBalanceVisible, setIsBalanceVisible] = useState(true);
     const [showOrderDetails, setShowOrderDetails] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const { user } = useAuth()
 
@@ -143,11 +147,18 @@ export default function HomePage() {
                                 </Text>
                             </View>
                         </View>
-                        <TouchableOpacity className="bg-white/30 rounded-full p-2 ml-2 relative">
+                        <TouchableOpacity
+                            className="bg-white/30 rounded-full p-2 ml-2 relative"
+                            onPress={() => setShowNotifications(true)}
+                        >
                             <Ionicons name="notifications" size={20} color="#fff" />
-                            <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center">
-                                <Text className="text-white text-xs font-bold">26</Text>
-                            </View>
+                            {unreadCount > 0 && (
+                                <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center">
+                                    <Text className="text-white text-xs font-bold">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </Text>
+                                </View>
+                            )}
                         </TouchableOpacity>
                         {/* Botão temporário para testar expiração do token */}
                         <TouchableOpacity
@@ -328,7 +339,7 @@ export default function HomePage() {
                                         </>
                                     )}
 
-                                    
+
                                 </>
                             )}
                         </View>
@@ -529,6 +540,11 @@ export default function HomePage() {
                     }}
                     getStatusLabel={getStatusLabel}
                     getStatusColor={getStatusColor}
+                />
+
+                <NotificationsCenter
+                    visible={showNotifications}
+                    onClose={() => setShowNotifications(false)}
                 />
             </ScrollView>
         </View>

@@ -5,6 +5,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from './providers/AuthProvider';
+import { NotificationsProvider } from './providers/NotificationsProvider';
 import { QueryProvider } from './providers/QueryProvider';
 
 import './globals.css';
@@ -29,7 +30,9 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <RootLayoutNav />
+        <NotificationsProvider>
+          <RootLayoutNav />
+        </NotificationsProvider>
       </AuthProvider>
     </QueryProvider>
   );

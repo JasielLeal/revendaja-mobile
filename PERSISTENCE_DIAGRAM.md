@@ -1,0 +1,252 @@
+/\*\*
+
+- 💾 PERSISTÊNCIA DE NOTIFICAÇÕES - O QUE MUDOU
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ ANTES: Tudo em memória (React State) ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- App aberto
+- ↓
+- Notificações em estado React
+- ↓
+- Usuário fecha o app
+- ↓
+- ❌ Todas as notificações desaparecem!
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ DEPOIS: Persistido em AsyncStorage ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- App aberto
+- ↓
+- Carrega notificações do AsyncStorage
+- ↓
+- Notificações em estado React + AsyncStorage
+- ↓
+- Usuário recebe notificação
+- ↓
+- Salva automaticamente no AsyncStorage
+- ↓
+- Usuário fecha o app
+- ↓
+- ✅ Notificações permanecem no AsyncStorage!
+- ↓
+- Usuário abre novamente
+- ↓
+- ✅ Todas as notificações reaparecem
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ MUDANÇAS NO CÓDIGO ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- 1.  useNotifications.ts
+-
+- ANTES:
+- const [notifications, setNotifications] = useState([]);
+-
+- DEPOIS:
+- const [notifications, setNotifications] = useState([]);
+- const [isLoading, setIsLoading] = useState(true);
+-
+- - useEffect(() => {
+-        loadNotificationsFromStorage();
+-      }, []);
+-
+- - async function loadNotificationsFromStorage() { ... }
+- - async function saveNotificationsToStorage() { ... }
+-
+-
+- 2.  Timestamp
+-
+- ANTES:
+- timestamp: Date
+-
+- DEPOIS:
+- timestamp: string (ISO format: "2025-12-10T14:32:00Z")
+-
+- Por quê? AsyncStorage só armazena strings
+-
+-
+- 3.  Cada ação agora chama saveNotificationsToStorage()
+-
+- markAsRead() → saveNotificationsToStorage()
+- deleteNotification() → saveNotificationsToStorage()
+- clearAll() → saveNotificationsToStorage()
+- addNotification() → saveNotificationsToStorage()
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ DIAGRAMA DE FLUXO ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- 🔄 CARREGAMENTO (Ao abrir app)
+-
+- App Start
+- ↓
+- useNotifications hook
+- ↓
+- loadNotificationsFromStorage()
+- ↓
+- AsyncStorage.getItem('notifications_list')
+- ↓
+- JSON.parse(saved)
+- ↓
+- setNotifications(parsed)
+- ↓
+- setIsLoading(false)
+- ↓
+- UI renderiza com histórico
+-
+-
+- 💾 SALVAMENTO (Ao receber notificação)
+-
+- Socket event
+- ↓
+- Notifications.scheduleNotificationAsync()
+- ↓
+- useNotifications listener
+- ↓
+- addNotification()
+- ↓
+- saveNotificationsToStorage()
+- ↓
+- AsyncStorage.setItem('notifications_list', JSON.stringify(...))
+- ↓
+- ✅ Salvo permanentemente
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ ESTADOS DA APLICAÇÃO ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- Memória (React State) AsyncStorage Resultado
+- ─────────────────────────────────────────────────────────────────
+- [] Vazio Sem notificações
+- [notif1, notif2] [notif1, notif2] ✅ Normal
+- [] [notif1, notif2] Carregando (isLoading)
+- [notif1, notif2] [notif1, notif2, notif3] Em sincronização
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ CASOS DE USO ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- ✅ CASO 1: Usuário vê notificação e sai do app
+-
+- 1.  Recebe notificação → Salva em AsyncStorage
+- 2.  Marca como lida → Atualiza AsyncStorage
+- 3.  Sai do app
+- 4.  Abre 1 semana depois
+- 5.  ✅ Notificação ainda está lá
+-
+-
+- ✅ CASO 2: Usuário quer limpar notificações
+-
+- 1.  Clica X em uma notificação
+- 2.  deleteNotification() → saveNotificationsToStorage([...])
+- 3.  AsyncStorage atualizado
+- 4.  Sai do app
+- 5.  ✅ Notificação não reaparece
+-
+-
+- ✅ CASO 3: Celular desliga
+-
+- 1.  App tem notificações
+- 2.  Todas salvas no AsyncStorage
+- 3.  Celular desliga (força)
+- 4.  Celular liga novamente
+- 5.  App abre
+- 6.  ✅ loadNotificationsFromStorage() carrega tudo
+-
+-
+- ✅ CASO 4: Usuario quer limpar tudo
+-
+- 1.  Clica botão de lixeira
+- 2.  clearAll() → saveNotificationsToStorage([])
+- 3.  AsyncStorage limpo
+- 4.  UI mostra "Sem notificações"
+- 5.  ✅ Permanentemente deletado
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ DETALHES TÉCNICOS ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- AsyncStorage Key:
+- "notifications_list"
+-
+- Formato Salvo:
+- JSON string com array de notificações
+-
+- Timestamp:
+- ISO 8601 format: "2025-12-10T14:32:00.000Z"
+- Convertido de Date.toISOString()
+-
+- Limite:
+- ~10MB por app (bastante para centenas de notificações)
+-
+- Sincronização:
+- Síncrona no saveNotificationsToStorage()
+- Assíncrona (não bloqueia UI)
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ FLUXO DETALHADO ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- [App Launch]
+- ↓
+- [useNotifications()] → useEffect(() => loadNotificationsFromStorage(), [])
+- ↓
+- [AsyncStorage.getItem('notifications_list')]
+- ↓
+- [if saved] → JSON.parse(saved)
+- ↓
+- [setNotifications(parsed)] → UI re-renders com histórico
+- [setIsLoading(false)]
+- ↓
+- [App Ready] ← NotificationsCenter pronta com dados antigos
+-
+-
+- [Nova Notificação Recebida]
+- ↓
+- [socket.ts] → Notifications.scheduleNotificationAsync()
+- ↓
+- [useNotifications.addNotificationReceivedListener]
+- ↓
+- [addNotification(newNotif)]
+- ↓
+- [setNotifications([newNotif, ...prev])]
+- ↓
+- [saveNotificationsToStorage(updated)]
+- ↓
+- [AsyncStorage.setItem('notifications_list', JSON.stringify(updated))]
+- ↓
+- [UI re-renders] ← Notificação aparece no modal
+- [Permanentemente salva!]
+-
+-
+- ╔═══════════════════════════════════════════════════════════════════╗
+- ║ SEGURANÇA ║
+- ╚═══════════════════════════════════════════════════════════════════╝
+-
+- ⚠️ AsyncStorage NÃO é criptografado
+-
+- Implicações:
+- - Qualquer app com permissão pode ler
+- - Qualquer um com acesso ao telefone pode ver
+- - Dados não devem ser sensíveis (senhas, tokens, etc)
+-
+- Para este caso (notificações de vendas):
+- - ✅ Seguro o suficiente
+- - Dados já são vistos em SMS/push
+- - Simples e rápido
+-
+- Se precisar de maior segurança:
+- - React Native Keychain (para dados sensíveis)
+- - Expo SecureStore (criptografado)
+- - Backend para sincronizar
+    \*/
