@@ -4,6 +4,7 @@ import React, { createContext, ReactNode, useContext } from 'react';
 interface NotificationsContextType {
     notifications: Notification[];
     unreadCount: number;
+    isLoading: boolean;
     addNotification: (notification: Notification) => void;
     markAsRead: (id: string) => void;
     markAllAsRead: () => void;

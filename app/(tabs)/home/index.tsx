@@ -1,7 +1,7 @@
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNotificationsContext } from '@/app/providers/NotificationsProvider';
 import { authService } from '@/app/services/auth';
-import Skeleton from '@/components/skeleton';
+import { SaleItemSkeleton } from '@/components/skeletons';
 import { Avatar } from '@/components/ui/avatar';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -363,51 +363,9 @@ export default function HomePage() {
                     {isSalesLoading ?
                         <View className="gap-3">
                             {[...Array(3)].map((_, index) => (
-                                <View
-                                    key={index}
-                                    className="flex-row items-center justify-between"
-                                >
-                                    {/* ESQUERDA */}
-                                    <View className="flex-1">
-                                        <View className="flex-row items-center mb-1">
-                                            {/* ÍCONE */}
-                                            <View className="mr-3">
-                                                <Skeleton borderRadius={12} height={44} width={44} />
-                                            </View>
-
-                                            {/* TEXTO */}
-                                            <View className="flex-1">
-                                                <Skeleton borderRadius={6} height={14} width={140} />
-                                                <Skeleton
-                                                    borderRadius={6}
-                                                    height={12}
-                                                    width={100}
-                                                    style={{ marginTop: 6 }}
-                                                />
-                                                <Skeleton
-                                                    borderRadius={999}
-                                                    height={20}
-                                                    width={80}
-                                                    style={{ marginTop: 8 }}
-                                                />
-                                            </View>
-                                        </View>
-                                    </View>
-
-                                    {/* DIREITA */}
-                                    <View className="items-end">
-                                        <Skeleton borderRadius={6} height={18} width={90} />
-                                        <Skeleton
-                                            borderRadius={6}
-                                            height={12}
-                                            width={70}
-                                            style={{ marginTop: 6 }}
-                                        />
-                                    </View>
-                                </View>
+                                <SaleItemSkeleton key={index} />
                             ))}
                         </View>
-
                         :
                         sales && sales.length > 0 ? (
                             <View className="gap-3">

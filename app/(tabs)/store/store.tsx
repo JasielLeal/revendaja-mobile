@@ -1,12 +1,13 @@
+import { ProductGridSkeleton } from '@/components/skeletons';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Image } from 'expo-image';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useInfiniteStoreProducts } from './hooks/useInfiniteStoreProducts';
-import { EditProduct, productType } from './components/edit-product';
 import { ConfigScreen } from './components/config-screen';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { EditProduct, productType } from './components/edit-product';
+import { useInfiniteStoreProducts } from './hooks/useInfiniteStoreProducts';
 
 
 interface StoreConfig {
@@ -336,89 +337,95 @@ export default function StorePage() {
 
                         {/* Lista de Produtos */}
                         <View className="mb-5">
-                            <FlatList
-                                data={products}
-                                contentContainerStyle={{ paddingBottom: tabBarHeight + 80 }}
-                                keyExtractor={item => item.id}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            setSelectedProduct({
-                                                ...item,
-                                                costPrice: item.costPrice ?? 0,
-                                                status: item.status as "Active" | "Inactive"
-                                            });
-                                            setShowEditModal(true);
-                                        }}
-                                        className="flex-row items-center p-3.5 mb-2.5 rounded-xl"
-                                        style={{
-                                            backgroundColor: colors.card,
-                                            shadowColor: '#000',
-                                            shadowOffset: { width: 0, height: 1 },
-                                            shadowOpacity: 0.06,
-                                            shadowRadius: 4,
-                                            elevation: 2,
-                                            borderColor: colors.border + '20',
-                                            borderWidth: 1,
-                                        }}
-                                    >
-                                        <Image
-                                            source={{ uri: item.imgUrl }}
-                                            style={{
-                                                width: 56,
-                                                height: 56,
-                                                borderRadius: 10,
-                                                marginRight: 12
+                            {isLoading ? (
+                                <View className="px-4">
+                                    <ProductGridSkeleton />
+                                </View>
+                            ) : (
+                                <FlatList
+                                    data={products}
+                                    contentContainerStyle={{ paddingBottom: tabBarHeight + 80 }}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setSelectedProduct({
+                                                    ...item,
+                                                    costPrice: item.costPrice ?? 0,
+                                                    status: item.status as "Active" | "Inactive"
+                                                });
+                                                setShowEditModal(true);
                                             }}
-                                            contentFit="cover"
-                                        />
-                                        <View className="flex-1">
-                                            <View className="flex-row items-start justify-between mb-1">
-                                                <View className="flex-1 mr-2" style={{ minHeight: 58 }}>
-                                                    <Text className="font-bold text-base" style={{ color: colors.foreground }}>
-                                                        {item.name}
-                                                    </Text>
-                                                    <Text className="text-sm mt-0.5" style={{ color: colors.mutedForeground }}>
-                                                        {item.company} • {item.barcode}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View className="flex-row items-center justify-between mt-2">
-                                                <Text className="font-bold text-lg" style={{ color: colors.primary }}>
-                                                    R$ {(item.price / 100).toFixed(2).replace('.', ',')}
-                                                </Text>
-                                                <View className="flex-row items-center">
-                                                    <View
-                                                        className="px-2 py-1.5 rounded-lg min-w-12 items-center"
-                                                        style={{
-                                                            backgroundColor: item.quantity <= 5 ? '#ef444415' : colors.primary + '15'
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            className="font-bold text-sm"
-                                                            style={{
-                                                                color: item.quantity <= 5 ? '#ef4444' : colors.primary
-                                                            }}
-                                                        >
-                                                            {item.quantity}
+                                            className="flex-row items-center p-3.5 mb-2.5 rounded-xl"
+                                            style={{
+                                                backgroundColor: colors.card,
+                                                shadowColor: '#000',
+                                                shadowOffset: { width: 0, height: 1 },
+                                                shadowOpacity: 0.06,
+                                                shadowRadius: 4,
+                                                elevation: 2,
+                                                borderColor: colors.border + '20',
+                                                borderWidth: 1,
+                                            }}
+                                        >
+                                            <Image
+                                                source={{ uri: item.imgUrl }}
+                                                style={{
+                                                    width: 56,
+                                                    height: 56,
+                                                    borderRadius: 10,
+                                                    marginRight: 12
+                                                }}
+                                                contentFit="cover"
+                                            />
+                                            <View className="flex-1">
+                                                <View className="flex-row items-start justify-between mb-1">
+                                                    <View className="flex-1 mr-2" style={{ minHeight: 58 }}>
+                                                        <Text className="font-bold text-base" style={{ color: colors.foreground }}>
+                                                            {item.name}
+                                                        </Text>
+                                                        <Text className="text-sm mt-0.5" style={{ color: colors.mutedForeground }}>
+                                                            {item.company} • {item.barcode}
                                                         </Text>
                                                     </View>
                                                 </View>
+                                                <View className="flex-row items-center justify-between mt-2">
+                                                    <Text className="font-bold text-lg" style={{ color: colors.primary }}>
+                                                        R$ {(item.price / 100).toFixed(2).replace('.', ',')}
+                                                    </Text>
+                                                    <View className="flex-row items-center">
+                                                        <View
+                                                            className="px-2 py-1.5 rounded-lg min-w-12 items-center"
+                                                            style={{
+                                                                backgroundColor: item.quantity <= 5 ? '#ef444415' : colors.primary + '15'
+                                                            }}
+                                                        >
+                                                            <Text
+                                                                className="font-bold text-sm"
+                                                                style={{
+                                                                    color: item.quantity <= 5 ? '#ef4444' : colors.primary
+                                                                }}
+                                                            >
+                                                                {item.quantity}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                )}
-                                onEndReached={() => {
-                                    if (hasNextPage && !isFetchingNextPage) {
-                                        fetchNextPage();
-                                    }
-                                }}
-                                onEndReachedThreshold={0.2}
-                                ListFooterComponent={isFetchingNextPage ? <ActivityIndicator size="small" /> : null}
-                                refreshing={isLoading}
-                                onRefresh={refetch}
-                            />
-                            {products.length === 0 && (
+                                        </TouchableOpacity>
+                                    )}
+                                    onEndReached={() => {
+                                        if (hasNextPage && !isFetchingNextPage) {
+                                            fetchNextPage();
+                                        }
+                                    }}
+                                    onEndReachedThreshold={0.2}
+                                    ListFooterComponent={isFetchingNextPage ? <ActivityIndicator size="small" /> : null}
+                                    refreshing={isLoading}
+                                    onRefresh={refetch}
+                                />
+                            )}
+                            {products.length === 0 && !isLoading && (
                                 <View
                                     className="items-center py-12 px-6 rounded-xl"
                                     style={{ backgroundColor: colors.card + '50' }}

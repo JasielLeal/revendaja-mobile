@@ -1,5 +1,6 @@
 import type { Notification } from '@/app/(tabs)/home/hooks/useNotifications';
 import { useNotificationsContext } from '@/app/providers/NotificationsProvider';
+import { NotificationsSkeleton } from '@/components/skeletons';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +21,7 @@ interface NotificationsCenterProps {
 
 export function NotificationsCenter({ visible, onClose }: NotificationsCenterProps) {
     const colors = useThemeColors();
-    const { notifications, unreadCount, markAsRead, deleteNotification: deleteNotif, clearAll } = useNotificationsContext();
+    const { notifications, unreadCount, isLoading, markAsRead, deleteNotification: deleteNotif, clearAll } = useNotificationsContext();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const handleRefresh = async () => {
@@ -162,7 +163,9 @@ export function NotificationsCenter({ visible, onClose }: NotificationsCenterPro
                     </View>
 
                     {/* Lista de Notificações */}
-                    {notifications.length > 0 ? (
+                    {isLoading ? (
+                        <NotificationsSkeleton />
+                    ) : notifications.length > 0 ? (
                         <FlatList
                             data={notifications}
                             renderItem={renderNotificationItem}

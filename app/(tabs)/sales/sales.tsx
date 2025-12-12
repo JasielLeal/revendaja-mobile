@@ -1,3 +1,4 @@
+import { SaleItemSkeleton } from '@/components/skeletons';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -375,87 +376,95 @@ export default function SalesPage({ navigation }: SalesPageProps) {
             />
 
             {/* Lista de vendas - SOMENTE isso scrolla */}
-            <FlatList
-                data={allOrders}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isRefetching}
-                        onRefresh={() => refetch()}
-                        colors={[colors.primary]}
-                        tintColor={colors.primary}
-                        progressBackgroundColor={colors.background}
-                    />
-                }
-                onEndReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) {
-                        fetchNextPage();
+            {isLoading ? (
+                <View className="px-4 gap-3 mt-4">
+                    {[...Array(5)].map((_, index) => (
+                        <SaleItemSkeleton key={index} />
+                    ))}
+                </View>
+            ) : (
+                <FlatList
+                    data={allOrders}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefetching}
+                            onRefresh={() => refetch()}
+                            colors={[colors.primary]}
+                            tintColor={colors.primary}
+                            progressBackgroundColor={colors.background}
+                        />
                     }
-                }}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={() => (
-                    isFetchingNextPage ? (
-                        <View className="py-4">
-                            <ActivityIndicator size="small" color={colors.primary} />
-                        </View>
-                    ) : null
-                )}
-                ListEmptyComponent={() => (
-                    !isLoading && allOrders.length === 0 && (
-                        <View className="px-4 py-16 items-center">
-                            <View
-                                className="w-24 h-24 rounded-full items-center justify-center mb-6"
-                                style={{ backgroundColor: colors.muted + '40' }}
-                            >
-                                <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} />
+                    onEndReached={() => {
+                        if (hasNextPage && !isFetchingNextPage) {
+                            fetchNextPage();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={() => (
+                        isFetchingNextPage ? (
+                            <View className="py-4">
+                                <ActivityIndicator size="small" color={colors.primary} />
                             </View>
-                            <Text
-                                className="text-xl font-bold mb-2 text-center"
-                                style={{ color: colors.foreground }}
-                            >
-                                Nenhuma venda encontrada
-                            </Text>
-                            <Text
-                                className="text-base text-center mb-6 px-8"
-                                style={{ color: colors.mutedForeground }}
-                            >
-                                {searchQuery
-                                    ? "Tente ajustar os filtros ou termo de busca"
-                                    : "Que tal começar registrando sua primeira venda?"
-                                }
-                            </Text>
-                            {!searchQuery && (
-                                <TouchableOpacity
-                                    className="flex-row items-center px-6 py-3 rounded-2xl"
-                                    style={{ backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1 }}
-                                    onPress={() => {/* Navegar para nova venda */ }}
+                        ) : null
+                    )}
+                    ListEmptyComponent={() => (
+                        !isLoading && allOrders.length === 0 && (
+                            <View className="px-4 py-16 items-center">
+                                <View
+                                    className="w-24 h-24 rounded-full items-center justify-center mb-6"
+                                    style={{ backgroundColor: colors.muted + '40' }}
                                 >
-                                    <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-                                    <Text
-                                        className="ml-2 font-semibold"
-                                        style={{ color: colors.primary }}
+                                    <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} />
+                                </View>
+                                <Text
+                                    className="text-xl font-bold mb-2 text-center"
+                                    style={{ color: colors.foreground }}
+                                >
+                                    Nenhuma venda encontrada
+                                </Text>
+                                <Text
+                                    className="text-base text-center mb-6 px-8"
+                                    style={{ color: colors.mutedForeground }}
+                                >
+                                    {searchQuery
+                                        ? "Tente ajustar os filtros ou termo de busca"
+                                        : "Que tal começar registrando sua primeira venda?"
+                                    }
+                                </Text>
+                                {!searchQuery && (
+                                    <TouchableOpacity
+                                        className="flex-row items-center px-6 py-3 rounded-2xl"
+                                        style={{ backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1 }}
+                                        onPress={() => {/* Navegar para nova venda */ }}
                                     >
-                                        Criar primeira venda
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    )
-                )}
-                renderItem={({ item: order }) => (
-                    <SalesItem
-                        order={order}
-                        onPress={() => {
-                            setSelectedOrder(order);
-                            setShowOrderDetails(true);
-                        }}
-                        getStatusLabel={getStatusLabel}
-                        getStatusColor={getStatusColor}
-                    />
-                )}
-            />
+                                        <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+                                        <Text
+                                            className="ml-2 font-semibold"
+                                            style={{ color: colors.primary }}
+                                        >
+                                            Criar primeira venda
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )
+                    )}
+                    renderItem={({ item: order }) => (
+                        <SalesItem
+                            order={order}
+                            onPress={() => {
+                                setSelectedOrder(order);
+                                setShowOrderDetails(true);
+                            }}
+                            getStatusLabel={getStatusLabel}
+                            getStatusColor={getStatusColor}
+                        />
+                    )}
+                />
+            )}
 
             <OrderDetailsModal
                 visible={showOrderDetails}
