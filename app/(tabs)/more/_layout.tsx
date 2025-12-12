@@ -10,6 +10,18 @@ export default function MoreLayout() {
                     title: 'Mais'
                 }}
             />
+            <Stack.Screen
+                name="components/account-screen"
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="components/plan-screen"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }

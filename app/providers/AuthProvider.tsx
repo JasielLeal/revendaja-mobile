@@ -10,6 +10,8 @@ interface User {
     id: string;
     email: string;
     name: string;
+    plan: string;
+    createdAt?: string;
 }
 
 interface AuthContextData {
@@ -18,6 +20,7 @@ interface AuthContextData {
     isAuthenticated: boolean;
     signIn: (token: string, userData: User) => Promise<void>;
     signOut: () => Promise<void>;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -87,12 +90,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async function loadStorageData() {
         try {
             const token = await authService.getToken();
+            const savedUser = await authService.getUser();
+
             console.log('Token carregado do storage:', token);
+            console.log('User carregado do storage:', savedUser);
 
             if (!token) {
                 // Não há token salvo
                 console.log('Nenhum token encontrado no storage');
                 setUser(null);
+                setIsLoading(false);
+                return;
+            }
+
+            // Se temos user salvo, usar ele primeiro
+            if (savedUser) {
+                console.log('Usando user do storage');
+                setUser(savedUser);
                 setIsLoading(false);
                 return;
             }
@@ -112,7 +126,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 }>('/verify-token');
 
                 if (response.data.valid && response.data.user) {
-                    setUser(response.data.user);
+                    const userData = response.data.user;
+                    setUser(userData);
+                    // Salvar user para próximas vezes
+                    await authService.saveUser(userData);
                 } else {
                     // Token inválido
                     console.log('Token inválido segundo a API');
@@ -131,10 +148,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } finally {
             setIsLoading(false);
         }
-    } async function signIn(token: string, userData: User) {
+    }
+
+    async function signIn(token: string, userData: User) {
         try {
             console.log('Salvando token durante o login:', token);
+            console.log('Salvando userData:', userData);
             await authService.saveToken(token);
+            await authService.saveUser(userData);
             setUser(userData);
         } catch (error) {
             console.error('Erro ao fazer login:', error);
@@ -145,10 +166,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async function signOut() {
         try {
             await authService.removeToken();
+            await authService.removeUser();
             setUser(null);
         } catch (error) {
             console.error('Erro ao fazer logout:', error);
             throw error;
+        }
+    }
+
+    async function logout() {
+        try {
+            await authService.logout();
+            setUser(null);
+        } catch (error) {
+            console.error('Erro ao fazer logout:', error);
         }
     }
 
@@ -160,6 +191,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 isAuthenticated: !!user,
                 signIn,
                 signOut,
+                logout,
             }}
         >
             {children}

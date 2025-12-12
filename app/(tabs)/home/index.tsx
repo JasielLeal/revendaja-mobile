@@ -136,7 +136,7 @@ export default function HomePage() {
                         <View className="flex-1">
                             <View className="flex-row items-center mb-1">
                                 <Avatar
-                                    name="Jasiel Viana Leal"
+                                    name={String(user?.name)}
                                     size="md"
                                     className="mr-3"
                                     backgroundColor={colors.background}

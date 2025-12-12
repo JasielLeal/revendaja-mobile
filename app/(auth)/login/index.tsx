@@ -46,7 +46,15 @@ export default function LoginScreen() {
     const onSubmit = async (data: LoginFormData) => {
         loginMutation.mutate(data, {
             onSuccess: async (response) => {
-                await signIn(response.tokenAcess, response.user);
+                // A API retorna os dados direto, sem propriedade .user
+                const userData = {
+                    id: response.id,
+                    email: response.email,
+                    name: response.name,
+                    plan: response.plan,
+                    createdAt: response.createdAt,
+                };
+                await signIn(response.tokenAcess, userData);
                 router.replace('/(tabs)/home');
             },
         });

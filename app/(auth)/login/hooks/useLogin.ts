@@ -3,12 +3,13 @@ import { useMutation } from "@tanstack/react-query";
 import { LoginFormData } from "../schemas/schema";
 
 interface LoginResponse {
+  id: string;
+  email: string;
+  name: string;
+  plan: string;
+  createdAt: string;
+  firstAccess: boolean;
   tokenAcess: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
 }
 
 export const useLogin = () => {
