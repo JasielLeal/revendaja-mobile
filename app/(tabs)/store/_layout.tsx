@@ -10,6 +10,12 @@ export default function StoreLayout() {
                     title: 'Loja'
                 }}
             />
+            <Stack.Screen
+                name="catalog"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }

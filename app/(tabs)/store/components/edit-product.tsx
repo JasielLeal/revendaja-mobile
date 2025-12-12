@@ -25,7 +25,7 @@ export interface productType {
     imgUrl: string;
     validity_date: string;
     cost_price: number;
-    status: 'Active' | 'Inactive';
+    status: 'active' | 'inactive';
 }
 
 interface EditProductProps {
@@ -38,7 +38,7 @@ export function EditProduct(props: EditProductProps) {
 
     const colors = useThemeColors()
 
-    const [isEnabled, setIsEnabled] = useState(props.product?.status === 'Inactive');
+    const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
     function formatToBRL(value: string) {
@@ -94,6 +94,7 @@ export function EditProduct(props: EditProductProps) {
             setCostPrice(formatToBRL(String(Math.round(props.product.cost_price))));
             setValidity(formatISOToBR(props.product.validity_date));
             setQuantity(String(props.product.quantity));
+            setIsEnabled(props.product.status === 'inactive');
         }
 
     }, [props.product, props.visible]);

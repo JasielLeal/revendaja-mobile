@@ -3,6 +3,7 @@ import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ConfigScreen } from './components/config-screen';
@@ -26,11 +27,12 @@ interface StoreConfig {
 
 export default function StorePage() {
     const colors = useThemeColors();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'stock' | 'config'>('stock');
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
-    const [showAddProduct, setShowAddProduct] = useState(false);
+    const [stockFilter, setStockFilter] = useState<'all' | 'inStock' | 'outOfStock'>('all');
     const [showConfigModal, setShowConfigModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<productType | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -52,7 +54,17 @@ export default function StorePage() {
         refetch,
     } = useInfiniteStoreProducts(debouncedQuery ? 50 : 20, debouncedQuery);
 
-    const products = data?.pages.flatMap(page => page.data) ?? [];
+    const allProducts = data?.pages.flatMap(page => page.data) ?? [];
+
+    // Usar allProducts para estatísticas (cards) e filteredProducts para a lista
+    const filteredProducts = allProducts.filter(product => {
+        if (stockFilter === 'inStock') return product.quantity > 0;
+        if (stockFilter === 'outOfStock') return product.quantity === 0;
+        return true; // 'all'
+    });
+
+    // Para os cards de estatísticas, usar todos os produtos
+    const products = allProducts;
 
     const [storeConfig, setStoreConfig] = useState<StoreConfig>({
         storeName: 'Leal Perfumaria',
@@ -67,17 +79,6 @@ export default function StorePage() {
         currency: 'BRL',
         taxRate: '0.00'
     });
-
-    // Estados para adicionar produto
-    const [newProduct, setNewProduct] = useState({
-        name: '',
-        price: '',
-        stock: '',
-        category: 'Perfumes',
-        barcode: ''
-    });
-
-    const categories = ['Todos', 'Perfumes', 'Cuidados', 'Kits', 'Maquiagem'];
 
     const getTotalProducts = () => products.length;
     const getLowStockProducts = () => products.filter(product => product.quantity <= 5).length;
@@ -144,7 +145,7 @@ export default function StorePage() {
                                     shadowRadius: 4,
                                     elevation: 3,
                                 }}
-                                onPress={() => setShowAddProduct(true)}
+                                onPress={() => router.push('/(tabs)/store/catalog')}
                             >
                                 <Ionicons name="add" size={24} color={colors.primaryForeground} />
                             </TouchableOpacity>
@@ -306,10 +307,10 @@ export default function StorePage() {
 
                         {/* Busca e Filtros */}
                         <View className="mb-4">
-                            {/* Campo de busca */}
-                            <View className="">
+                            {/* Campo de busca e Select */}
+                            <View className="flex-row gap-2 items-center">
                                 <View
-                                    className="flex-row items-center rounded-xl px-4 py-3.5"
+                                    className="flex-1 flex-row items-center rounded-xl px-4 py-3.5"
                                     style={{
                                         backgroundColor: colors.card,
                                         borderColor: colors.border + '40',
@@ -331,6 +332,33 @@ export default function StorePage() {
                                         style={{ color: colors.foreground }}
                                     />
                                 </View>
+
+                                {/* Select de Filtro */}
+                                <TouchableOpacity
+                                    className="rounded-xl px-4 py-3.5"
+                                    style={{
+                                        backgroundColor: colors.card,
+                                        borderColor: colors.border + '40',
+                                        borderWidth: 1,
+                                        shadowColor: '#000',
+                                        shadowOffset: { width: 0, height: 1 },
+                                        shadowOpacity: 0.04,
+                                        shadowRadius: 3,
+                                        elevation: 1,
+                                    }}
+                                    onPress={() => {
+                                        const options = ['all', 'inStock', 'outOfStock'];
+                                        const currentIndex = options.indexOf(stockFilter);
+                                        const nextIndex = (currentIndex + 1) % options.length;
+                                        setStockFilter(options[nextIndex] as 'all' | 'inStock' | 'outOfStock');
+                                    }}
+                                >
+                                    <Ionicons
+                                        name={stockFilter === 'all' ? 'funnel' : stockFilter === 'inStock' ? 'checkmark-circle' : 'close-circle'}
+                                        size={20}
+                                        color={colors.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
 
                         </View>
@@ -343,7 +371,7 @@ export default function StorePage() {
                                 </View>
                             ) : (
                                 <FlatList
-                                    data={products}
+                                    data={filteredProducts}
                                     contentContainerStyle={{ paddingBottom: tabBarHeight + 80 }}
                                     keyExtractor={item => item.id}
                                     renderItem={({ item }) => (
@@ -352,7 +380,7 @@ export default function StorePage() {
                                                 setSelectedProduct({
                                                     ...item,
                                                     costPrice: item.costPrice ?? 0,
-                                                    status: item.status as "Active" | "Inactive"
+                                                    status: item.status as "active" | "inactive"
                                                 });
                                                 setShowEditModal(true);
                                             }}
@@ -453,159 +481,6 @@ export default function StorePage() {
                     </>
                 )}
             </View>
-
-            {/* Modal Adicionar Produto */}
-            <Modal
-                visible={showAddProduct}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setShowAddProduct(false)}
-            >
-                <View
-                    className="flex-1 justify-end"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-                >
-                    <View
-                        className="rounded-t-3xl p-6"
-                        style={{
-                            backgroundColor: colors.card,
-                            maxHeight: '80%',
-                        }}
-                    >
-                        <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-xl font-bold" style={{ color: colors.foreground }}>
-                                Adicionar Produto
-                            </Text>
-                            <TouchableOpacity onPress={() => setShowAddProduct(false)}>
-                                <Ionicons name="close" size={24} color={colors.mutedForeground} />
-                            </TouchableOpacity>
-                        </View>
-
-                        <ScrollView>
-                            {/* Nome */}
-                            <View className="mb-4">
-                                <Text className="text-sm font-medium mb-2" style={{ color: colors.foreground }}>
-                                    Nome do Produto
-                                </Text>
-                                <TextInput
-                                    className="border rounded-xl px-4 py-3"
-                                    style={{
-                                        borderColor: colors.border,
-                                        backgroundColor: colors.background,
-                                        color: colors.foreground
-                                    }}
-                                    placeholder="Ex: Perfume Chanel"
-                                    placeholderTextColor={colors.mutedForeground}
-                                    value={newProduct.name}
-                                    onChangeText={(text) => setNewProduct({ ...newProduct, name: text })}
-                                />
-                            </View>
-
-                            {/* Preço */}
-                            <View className="mb-4">
-                                <Text className="text-sm font-medium mb-2" style={{ color: colors.foreground }}>
-                                    Preço (R$)
-                                </Text>
-                                <TextInput
-                                    className="border rounded-xl px-4 py-3"
-                                    style={{
-                                        borderColor: colors.border,
-                                        backgroundColor: colors.background,
-                                        color: colors.foreground
-                                    }}
-                                    placeholder="Ex: 450.00"
-                                    placeholderTextColor={colors.mutedForeground}
-                                    keyboardType="numeric"
-                                    value={newProduct.price}
-                                    onChangeText={(text) => setNewProduct({ ...newProduct, price: text })}
-                                />
-                            </View>
-
-                            {/* Estoque */}
-                            <View className="mb-4">
-                                <Text className="text-sm font-medium mb-2" style={{ color: colors.foreground }}>
-                                    Quantidade em Estoque
-                                </Text>
-                                <TextInput
-                                    className="border rounded-xl px-4 py-3"
-                                    style={{
-                                        borderColor: colors.border,
-                                        backgroundColor: colors.background,
-                                        color: colors.foreground
-                                    }}
-                                    placeholder="Ex: 15"
-                                    placeholderTextColor={colors.mutedForeground}
-                                    keyboardType="numeric"
-                                    value={newProduct.stock}
-                                    onChangeText={(text) => setNewProduct({ ...newProduct, stock: text })}
-                                />
-                            </View>
-
-                            {/* Categoria */}
-                            <View className="mb-4">
-                                <Text className="text-sm font-medium mb-2" style={{ color: colors.foreground }}>
-                                    Categoria
-                                </Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                    <View className="flex-row space-x-2">
-                                        {categories.slice(1).map((category) => (
-                                            <TouchableOpacity
-                                                key={category}
-                                                className="px-4 py-2 rounded-xl"
-                                                style={{
-                                                    backgroundColor: newProduct.category === category ? colors.primary : colors.muted,
-                                                    borderColor: newProduct.category === category ? colors.primary : colors.border,
-                                                    borderWidth: 1,
-                                                }}
-                                                onPress={() => setNewProduct({ ...newProduct, category })}
-                                            >
-                                                <Text
-                                                    className="font-medium"
-                                                    style={{
-                                                        color: newProduct.category === category ? 'white' : colors.foreground
-                                                    }}
-                                                >
-                                                    {category}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                </ScrollView>
-                            </View>
-
-                            {/* Código de Barras */}
-                            <View className="mb-6">
-                                <Text className="text-sm font-medium mb-2" style={{ color: colors.foreground }}>
-                                    Código de Barras
-                                </Text>
-                                <TextInput
-                                    className="border rounded-xl px-4 py-3"
-                                    style={{
-                                        borderColor: colors.border,
-                                        backgroundColor: colors.background,
-                                        color: colors.foreground
-                                    }}
-                                    placeholder="Ex: 7891000123456"
-                                    placeholderTextColor={colors.mutedForeground}
-                                    value={newProduct.barcode}
-                                    onChangeText={(text) => setNewProduct({ ...newProduct, barcode: text })}
-                                />
-                            </View>
-                        </ScrollView>
-
-                        {/* Botão Adicionar */}
-                        <TouchableOpacity
-                            className="rounded-xl py-4 mt-4"
-                            style={{ backgroundColor: colors.primary }}
-
-                        >
-                            <Text className="text-center text-lg font-bold text-white">
-                                Adicionar ao Estoque
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
 
             {/* Modal Configurar Loja */}
             <Modal
