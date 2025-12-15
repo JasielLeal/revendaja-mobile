@@ -1,26 +1,39 @@
-import { useAuth } from '@/app/providers/AuthProvider';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
+    ActivityIndicator,
     Alert,
+    Linking,
     SafeAreaView,
     ScrollView,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
+import { usePlanUsage } from '../hooks/usePlanUsage';
 
 export default function PlanScreen() {
     const colors = useThemeColors();
-    const { user } = useAuth();
     const router = useRouter();
-
-    const isPremium = user?.plan !== 'Premium';
+    const { data: planData, isLoading, error, refetch } = usePlanUsage();
 
     const handleUpgrade = () => {
-        Alert.alert('Upgrade', 'Em desenvolvimento');
+        Alert.alert(
+            'Fazer Upgrade',
+            'Você será redirecionado para escolher seu plano Premium.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Continuar',
+                    onPress: () => {
+                        // TODO: Replace with actual upgrade URL
+                        Linking.openURL('https://revendaja.com/upgrade');
+                    },
+                },
+            ]
+        );
     };
 
     const handleDowngrade = () => {
@@ -37,6 +50,46 @@ export default function PlanScreen() {
             ]
         );
     };
+
+    const getUsagePercentage = (used: number, limit: number) => {
+        if (limit === 0) return 0;
+        return Math.min((used / limit) * 100, 100);
+    };
+
+    const getUsageColor = (percentage: number) => {
+        if (percentage >= 90) return '#EF4444';
+        if (percentage >= 70) return '#F59E0B';
+        return colors.primary;
+    };
+
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
+
+    if (error || !planData) {
+        return (
+            <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                <Ionicons name="alert-circle-outline" size={48} color={colors.mutedForeground} />
+                <Text style={{ color: colors.foreground, fontSize: 16, marginTop: 16, textAlign: 'center' }}>
+                    Erro ao carregar informações do plano
+                </Text>
+                <TouchableOpacity
+                    onPress={() => refetch()}
+                    className="mt-4 px-6 py-3 rounded-lg"
+                    style={{ backgroundColor: colors.primary }}
+                >
+                    <Text style={{ color: colors.primaryForeground, fontWeight: '600' }}>Tentar novamente</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    const ordersPercentage = getUsagePercentage(planData.usage.monthlyOrders, planData.limits.monthlyOrders);
+    const productsPercentage = getUsagePercentage(planData.usage.totalProducts, planData.limits.maxProducts);
 
     return (
         <View style={{ flex: 1 }}>
@@ -73,8 +126,8 @@ export default function PlanScreen() {
                         <View
                             className="rounded-2xl p-6 overflow-hidden"
                             style={{
-                                backgroundColor: isPremium ? colors.primary + '20' : colors.card,
-                                borderColor: isPremium ? colors.primary : colors.border + '30',
+                                backgroundColor: colors.card,
+                                borderColor: colors.border + '30',
                                 borderWidth: 2,
                             }}
                         >
@@ -84,32 +137,95 @@ export default function PlanScreen() {
                                         className="text-3xl font-black"
                                         style={{ color: colors.foreground }}
                                     >
-                                        {isPremium ? 'Premium' : 'Gratuito'}
+                                        {planData.plan}
                                     </Text>
                                     <Text
                                         className="text-sm mt-2"
                                         style={{ color: colors.mutedForeground }}
                                     >
-                                        {isPremium ? 'Plano Premium ativo' : 'Plano gratuito ativo'}
+                                        {`Plano ${planData.plan} ativo`}
                                     </Text>
                                 </View>
                                 <Ionicons
-                                    name={isPremium ? 'star' : 'infinite'}
+                                    name={'sparkles-outline'}
                                     size={48}
-                                    color={isPremium ? colors.primary : colors.mutedForeground}
+                                    color={colors.mutedForeground}
                                 />
                             </View>
+                        </View>
+                    </View>
 
-                            {isPremium && (
-                                <View className="mt-4 pt-4" style={{ borderTopColor: colors.border + '30', borderTopWidth: 1 }}>
-                                    <Text className="text-xs font-semibold mb-2" style={{ color: colors.mutedForeground }}>
-                                        RENOVAÇÃO
-                                    </Text>
-                                    <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>
-                                        Próxima cobrança em 15 dias
+                    {/* Uso e Limites */}
+                    <View className="px-5 mb-6">
+                        <Text
+                            className="text-sm font-semibold mb-3"
+                            style={{ color: colors.mutedForeground }}
+                        >
+                            Uso do Plano
+                        </Text>
+
+                        {/* Pedidos do Mês */}
+                        <View
+                            className="rounded-xl p-4 mb-3"
+                            style={{ backgroundColor: colors.card }}
+                        >
+                            <View className="flex-row items-center justify-between mb-2">
+                                <View className="flex-row items-center gap-2">
+                                    <Ionicons name="cart-outline" size={20} color={colors.foreground} />
+                                    <Text className="font-semibold" style={{ color: colors.foreground }}>
+                                        Pedidos do Mês
                                     </Text>
                                 </View>
-                            )}
+                                <Text className="font-bold" style={{ color: getUsageColor(ordersPercentage) }}>
+                                    {planData.usage.monthlyOrders}/{planData.limits.monthlyOrders}
+                                </Text>
+                            </View>
+                            <View className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: colors.border }}>
+                                <View
+                                    className="h-full rounded-full"
+                                    style={{
+                                        backgroundColor: getUsageColor(ordersPercentage),
+                                        width: `${ordersPercentage}%`,
+                                    }}
+                                />
+                            </View>
+                            <Text className="text-xs mt-2" style={{ color: colors.mutedForeground }}>
+                                {planData.remaining.monthlyOrders > 0
+                                    ? `${planData.remaining.monthlyOrders} pedidos restantes`
+                                    : 'Limite atingido'}
+                            </Text>
+                        </View>
+
+                        {/* Produtos Cadastrados */}
+                        <View
+                            className="rounded-xl p-4"
+                            style={{ backgroundColor: colors.card }}
+                        >
+                            <View className="flex-row items-center justify-between mb-2">
+                                <View className="flex-row items-center gap-2">
+                                    <Ionicons name="cube-outline" size={20} color={colors.foreground} />
+                                    <Text className="font-semibold" style={{ color: colors.foreground }}>
+                                        Produtos Cadastrados
+                                    </Text>
+                                </View>
+                                <Text className="font-bold" style={{ color: getUsageColor(productsPercentage) }}>
+                                    {planData.usage.totalProducts}/{planData.limits.maxProducts}
+                                </Text>
+                            </View>
+                            <View className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: colors.border }}>
+                                <View
+                                    className="h-full rounded-full"
+                                    style={{
+                                        backgroundColor: getUsageColor(productsPercentage),
+                                        width: `${productsPercentage}%`,
+                                    }}
+                                />
+                            </View>
+                            <Text className="text-xs mt-2" style={{ color: colors.mutedForeground }}>
+                                {planData.remaining.products > 0
+                                    ? `${planData.remaining.products} produtos restantes`
+                                    : 'Limite atingido'}
+                            </Text>
                         </View>
                     </View>
 
@@ -119,94 +235,114 @@ export default function PlanScreen() {
                             className="text-sm font-semibold mb-3"
                             style={{ color: colors.mutedForeground }}
                         >
-                            Recursos Inclusos
+                            Recursos do Plano
                         </Text>
 
                         <View className="space-y-2">
                             <View className="flex-row items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: colors.card + '50' }}>
                                 <Ionicons
-                                    name={isPremium ? 'checkmark-circle' : 'close-circle'}
+                                    name={planData.limits.canUseOnlineStore ? 'checkmark-circle' : 'close-circle'}
                                     size={20}
-                                    color={isPremium ? colors.primary : colors.mutedForeground}
+                                    color={planData.limits.canUseOnlineStore ? colors.primary : colors.mutedForeground}
                                 />
-                                <Text style={{ color: colors.foreground }} className="font-medium flex-1">
-                                    Vendas ilimitadas
+                                <Text style={{ color: planData.limits.canUseOnlineStore ? colors.foreground : colors.mutedForeground }} className="font-medium flex-1">
+                                    Loja Online
                                 </Text>
                             </View>
 
                             <View className="flex-row items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: colors.card + '50' }}>
                                 <Ionicons
-                                    name={isPremium ? 'checkmark-circle' : 'close-circle'}
+                                    name={planData.limits.canUseWhatsappIntegration ? 'checkmark-circle' : 'close-circle'}
                                     size={20}
-                                    color={isPremium ? colors.primary : colors.mutedForeground}
+                                    color={planData.limits.canUseWhatsappIntegration ? colors.primary : colors.mutedForeground}
                                 />
-                                <Text style={{ color: colors.foreground }} className="font-medium flex-1">
-                                    Relatórios avançados
+                                <Text style={{ color: planData.limits.canUseWhatsappIntegration ? colors.foreground : colors.mutedForeground }} className="font-medium flex-1">
+                                    Integração WhatsApp
                                 </Text>
                             </View>
 
                             <View className="flex-row items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: colors.card + '50' }}>
                                 <Ionicons
-                                    name={isPremium ? 'checkmark-circle' : 'close-circle'}
+                                    name={planData.limits.canExportReports ? 'checkmark-circle' : 'close-circle'}
                                     size={20}
-                                    color={isPremium ? colors.primary : colors.mutedForeground}
+                                    color={planData.limits.canExportReports ? colors.primary : colors.mutedForeground}
                                 />
-                                <Text style={{ color: colors.foreground }} className="font-medium flex-1">
-                                    Suporte prioritário
+                                <Text style={{ color: planData.limits.canExportReports ? colors.foreground : colors.mutedForeground }} className="font-medium flex-1">
+                                    Exportar Relatórios
                                 </Text>
                             </View>
 
                             <View className="flex-row items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: colors.card + '50' }}>
                                 <Ionicons
-                                    name={isPremium ? 'checkmark-circle' : 'close-circle'}
+                                    name={planData.limits.prioritySupport ? 'checkmark-circle' : 'close-circle'}
                                     size={20}
-                                    color={isPremium ? colors.primary : colors.mutedForeground}
+                                    color={planData.limits.prioritySupport ? colors.primary : colors.mutedForeground}
                                 />
-                                <Text style={{ color: colors.foreground }} className="font-medium flex-1">
-                                    Integração com APIs
+                                <Text style={{ color: planData.limits.prioritySupport ? colors.foreground : colors.mutedForeground }} className="font-medium flex-1">
+                                    Suporte Prioritário
                                 </Text>
                             </View>
-
-                            {!isPremium && (
-                                <View className="flex-row items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: colors.card + '50' }}>
-                                    <Ionicons
-                                        name="lock-closed"
-                                        size={20}
-                                        color={colors.mutedForeground}
-                                    />
-                                    <Text style={{ color: colors.mutedForeground }} className="font-medium flex-1">
-                                        Análise de tendências
-                                    </Text>
-                                </View>
-                            )}
                         </View>
                     </View>
 
                     {/* Ações */}
                     <View className="px-5">
-                        {!isPremium ? (
-                            <TouchableOpacity
-                                className="p-4 rounded-lg flex-row items-center justify-center gap-2"
-                                style={{ backgroundColor: colors.primary }}
-                                onPress={handleUpgrade}
-                            >
-                                <Ionicons name="arrow-up" size={20} color={colors.primaryForeground} />
-                                <Text className="font-semibold text-base" style={{ color: colors.primaryForeground }}>
-                                    Fazer upgrade
+                        <>
+                            {/* Alert de limite se estiver próximo */}
+                            {(ordersPercentage >= 80 || productsPercentage >= 80) && (
+                                <View
+                                    className="rounded-xl p-4 mb-4 flex-row items-center gap-3"
+                                    style={{ backgroundColor: '#F59E0B' + '20', borderColor: '#F59E0B', borderWidth: 1 }}
+                                >
+                                    <Ionicons name="warning" size={24} color="#F59E0B" />
+                                    <View className="flex-1">
+                                        <Text className="font-semibold" style={{ color: colors.foreground }}>
+                                            Você está chegando no limite!
+                                        </Text>
+                                        <Text className="text-xs mt-1" style={{ color: colors.mutedForeground }}>
+                                            Faça upgrade para continuar crescendo seu negócio.
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+                            {planData.plan === "Exclusive" ? (
+                                <Text
+                                    className="text-xs text-center mt-3"
+                                    style={{ color: colors.mutedForeground }}
+                                >
+                                    Você está no plano Exclusive, nosso melhor plano.
                                 </Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity
-                                className="p-4 rounded-lg flex-row items-center justify-center gap-2 border"
-                                style={{ borderColor: '#EF4444', backgroundColor: '#EF4444' + '10' }}
-                                onPress={handleDowngrade}
-                            >
-                                <Ionicons name="arrow-down" size={20} color="#EF4444" />
-                                <Text className="font-semibold text-base" style={{ color: '#EF4444' }}>
-                                    Fazer downgrade
-                                </Text>
-                            </TouchableOpacity>
-                        )}
+                            ) : (
+                                <>
+                                    <TouchableOpacity
+                                        className="p-4 rounded-xl flex-row items-center justify-center gap-2"
+                                        style={{ backgroundColor: colors.primary }}
+                                        onPress={handleUpgrade}
+                                    >
+                                        <Ionicons name="rocket" size={20} color={colors.primaryForeground} />
+                                        <Text
+                                            className="font-semibold text-base"
+                                            style={{ color: colors.primaryForeground }}
+                                        >
+                                            {planData.plan === "Free"
+                                                ? "Fazer upgrade para Starter"
+                                                : "Fazer upgrade para Exclusive"}
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <Text
+                                        className="text-xs text-center mt-3"
+                                        style={{ color: colors.mutedForeground }}
+                                    >
+                                        {planData.plan === "Free"
+                                            ? "Comece com recursos essenciais para vender mais"
+                                            : "Desbloqueie todos os recursos e limites ilimitados"}
+                                    </Text>
+                                </>
+                            )}
+
+                        </>
+
                     </View>
                 </ScrollView>
             </SafeAreaView>

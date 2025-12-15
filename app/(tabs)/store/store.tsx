@@ -31,7 +31,6 @@ export default function StorePage() {
     const [activeTab, setActiveTab] = useState<'stock' | 'config'>('stock');
     const [searchQuery, setSearchQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('Todos');
     const [stockFilter, setStockFilter] = useState<'all' | 'inStock' | 'outOfStock'>('all');
     const [showConfigModal, setShowConfigModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<productType | null>(null);

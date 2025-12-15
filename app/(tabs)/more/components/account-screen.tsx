@@ -61,7 +61,7 @@ export default function AccountScreen() {
                                 className="text-sm"
                                 style={{ color: colors.mutedForeground }}
                             >
-                                {user?.plan === 'Free' ? 'Plano Gratuito' : 'Plano Premium'}
+                                {user?.plan === 'Free' ? 'Plano Gratuito' : `Plano ${user?.plan}`}
                             </Text>
                         </View>
                     </View>
