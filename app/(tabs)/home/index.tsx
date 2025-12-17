@@ -143,7 +143,7 @@ export default function HomePage() {
                                     textColor={colors.foreground}
                                 />
                                 <Text className='text-primary-foreground font-bold text-xl'>
-                                    Olá, {user?.name}
+                                    Olá, {user?.name.split(' ')[0]}
                                 </Text>
                             </View>
                         </View>

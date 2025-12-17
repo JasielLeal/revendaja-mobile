@@ -9,7 +9,8 @@ interface LoginResponse {
   plan: string;
   createdAt: string;
   firstAccess: boolean;
-  tokenAcess: string;
+  store: boolean
+  token: string;
 }
 
 export const useLogin = () => {

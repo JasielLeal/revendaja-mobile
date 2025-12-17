@@ -22,6 +22,12 @@ export default function MoreLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="components/plans-screen"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }

@@ -8,7 +8,6 @@ import { Image } from 'expo-image';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
-import template from "../../../assets/template.jpg";
 import { useCreateSale } from './hooks/useCreateSale';
 
 // Configurar localização PT-BR
@@ -99,7 +98,7 @@ export default function NewSalePage() {
                 name: productData.name,
                 price: productData.price,
                 barcode: barcodeValue,
-                img: productData.imgUrl || template,
+                img: productData.imgUrl,
                 quantity: 1
             };
 

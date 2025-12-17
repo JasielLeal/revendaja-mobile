@@ -26,7 +26,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || "";
+
+    // Não redirecionar se for erro de login/registro (rotas públicas)
+    const isAuthRoute =
+      requestUrl.includes("/signin") ||
+      requestUrl.includes("/signup") ||
+      requestUrl.includes("/forgot-password") ||
+      requestUrl.includes("/reset-password");
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       // Token inválido ou expirado, remover token e redirecionar
       await authService.removeToken();
       router.replace("/(auth)/login");

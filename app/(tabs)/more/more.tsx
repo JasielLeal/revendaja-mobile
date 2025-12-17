@@ -181,6 +181,47 @@ export default function MorePage() {
                             />
                         </TouchableOpacity>
 
+                        <TouchableOpacity
+                            className="flex-row items-center justify-between px-4 py-4"
+                            onPress={() => router.push("/(tabs)/more/components/plans-screen")}
+                        >
+                            <View className="flex-row items-center gap-3">
+                                <View
+                                    className="w-10 h-10 rounded-full items-center justify-center"
+                                    style={{
+                                        backgroundColor: '#F59E0B' + '15',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="diamond-outline"
+                                        size={20}
+                                        color="#F59E0B"
+                                    />
+                                </View>
+                                <View>
+                                    <Text
+                                        className="font-semibold text-base"
+                                        style={{ color: colors.foreground }}
+                                    >
+                                        Nossos planos
+                                    </Text>
+                                    <Text
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                            color: colors.mutedForeground,
+                                        }}
+                                    >
+                                        Conheça todos os planos
+                                    </Text>
+                                </View>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={colors.mutedForeground}
+                            />
+                        </TouchableOpacity>
+
                     </View>
                 </View>
 
