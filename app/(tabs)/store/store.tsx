@@ -5,13 +5,10 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native';
 import { EditProduct, productType } from './components/edit-product';
 import { useInfiniteStoreProducts } from './hooks/useInfiniteStoreProducts';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/app/backend/api';
 import { useStoreSummary } from './hooks/useStoreSumary';
-
 
 export default function StorePage() {
     const colors = useThemeColors();
@@ -119,13 +116,6 @@ export default function StorePage() {
                     <View className="flex-row space-x-2">
                         <TouchableOpacity
                             className="bg-white/20 rounded-2xl px-4 py-3"
-                            style={{
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 4,
-                                elevation: 3,
-                            }}
                             onPress={() => router.push('/(tabs)/store/catalog')}
                         >
                             <Ionicons name="add" size={24} color={colors.primaryForeground} />
@@ -151,7 +141,7 @@ export default function StorePage() {
                             }}
                         >
                             <View className="flex-row items-center justify-between mb-2">
-                                <Text className="text-sm font-medium" style={{ color: colors.mutedForeground }}>
+                                <Text className="text-sm font-medium" allowFontScaling={false} style={{ color: colors.mutedForeground }}>
                                     TOTAL DE PRODUTOS
                                 </Text>
                                 <View
@@ -161,7 +151,7 @@ export default function StorePage() {
                                     <Ionicons name="cube" size={16} color={colors.primary} />
                                 </View>
                             </View>
-                            <Text className="text-2xl font-bold" style={{ color: colors.foreground }}>
+                            <Text className="text-2xl font-bold" allowFontScaling={false} style={{ color: colors.foreground }}>
                                 {
 
                                     isPending ?
@@ -183,7 +173,7 @@ export default function StorePage() {
                             }}
                         >
                             <View className="flex-row items-center justify-between mb-2">
-                                <Text className="text-sm font-medium" style={{ color: colors.mutedForeground }}>
+                                <Text className="text-sm font-medium" allowFontScaling={false} style={{ color: colors.mutedForeground }}>
                                     ESTOQUE BAIXO
                                 </Text>
                                 <View
@@ -193,7 +183,7 @@ export default function StorePage() {
                                     <Ionicons name="alert-circle" size={16} color="#ef4444" />
                                 </View>
                             </View>
-                            <Text className="text-2xl font-bold" style={{ color: '#ef4444' }}>
+                            <Text className="text-2xl font-bold" allowFontScaling={false} style={{ color: '#ef4444' }}>
                                 {
                                     isPending ?
                                         <ActivityIndicator size="small" color={colors.foreground} /> :
@@ -208,7 +198,12 @@ export default function StorePage() {
                         {/* Campo de busca e Select */}
                         <View className="flex-row gap-2 items-center">
                             <View
-                                className="flex-1 flex-row items-center rounded-xl px-4 py-3.5"
+                                className={
+                                    Platform.OS === 'ios' ?
+                                        "flex-1 flex-row items-center rounded-xl px-4 py-3.5"
+                                        :
+                                        "flex-1 flex-row items-center rounded-xl px-4 py-3"
+                                }
                                 style={{
                                     backgroundColor: colors.card,
                                     borderColor: colors.border + '40',
@@ -222,12 +217,16 @@ export default function StorePage() {
                             >
                                 <Ionicons name="search" size={20} color={colors.mutedForeground} />
                                 <TextInput
+                                    allowFontScaling={false}
                                     className="flex-1 ml-3"
                                     placeholder="Buscar produtos..."
                                     placeholderTextColor={colors.mutedForeground}
                                     value={searchQuery}
                                     onChangeText={setSearchQuery}
-                                    style={{ color: colors.foreground }}
+                                    style={{
+                                        color: colors.foreground,
+                                        paddingVertical: 0,
+                                    }}
                                 />
                             </View>
 
@@ -308,10 +307,10 @@ export default function StorePage() {
                                         <View className="flex-1">
                                             <View className="flex-row items-start justify-between mb-1">
                                                 <View className="flex-1 mr-2" style={{ minHeight: 58 }}>
-                                                    <Text className="font-bold text-base" style={{ color: colors.foreground }}>
+                                                    <Text className="font-bold text-base" allowFontScaling={false} style={{ color: colors.foreground }}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text className="text-sm mt-0.5" style={{ color: colors.mutedForeground }}>
+                                                    <Text className="text-sm mt-0.5" allowFontScaling={false} style={{ color: colors.mutedForeground }}>
                                                         {
                                                             item.company === "Custom" ? "Produto Customizado" : item.company
                                                         } • {item.barcode}
@@ -323,14 +322,14 @@ export default function StorePage() {
                                                         style={{ backgroundColor: '#ef444415' }}
                                                     >
                                                         <Ionicons name="close-circle" size={14} color="#ef4444" />
-                                                        <Text className="ml-1 text-xs font-semibold" style={{ color: '#ef4444' }}>
+                                                        <Text className="ml-1 text-xs font-semibold" allowFontScaling={false} style={{ color: '#ef4444' }}>
                                                             Desativado
                                                         </Text>
                                                     </View>
                                                 )}
                                             </View>
                                             <View className="flex-row items-center justify-between mt-2">
-                                                <Text className="font-bold text-lg" style={{ color: colors.primary }}>
+                                                <Text className="font-bold text-lg" allowFontScaling={false} style={{ color: colors.primary }}>
                                                     R$ {(item.price / 100).toFixed(2).replace('.', ',')}
                                                 </Text>
                                                 <View className="flex-row items-center">
@@ -342,6 +341,7 @@ export default function StorePage() {
                                                     >
                                                         <Text
                                                             className="font-bold text-sm"
+                                                            allowFontScaling={false}
                                                             style={{
                                                                 color: item.quantity <= 5 ? '#ef4444' : colors.primary
                                                             }}

@@ -14,7 +14,7 @@ export function SalesStatsCards({ totalRevenue, totalOrders, selectedDateFilter 
     const colors = useThemeColors();
 
     return (
-        <View className="px-4 mb-6 relative z-10" style={{ marginTop: -30 }}>
+        <View className="px-4 mb-2 relative z-10" style={{ marginTop: -30 }}>
             <View className="flex-row gap-3 mb-4">
                 {/* Total de Vendas */}
                 <View
@@ -41,12 +41,14 @@ export function SalesStatsCards({ totalRevenue, totalOrders, selectedDateFilter 
                     <Text
                         className="text-xl font-black"
                         style={{ color: colors.foreground }}
+                        allowFontScaling={false}
                     >
                         {formatCurrency(totalRevenue)}
                     </Text>
                     <Text
                         className="text-sm font-medium"
                         style={{ color: colors.mutedForeground }}
+                        allowFontScaling={false}
                     >
                         Total em vendas
                     </Text>
@@ -75,6 +77,7 @@ export function SalesStatsCards({ totalRevenue, totalOrders, selectedDateFilter 
                         </View>
                         <Text
                             className="text-xs font-semibold px-2 py-1 rounded-full"
+                            allowFontScaling={false}
                             style={{
                                 backgroundColor: '#3b82f6' + '20',
                                 color: '#3b82f6'
@@ -86,11 +89,13 @@ export function SalesStatsCards({ totalRevenue, totalOrders, selectedDateFilter 
                     <Text
                         className="text-xl font-black"
                         style={{ color: colors.foreground }}
+                        allowFontScaling={false}
                     >
                         {totalOrders}
                     </Text>
                     <Text
                         className="text-sm font-medium"
+                        allowFontScaling={false}
                         style={{ color: colors.mutedForeground }}
                     >
                         Vendas realizadas

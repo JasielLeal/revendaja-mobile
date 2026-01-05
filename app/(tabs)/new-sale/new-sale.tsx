@@ -9,6 +9,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useCreateSale } from './hooks/useCreateSale';
+import { Dialog } from '@/components/ui/Dialog';
+import { set } from 'zod';
+import { AxiosError } from 'axios';
 
 // Configurar localização PT-BR
 LocaleConfig.locales['pt-br'] = {
@@ -55,7 +58,15 @@ export default function NewSalePage() {
     const [showProductSelect, setShowProductSelect] = useState(false);
     const [currentBarcode, setCurrentBarcode] = useState<string | null>(null);
     const productSearchPageSize = 10;
-
+    const [showDialog, setShowDialog] = useState(false);
+    const [dialog, setDialog] = useState({
+        visible: false,
+        title: '',
+        description: '',
+        confirmText: 'OK',
+        showCancel: false,
+        onConfirm: () => { },
+    });
     // Infinite Query para produtos customizados
     const {
         data: foundProductsData,
@@ -133,7 +144,14 @@ export default function NewSalePage() {
             } else if (productData && typeof productData === 'object') {
                 // Produto normal, adiciona direto
                 if (productData.quantity <= 0) {
-                    Alert.alert('Produto sem estoque', `${productData.name} não tem unidades disponíveis`);
+                    setDialog({
+                        visible: true,
+                        title: 'Produto sem estoque',
+                        description: `${productData.name} não tem unidades disponíveis`,
+                        confirmText: 'OK',
+                        showCancel: false,
+                        onConfirm: () => { },
+                    });
                 } else {
                     const product = {
                         id: productData.id,
@@ -148,26 +166,73 @@ export default function NewSalePage() {
                         if (existingIndex >= 0) {
                             const currentQty = prev[existingIndex].quantity || 1;
                             if (currentQty >= productData.quantity) {
-                                Alert.alert('Estoque insuficiente', `Apenas ${productData.quantity} unidades disponíveis`);
+                                setDialog({
+                                    visible: true,
+                                    title: 'Estoque insuficiente',
+                                    description: `Apenas ${productData.quantity} unidades disponíveis de ${product.name}`,
+                                    confirmText: 'OK',
+                                    showCancel: false,
+                                    onConfirm: () => { },
+                                });
                                 return prev;
                             } else {
                                 const updated = [...prev];
                                 updated[existingIndex].quantity = currentQty + 1;
-                                Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+                                setDialog({
+                                    visible: true,
+                                    title: 'Sucesso',
+                                    description: `Adicionada mais 1 unidade de ${product.name}`,
+                                    confirmText: 'OK',
+                                    showCancel: false,
+                                    onConfirm: () => { },
+                                });
                                 return updated;
                             }
                         } else {
-                            Alert.alert('Sucesso', `${product.name} adicionado à venda`);
+                            setDialog({
+                                visible: true,
+                                title: 'Sucesso',
+                                description: `${product.name} adicionado à venda`,
+                                confirmText: 'OK',
+                                showCancel: false,
+                                onConfirm: () => { },
+                            });
+
                             return [...prev, product];
                         }
                     });
                 }
             } else {
-                Alert.alert('Produto não encontrado', 'Código de barras não cadastrado no sistema');
+                setDialog({
+                    visible: true,
+                    title: 'Produto não encontrado',
+                    description: 'Código de barras não cadastrado no sistema',
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
             }
-        } catch (error) {
-            Alert.alert('Erro', 'Erro ao buscar produto. Tente novamente.');
-            console.error('Error fetching product:', error);
+        } catch (error: AxiosError | any) {
+            console.log(error?.response?.status);
+            if (error?.response?.status === 404) {
+                setDialog({
+                    visible: true,
+                    title: 'Produto não encontrado',
+                    description: 'Código de barras não cadastrado no estoque',
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
+            } else {
+                setDialog({
+                    visible: true,
+                    title: 'Erro',
+                    description: 'Erro ao buscar produto. Tente novamente.',
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
+            }
         } finally {
             setIsLoadingProduct(false);
         }
@@ -201,7 +266,14 @@ export default function NewSalePage() {
         if (!permission?.granted) {
             const { granted } = await requestPermission();
             if (!granted) {
-                Alert.alert('Permissão negada', 'É necessário permitir o acesso à câmera para escanear códigos de barras');
+                setDialog({
+                    visible: true,
+                    title: 'Permissão negada',
+                    description: 'É necessário permitir o acesso à câmera para escanear códigos de barras',
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
                 return;
             }
         }
@@ -226,7 +298,7 @@ export default function NewSalePage() {
 
     const handleFinalizeSale = () => {
         if (!customerName.trim()) {
-            Alert.alert('Erro', 'Digite o nome do cliente');
+            Alert.alert('Erro', 'Informe o nome do cliente');
             return;
         }
 
@@ -260,21 +332,24 @@ export default function NewSalePage() {
                 queryClient.invalidateQueries({ queryKey: ["store-products"] });
                 resetForm();
                 // Feedback de sucesso
-                Alert.alert(
-                    'Sucesso! 🎉',
-                    `Venda finalizada com sucesso!\n\nCliente: ${customerName}\nTotal: R$ ${getTotalAmount().toFixed(2).replace('.', ',')}\nItens: ${getTotalItems()}`,
-                    [
-                        {
-                            text: 'OK',
-                        }
-                    ]
-                );
+                setDialog({
+                    visible: true,
+                    title: 'Venda finalizada',
+                    description: 'A venda foi registrada com sucesso.',
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
             },
             onError: (error: any) => {
-                Alert.alert(
-                    'Erro ao finalizar venda',
-                    error?.response?.data?.message || 'Ocorreu um erro ao processar a venda. Tente novamente.'
-                );
+                setDialog({ 
+                    visible: true,
+                    title: 'Erro ao finalizar venda',
+                    description: error?.response?.data?.message || 'Ocorreu um erro ao processar a venda. Tente novamente.',
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
             }
         });
     };
@@ -296,7 +371,14 @@ export default function NewSalePage() {
     // Função para adicionar produto escolhido do modal
     const handleSelectProduct = (product: Product) => {
         if ((product.quantity ?? 0) <= 0) {
-            Alert.alert('Produto sem estoque', `${product.name} não tem unidades disponíveis`);
+            setDialog({
+                visible: true,
+                title: 'Produto sem estoque',
+                description: `${product.name} não tem unidades disponíveis`,
+                confirmText: 'OK',
+                showCancel: false,
+                onConfirm: () => { },
+            });
             setShowProductSelect(false);
             setCurrentBarcode(null);
             return;
@@ -305,12 +387,26 @@ export default function NewSalePage() {
         if (existingProductIndex >= 0) {
             const currentQty = products[existingProductIndex].quantity || 1;
             if (currentQty >= (product.quantity ?? 0)) {
-                Alert.alert('Estoque insuficiente', `Apenas ${(product.quantity ?? 0)} unidades disponíveis`);
+                setDialog({
+                    visible: true,
+                    title: 'Estoque insuficiente',
+                    description: `Apenas ${(product.quantity ?? 0)} unidades disponíveis`,
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
             } else {
                 const updatedProducts = [...products];
                 updatedProducts[existingProductIndex].quantity = currentQty + 1;
                 setProducts(updatedProducts);
-                Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+                setDialog({
+                    visible: true,
+                    title: 'Sucesso',
+                    description: `Adicionada mais 1 unidade de ${product.name}`,
+                    confirmText: 'OK',
+                    showCancel: false,
+                    onConfirm: () => { },
+                });
             }
         } else {
             // Corrige para garantir que a imagem vá para a lista como 'img'
@@ -322,7 +418,14 @@ export default function NewSalePage() {
                     quantity: 1
                 }
             ]);
-            Alert.alert('Sucesso', `${product.name} adicionado à venda`);
+            setDialog({
+                visible: true,
+                title: 'Sucesso',
+                description: `${product.name} adicionado à venda`,
+                confirmText: 'OK',
+                showCancel: false,
+                onConfirm: () => { },
+            });
         }
         setShowProductSelect(false);
         setCurrentBarcode(null);
@@ -516,7 +619,7 @@ export default function NewSalePage() {
 
                         {/* Data Selecionada */}
                         <View
-                            className="mt-4 p-3 rounded-2xl"
+                            className="mt-4 p-3 rounded-2xl "
                             style={{ backgroundColor: colors.primary + '10' }}
                         >
                             <Text
@@ -580,12 +683,14 @@ export default function NewSalePage() {
                         <Text
                             className="text-lg font-medium mb-1"
                             style={{ color: colors.primaryForeground + '80' }}
+                            allowFontScaling={false}
                         >
                             Nova venda
                         </Text>
                         <Text
                             className="text-3xl font-black tracking-tight"
                             style={{ color: colors.primaryForeground }}
+                            allowFontScaling={false}
                         >
                             Iniciar
                         </Text>
@@ -593,13 +698,7 @@ export default function NewSalePage() {
 
                     <TouchableOpacity
                         className="flex-row items-center bg-white/20 rounded-2xl px-4 py-2"
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 4,
-                            elevation: 3,
-                        }}
+
                         onPress={() => setShowCalendar(true)}
                     >
                         <Ionicons name="calendar" size={20} color={colors.primaryForeground} />
@@ -625,6 +724,7 @@ export default function NewSalePage() {
                     {/* Nome do Cliente */}
                     <TextInput
                         className="border rounded-xl px-4 py-4 text-base mb-4"
+                        allowFontScaling={false}
                         style={{
                             borderColor: colors.border,
                             backgroundColor: colors.card,
@@ -667,6 +767,7 @@ export default function NewSalePage() {
                                 <Text
                                     className="text-base font-medium"
                                     style={{ color: colors.foreground }}
+                                    allowFontScaling={false}
                                 >
                                     {paymentMethod}
                                 </Text>
@@ -713,6 +814,7 @@ export default function NewSalePage() {
                                         />
                                         <Text
                                             className="text-base font-medium"
+                                            allowFontScaling={false}
                                             style={{
                                                 color: method.label === paymentMethod ? colors.primary : colors.foreground
                                             }}
@@ -730,6 +832,7 @@ export default function NewSalePage() {
                         <View className="flex-1 relative">
                             <TextInput
                                 className="flex-1 border rounded-xl px-4 py-4 text-base mr-3"
+                                allowFontScaling={false}
                                 style={{
                                     borderColor: colors.border,
                                     backgroundColor: colors.card,
@@ -771,13 +874,7 @@ export default function NewSalePage() {
             <ScrollView className="flex-1 px-4">
                 <View
                     className="rounded-xl mb-6 min-h-[200px]"
-                    style={{
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 8,
-                        elevation: 3,
-                    }}
+
                 >
                     {products.length === 0 ? (
                         <View className="flex-1 items-center justify-center py-12">
@@ -789,6 +886,7 @@ export default function NewSalePage() {
                             />
                             <Text
                                 className="text-base text-center"
+                                allowFontScaling={false}
                                 style={{ color: colors.mutedForeground }}
                             >
                                 Nenhum produto adicionado{'\n'}
@@ -822,18 +920,21 @@ export default function NewSalePage() {
                                                 <Text
                                                     className="font-medium mb-1"
                                                     style={{ color: colors.foreground }}
+                                                    allowFontScaling={false}
                                                 >
                                                     {product.name}
                                                 </Text>
                                                 <Text
                                                     className="text-base font-bold mb-1"
                                                     style={{ color: colors.primary }}
+                                                    allowFontScaling={false}
                                                 >
                                                     {formatCurrency(product.price)}
                                                 </Text>
                                                 <View className="flex-row items-center">
                                                     <Text
                                                         className="text-sm font-medium mr-2"
+                                                        allowFontScaling={false}
                                                         style={{ color: colors.mutedForeground }}
                                                     >
                                                         Quantidade:
@@ -845,6 +946,7 @@ export default function NewSalePage() {
                                                         <Text
                                                             className="text-sm font-bold"
                                                             style={{ color: colors.primary }}
+                                                            allowFontScaling={false}
                                                         >
                                                             {product.quantity || 1}
                                                         </Text>
@@ -881,10 +983,10 @@ export default function NewSalePage() {
                             borderWidth: 1,
                         }}
                     >
-                        <Text className="text-lg font-bold" style={{ color: colors.foreground }}>
+                        <Text className="text-lg font-bold" style={{ color: colors.foreground }} allowFontScaling={false}>
                             Total da Venda
                         </Text>
-                        <Text className="text-xl font-bold" style={{ color: '#ff6b35' }}>
+                        <Text className="text-xl font-bold" style={{ color: '#ff6b35' }} allowFontScaling={false}>
                             R$ {formatCurrency(getTotalAmount())}
                         </Text>
                     </View>
@@ -892,7 +994,7 @@ export default function NewSalePage() {
                 <TouchableOpacity
                     className="rounded-xl py-4"
                     style={{
-                        backgroundColor: customerName && products.length > 0 ? '#ff6b35' : colors.muted,
+                        backgroundColor: customerName && products.length > 0 ? '#ff6b35' : '#db714a',
                         shadowColor: '#ff6b35',
                         shadowOffset: { width: 0, height: 4 },
                         shadowOpacity: customerName && products.length > 0 ? 0.3 : 0,
@@ -911,6 +1013,7 @@ export default function NewSalePage() {
 
                                 <Text
                                     className="text-center text-lg font-bold"
+                                    allowFontScaling={false}
                                     style={{
                                         color: customerName && products.length > 0 ? 'white' : colors.mutedForeground
                                     }}
@@ -993,6 +1096,18 @@ export default function NewSalePage() {
                     </CameraView>
                 </View>
             </Modal>
+
+            <Dialog
+                visible={dialog.visible}
+                title={dialog.title}
+                description={dialog.description}
+                confirmText={dialog.confirmText}
+                showCancel={dialog.showCancel}
+                onConfirm={() => {
+                    dialog.onConfirm();
+                    setDialog(prev => ({ ...prev, visible: false }));
+                }}
+            />
         </View>
     );
 }

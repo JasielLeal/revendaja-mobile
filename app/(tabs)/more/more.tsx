@@ -38,11 +38,7 @@ export default function MorePage() {
                     backgroundColor: colors.background,
                     borderTopLeftRadius: 30,
                     borderTopRightRadius: 30,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: -5 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 10,
-                    elevation: 5,
+                  
                 }}
             />
 
@@ -58,12 +54,14 @@ export default function MorePage() {
                             <Text
                                 className="text-lg font-medium mb-1"
                                 style={{ color: colors.primaryForeground + '80' }}
+                                allowFontScaling={false}
                             >
                                 Menu
                             </Text>
                             <Text
                                 className="text-3xl font-black tracking-tight"
                                 style={{ color: colors.primaryForeground }}
+                                allowFontScaling={false}
                             >
                                 Mais opções
                             </Text>
@@ -79,17 +77,18 @@ export default function MorePage() {
                     <Text
                         className="text-sm font-semibold mb-3"
                         style={{ color: colors.mutedForeground }}
+                        allowFontScaling={false}
                     >
                         APP
                     </Text>
 
                     <View
                         className="rounded-xl overflow-hidden"
-                        style={{
-                            backgroundColor: colors.card,
-                            borderColor: colors.border + '20',
-                            borderWidth: 1,
-                        }}
+                            style={{
+                                backgroundColor: colors.card,
+                                borderColor: colors.border + '20',
+                                borderWidth: 1,
+                            }}
                     >
                         <TouchableOpacity
                             className="flex-row items-center justify-between px-4 py-4"
@@ -230,6 +229,7 @@ export default function MorePage() {
                     <Text
                         className="text-sm font-semibold mb-3"
                         style={{ color: colors.mutedForeground }}
+                        allowFontScaling={false}
                     >
                         MAIS
                     </Text>

@@ -213,6 +213,7 @@ export const AddProductSheet = ({
                         </TouchableOpacity>
                         <Text
                             className="text-lg font-bold"
+                            allowFontScaling={false}
                             style={{ color: colors.foreground }}
                         >
                             Adicionar à Loja
@@ -267,6 +268,7 @@ export const AddProductSheet = ({
                                         >
                                             <Text
                                                 className="text-xs font-semibold"
+                                                allowFontScaling={false}
                                                 style={{ color: colors.primary }}
                                             >
                                                 {product.brand}
@@ -275,6 +277,7 @@ export const AddProductSheet = ({
                                     </View>
                                     <Text
                                         className="text-base font-bold"
+                                        allowFontScaling={false}
                                         numberOfLines={2}
                                         style={{ color: colors.foreground }}
                                     >
@@ -284,6 +287,7 @@ export const AddProductSheet = ({
                                         <Text
                                             className="text-sm mt-1"
                                             style={{ color: colors.mutedForeground }}
+                                            allowFontScaling={false}
                                         >
                                             Preço sugerido:{' '}
                                             <Text style={{ color: colors.primary, fontWeight: '600' }}>
@@ -311,6 +315,7 @@ export const AddProductSheet = ({
                                         <Text
                                             className="text-sm font-bold"
                                             style={{ color: colors.primary }}
+                                            allowFontScaling={false}
                                         >
                                             Preço de Venda
                                         </Text>
@@ -318,6 +323,7 @@ export const AddProductSheet = ({
                                     <Text
                                         className="text-xs"
                                         style={{ color: colors.mutedForeground }}
+                                        allowFontScaling={false}
                                     >
                                         toque para alterar
                                     </Text>
@@ -334,11 +340,13 @@ export const AddProductSheet = ({
                                     <Text
                                         className="text-xl font-bold mr-2"
                                         style={{ color: colors.primary }}
+                                        allowFontScaling={false}
                                     >
                                         R$
                                     </Text>
                                     <TextInput
                                         className="flex-1 text-2xl font-bold"
+                                        allowFontScaling={false}
                                         style={{ color: colors.foreground }}
                                         placeholder="0,00"
                                         placeholderTextColor={colors.mutedForeground}
@@ -369,6 +377,7 @@ export const AddProductSheet = ({
                                     <Text
                                         className="text-sm font-semibold"
                                         style={{ color: colors.foreground }}
+                                        allowFontScaling={false}
                                     >
                                         Quantidade em Estoque
                                     </Text>
@@ -387,6 +396,7 @@ export const AddProductSheet = ({
                                     </TouchableOpacity>
                                     <TextInput
                                         className="text-3xl font-bold text-center w-24"
+                                        allowFontScaling={false}
                                         style={{ color: colors.foreground }}
                                         keyboardType="number-pad"
                                         value={formData.quantity}
@@ -426,6 +436,7 @@ export const AddProductSheet = ({
                                     <Text
                                         className="text-sm font-semibold"
                                         style={{ color: colors.mutedForeground }}
+                                        allowFontScaling={false}
                                     >
                                         Campos Opcionais
                                     </Text>
@@ -440,24 +451,26 @@ export const AddProductSheet = ({
                                         <Text
                                             className="text-xs font-medium mb-2"
                                             style={{ color: colors.mutedForeground }}
+                                            allowFontScaling={false}
                                         >
                                             Preço de Custo
                                         </Text>
                                         <View
-                                            className="flex-row items-center rounded-xl px-4"
-                                            style={{
-                                                backgroundColor: colors.muted,
+                                            className="flex-row items-center rounded-xl px-4 bg-background"
+                                            style={{                                               
                                                 height: 48,
                                             }}
                                         >
                                             <Text
                                                 className="text-base font-semibold"
                                                 style={{ color: colors.mutedForeground }}
+                                                allowFontScaling={false}
                                             >
                                                 R$
                                             </Text>
                                             <TextInput
                                                 className="flex-1 ml-2 text-base"
+                                                allowFontScaling={false}
                                                 style={{ color: colors.foreground }}
                                                 placeholder="0,00"
                                                 placeholderTextColor={colors.mutedForeground}
@@ -474,14 +487,14 @@ export const AddProductSheet = ({
                                     <View>
                                         <Text
                                             className="text-xs font-medium mb-2"
+                                            allowFontScaling={false}
                                             style={{ color: colors.mutedForeground }}
                                         >
                                             Data de Validade
                                         </Text>
                                         <View
-                                            className="flex-row items-center rounded-xl px-4"
-                                            style={{
-                                                backgroundColor: colors.muted,
+                                            className="flex-row items-center rounded-xl px-4 bg-background"
+                                            style={{                                               
                                                 height: 48,
                                             }}
                                         >
@@ -491,7 +504,8 @@ export const AddProductSheet = ({
                                                 color={colors.mutedForeground}
                                             />
                                             <TextInput
-                                                className="flex-1 ml-3 text-base"
+                                                className="flex-1 ml-3 text-base "
+                                                allowFontScaling={false}
                                                 style={{ color: colors.foreground }}
                                                 placeholder="DD/MM/AAAA"
                                                 placeholderTextColor={colors.mutedForeground}
@@ -526,6 +540,7 @@ export const AddProductSheet = ({
                         >
                             <Text
                                 className="text-base font-semibold"
+                                 allowFontScaling={false}
                                 style={{ color: colors.foreground }}
                             >
                                 Cancelar
@@ -557,6 +572,7 @@ export const AddProductSheet = ({
                             <Text
                                 className="text-base font-bold"
                                 style={{ color: colors.primaryForeground }}
+                                 allowFontScaling={false}
                             >
                                 {isPending ? 'Adicionando...' : 'Adicionar'}
                             </Text>

@@ -7,14 +7,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
-    SafeAreaView,
     Text,
     TextInput,
     TouchableOpacity,
     View,
+    Platform
 } from 'react-native';
 import { AddProductSheet } from './components/AddProductSheet';
 import { CatalogProduct, useInfiniteCatalogProducts } from './hooks/useInfiniteCatalogProducts';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CatalogScreen() {
     const colors = useThemeColors();
@@ -94,7 +95,7 @@ export default function CatalogScreen() {
                     className="absolute top-2 right-2 px-2 py-1 rounded-lg"
                     style={{ backgroundColor: colors.primary }}
                 >
-                    <Text className="text-xs font-bold" style={{ color: colors.primaryForeground }}>
+                    <Text className="text-xs font-bold" allowFontScaling={false} style={{ color: colors.primaryForeground }}>
                         {item.company}
                     </Text>
                 </View>
@@ -105,14 +106,15 @@ export default function CatalogScreen() {
                 <View>
                     <Text
                         className="text-xs font-semibold mb-1"
-                        style={{ color: colors.mutedForeground }}
+                        style={{ color: colors.mutedForeground }}     
                     >
                         {item.brand}
                     </Text>
                     <Text
-                        className="text-sm font-bold mb-2 leading-4"
+                        className="text-[15px] font-bold mb-2 leading-4"
                         numberOfLines={3}
                         style={{ color: colors.foreground }}
+                        allowFontScaling={false}
                     >
                         {item.name}
                     </Text>
@@ -121,6 +123,7 @@ export default function CatalogScreen() {
                     <Text
                         className="text-lg font-bold"
                         style={{ color: colors.primary }}
+                        allowFontScaling={false}
                     >
                         {formatPrice(item.price)}
                     </Text>
@@ -162,6 +165,7 @@ export default function CatalogScreen() {
                     </TouchableOpacity>
                     <Text
                         className="text-xl font-bold flex-1 ml-4"
+                        allowFontScaling={false}
                         style={{ color: colors.foreground }}
                     >
                         Catálogo
@@ -176,8 +180,14 @@ export default function CatalogScreen() {
                 {/* Input de Busca */}
                 <View className="px-5 pb-4">
                     <View
-                        className="flex-row items-center rounded-xl px-4 py-3.5"
+                        className={
+                            Platform.OS === 'ios' ?
+                                "flex-row items-center rounded-xl px-4 py-3.5"
+                                :
+                                "flex-row items-center rounded-xl px-4 py-1"
+                        }
                         style={{
+
                             backgroundColor: colors.card,
                             borderColor: colors.border + '40',
                             borderWidth: 1,
@@ -190,6 +200,7 @@ export default function CatalogScreen() {
                     >
                         <Ionicons name="search" size={20} color={colors.mutedForeground} />
                         <TextInput
+                            allowFontScaling={false}
                             className="flex-1 ml-3"
                             placeholder="Buscar produtos..."
                             placeholderTextColor={colors.mutedForeground}

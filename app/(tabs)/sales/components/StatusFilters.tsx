@@ -41,6 +41,7 @@ export function StatusFilters({ filters, selectedFilter, ordersByStatus, onFilte
                         >
                             <Text
                                 className="font-semibold"
+                                allowFontScaling={false}
                                 style={{
                                     color: isSelected ? colors.primaryForeground : colors.foreground,
                                 }}
@@ -55,6 +56,7 @@ export function StatusFilters({ filters, selectedFilter, ordersByStatus, onFilte
                             >
                                 <Text
                                     className="text-xs font-bold"
+                                    allowFontScaling={false}
                                     style={{
                                         color: isSelected ? colors.primaryForeground : colors.mutedForeground,
                                     }}

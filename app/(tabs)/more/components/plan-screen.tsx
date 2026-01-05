@@ -6,12 +6,12 @@ import {
     ActivityIndicator,
     Alert,
     Linking,
-    SafeAreaView,
     ScrollView,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePlanUsage } from '../hooks/usePlanUsage';
 
 export default function PlanScreen() {

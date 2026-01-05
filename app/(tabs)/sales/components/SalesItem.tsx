@@ -49,12 +49,14 @@ export function SalesItem({ order, onPress, getStatusLabel, getStatusColor }: Sa
                                 <Text
                                     className="font-semibold text-base"
                                     style={{ color: colors.foreground }}
+                                    allowFontScaling={false}
                                 >
                                     {order.customerName}
                                 </Text>
                                 <Text
                                     className="text-sm mb-2"
                                     style={{ color: colors.mutedForeground }}
+                                    allowFontScaling={false}
                                 >
                                     {order.paymentMethod}
                                 </Text>
@@ -67,6 +69,7 @@ export function SalesItem({ order, onPress, getStatusLabel, getStatusColor }: Sa
                                 >
                                     <Text
                                         className="text-xs font-medium"
+                                        allowFontScaling={false}
                                         style={{
                                             color: getStatusColor(order.status).text
                                         }}
@@ -79,12 +82,12 @@ export function SalesItem({ order, onPress, getStatusLabel, getStatusColor }: Sa
                     </View>
 
                     <View className="items-end">
-                        <Text className={order.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
+                        <Text className={order.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"} allowFontScaling={false}>
                             {
-                                order.status === 'approved' ? <Text>+{formatCurrency(order.total)}</Text> : <Text>{formatCurrency(order.total)}</Text>
+                                order.status === 'approved' ? <Text allowFontScaling={false}>+{formatCurrency(order.total)}</Text> : <Text allowFontScaling={false}>{formatCurrency(order.total)}</Text>
                             }
                         </Text>
-                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                        <Text className="text-xs" style={{ color: colors.mutedForeground }} allowFontScaling={false}>
                             {formatDate(order.createdAt)}
                         </Text>
                     </View>

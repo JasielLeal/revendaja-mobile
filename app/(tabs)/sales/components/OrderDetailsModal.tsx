@@ -154,11 +154,12 @@ export function OrderDetailsModal({
                     <View className="items-center pt-2 pb-6" style={{ backgroundColor: colors.primary }}>
                         <View className="flex-row items-center justify-between w-full px-4 mb-2 mt-4">
                             <View>
-                                <Text className='uppercase' style={{ color: colors.primaryForeground + '90', fontSize: 12, fontWeight: '700' }}>
+                                <Text className='uppercase' allowFontScaling={false} style={{ color: colors.primaryForeground + '90', fontSize: 12, fontWeight: '700' }}>
                                     Informações da Venda
                                 </Text>
                                 <Text
                                     className="text-xl font-black mb-1"
+                                    allowFontScaling={false}
                                     style={{ color: colors.primaryForeground }}
                                 >
                                     #{order?.orderNumber}
@@ -191,6 +192,7 @@ export function OrderDetailsModal({
                                     >
                                         <Text
                                             className="text-sm font-bold"
+                                            allowFontScaling={false}
                                             style={{
                                                 color: getStatusColor(order?.status || '').text
                                             }}
@@ -210,10 +212,10 @@ export function OrderDetailsModal({
                                         <View className="flex-row items-center py-2">
                                             <Ionicons name="person-outline" size={20} color={colors.mutedForeground} />
                                             <View className="ml-3 flex-1">
-                                                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                <Text className="text-xs" allowFontScaling={false} style={{ color: colors.mutedForeground }}>
                                                     Cliente
                                                 </Text>
-                                                <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                <Text className="text-base font-semibold" style={{ color: colors.foreground }} allowFontScaling={false}>
                                                     {order?.customerName}
                                                 </Text>
                                             </View>
@@ -222,10 +224,10 @@ export function OrderDetailsModal({
                                         <View className="flex-row items-center py-2">
                                             <Ionicons name="call-outline" size={20} color={colors.mutedForeground} />
                                             <View className="ml-3 flex-1">
-                                                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                <Text allowFontScaling={false} className="text-xs" style={{ color: colors.mutedForeground }}>
                                                     Telefone
                                                 </Text>
-                                                <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                <Text allowFontScaling={false} className="text-base font-semibold" style={{ color: colors.foreground }}>
                                                     {order?.customerPhone ? order.customerPhone : 'Não informado'}
                                                 </Text>
                                             </View>
@@ -236,10 +238,10 @@ export function OrderDetailsModal({
                                         <View className="flex-row items-center py-2">
                                             <Ionicons name="card-outline" size={20} color={colors.mutedForeground} />
                                             <View className="ml-3 flex-1">
-                                                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                <Text allowFontScaling={false} className="text-xs" style={{ color: colors.mutedForeground }}>
                                                     Método de Pagamento
                                                 </Text>
-                                                <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                <Text allowFontScaling={false} className="text-base font-semibold" style={{ color: colors.foreground }}>
                                                     {order?.paymentMethod}
                                                 </Text>
                                             </View>
@@ -248,10 +250,10 @@ export function OrderDetailsModal({
                                         <View className="flex-row items-center py-2">
                                             <Ionicons name="calendar-outline" size={20} color={colors.mutedForeground} />
                                             <View className="ml-3 flex-1">
-                                                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                <Text allowFontScaling={false} className="text-xs" style={{ color: colors.mutedForeground }}>
                                                     Data da Venda
                                                 </Text>
-                                                <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                <Text allowFontScaling={false} className="text-base font-semibold" style={{ color: colors.foreground }}>
                                                     {order?.createdAt ? formatDate(order.createdAt) : ''}
                                                 </Text>
                                             </View>
@@ -264,7 +266,7 @@ export function OrderDetailsModal({
 
                         {/* Produtos */}
                         <View className="mb-6">
-                            <Text className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: colors.mutedForeground }}>
+                            <Text allowFontScaling={false} className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: colors.mutedForeground }}>
                                 Produtos ({order?.items.length})
                             </Text>
 
@@ -277,14 +279,14 @@ export function OrderDetailsModal({
                                             style={{ backgroundColor: colors.muted }}
                                         />
                                         <View className="flex-1">
-                                            <Text className="text-base font-semibold mb-1" style={{ color: colors.foreground }}>
+                                            <Text allowFontScaling={false} className="text-base font-semibold mb-1" style={{ color: colors.foreground }}>
                                                 {item.name}
                                             </Text>
-                                            <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                            <Text allowFontScaling={false} className="text-sm" style={{ color: colors.mutedForeground }}>
                                                 {item.quantity}x {formatCurrency(item.price)}
                                             </Text>
                                         </View>
-                                        <Text className="text-lg font-bold" style={{ color: colors.foreground }}>
+                                        <Text allowFontScaling={false} className="text-lg font-bold" style={{ color: colors.foreground }}>
                                             {formatCurrency(item.price * item.quantity)}
                                         </Text>
                                     </View>
@@ -297,10 +299,10 @@ export function OrderDetailsModal({
                             <View style={{ height: 1, backgroundColor: colors.border, marginTop: 16, marginBottom: 16 }} />
 
                             <View className="flex-row items-center justify-between py-2">
-                                <Text className="text-lg font-bold" style={{ color: colors.foreground }}>
+                                <Text allowFontScaling={false} className="text-lg font-bold" style={{ color: colors.foreground }}>
                                     Total
                                 </Text>
-                                <Text className="text-3xl font-black" style={{ color: order?.status === 'approved' ? '#10b981' : '#f59e0b' }}>
+                                <Text allowFontScaling={false} className="text-3xl font-black" style={{ color: order?.status === 'approved' ? '#10b981' : '#f59e0b' }}>
                                     {formatCurrency(order?.total || 0)}
                                 </Text>
                             </View>

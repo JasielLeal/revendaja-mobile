@@ -19,12 +19,14 @@ export function SalesHeader({ selectedDateFilter, showDatePicker, onToggleDatePi
                     <Text
                         className="text-lg font-medium mb-1"
                         style={{ color: colors.primaryForeground + '80' }}
+                        allowFontScaling={false}
                     >
                         Gestão de vendas
                     </Text>
                     <Text
                         className="text-3xl font-black tracking-tight"
                         style={{ color: colors.primaryForeground }}
+                        allowFontScaling={false}
                     >
                         Vendas
                     </Text>
@@ -32,19 +34,13 @@ export function SalesHeader({ selectedDateFilter, showDatePicker, onToggleDatePi
 
                 <TouchableOpacity
                     className="flex-row items-center bg-white/20 rounded-2xl px-4 py-2"
-                    style={{
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 3,
-                    }}
                     onPress={onToggleDatePicker}
                 >
                     <Ionicons name="calendar" size={20} color={colors.primaryForeground} />
                     <Text
                         className="ml-2 text-sm font-semibold"
                         style={{ color: colors.primaryForeground }}
+                        allowFontScaling={false}
                     >
                         {selectedDateFilter}
                     </Text>

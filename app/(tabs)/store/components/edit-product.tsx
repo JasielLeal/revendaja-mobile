@@ -9,7 +9,7 @@ import {
     Switch,
     Text,
     TextInput,
-    TouchableOpacity, View
+    TouchableOpacity, View, Platform
 } from "react-native";
 import { useEditProduct } from "../hooks/useEditProduct";
 import { useQueryClient } from "@tanstack/react-query";
@@ -178,12 +178,13 @@ export function EditProduct(props: EditProductProps) {
                         <View className="items-center pt-2 pb-6" style={{ backgroundColor: colors.primary }}>
                             <View className="flex-row items-center justify-between w-full px-4 mb-2 mt-4">
                                 <View>
-                                    <Text className='uppercase' style={{ color: colors.primaryForeground + '90', fontSize: 12, fontWeight: '700' }}>
+                                    <Text className='uppercase' allowFontScaling={false} style={{ color: colors.primaryForeground + '90', fontSize: 12, fontWeight: '700' }}>
                                         Informações do Produto
                                     </Text>
                                     <Text
                                         className="text-xl font-black mb-1"
                                         style={{ color: colors.primaryForeground }}
+                                        allowFontScaling={false}
                                     >
                                         {props.product?.barcode}
                                     </Text>
@@ -218,16 +219,21 @@ export function EditProduct(props: EditProductProps) {
                                         {/* Imagem */}
                                         <Image
                                             source={{ uri: props.product?.imgUrl }}
-                                            className="w-full h-96 rounded-xl"
+                                            className={
+                                                Platform.OS === 'ios' ?
+                                                    "w-full h-96 rounded-xl"
+                                                    :
+                                                    "w-60 h-60 rounded-xl"
+                                            }
                                             resizeMode="cover"
                                             style={{ backgroundColor: colors.muted }}
                                         />
 
                                         <View className="w-full mt-4">
-                                            <Text style={{ color: colors.mutedForeground }}>
+                                            <Text style={{ color: colors.mutedForeground }} allowFontScaling={false}>
                                                 {props.product?.brand}
                                             </Text>
-                                            <Text className="text-lg font-semibold" style={{ color: colors.foreground }}>
+                                            <Text className="text-lg font-semibold" style={{ color: colors.foreground }} allowFontScaling={false}>
                                                 {props.product?.name}
                                             </Text>
                                         </View>
@@ -235,11 +241,12 @@ export function EditProduct(props: EditProductProps) {
                                         {/* Container com mesma largura da imagem */}
                                         <View className="w-full flex flex-row justify-between py-3 mt-4">
                                             <View>
-                                                <Text style={{ color: colors.mutedForeground }}>
+                                                <Text style={{ color: colors.mutedForeground }} allowFontScaling={false}>
                                                     Preço para o cliente
                                                 </Text>
                                                 <View className="flex-row items-center justify-between rounded-lg mt-1 ">
                                                     <TextInput
+                                                        allowFontScaling={false}
                                                         className="flex-1 text-base font-semibold"
                                                         style={{ color: colors.foreground }}
                                                         keyboardType="numeric"
@@ -261,11 +268,12 @@ export function EditProduct(props: EditProductProps) {
                                             </View>
 
                                             <View>
-                                                <Text style={{ color: colors.mutedForeground }}>
+                                                <Text style={{ color: colors.mutedForeground }} allowFontScaling={false}>
                                                     Preço de custo
                                                 </Text>
                                                 <View className="flex-row items-center justify-between rounded-lg mt-1">
                                                     <TextInput
+                                                        allowFontScaling={false}
                                                         className="text-base font-semibold"
                                                         style={{ color: colors.foreground }}
                                                         keyboardType="numeric"
@@ -287,11 +295,12 @@ export function EditProduct(props: EditProductProps) {
 
                                         <View className="w-full flex flex-row justify-between py-3">
                                             <View>
-                                                <Text style={{ color: colors.mutedForeground }}>
+                                                <Text style={{ color: colors.mutedForeground }} allowFontScaling={false}>
                                                     Data de validade
                                                 </Text>
                                                 <View className="flex-row items-center justify-between rounded-lg mt-1 ">
                                                     <TextInput
+                                                        allowFontScaling={false}
                                                         className="text-base font-semibold"
                                                         style={{ color: colors.foreground }}
                                                         value={validity}
@@ -313,11 +322,12 @@ export function EditProduct(props: EditProductProps) {
                                             </View>
 
                                             <View>
-                                                <Text style={{ color: colors.mutedForeground }}>
+                                                <Text style={{ color: colors.mutedForeground }} allowFontScaling={false}>
                                                     Estoque
                                                 </Text>
                                                 <View className="flex-row items-center justify-between rounded-lg mt-1 ">
                                                     <TextInput
+                                                        allowFontScaling={false}
                                                         className="text-base font-semibold"
                                                         style={{ color: colors.foreground }}
                                                         keyboardType="numeric"

@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateCustomProduct } from "./hooks/useCreateCustomProduct";
 import { useQueryClient } from "@tanstack/react-query";
+import { Dialog } from "@/components/ui/Dialog";
 
 /* ================== helpers ================== */
 function formatToBRL(value: string) {
@@ -34,17 +35,22 @@ function parseCurrency(value: string) {
     return Number(value.replace(/\D/g, "")) / 100;
 }
 
+interface CustomProductDialogProps {
+    onClose: () => void;
+}
+
 /* ================== component ================== */
-export default function CustomProductScreen() {
+export default function CustomProductScreen({ onClose }: CustomProductDialogProps) {
     const colors = useThemeColors();
     const router = useRouter();
     const mutation = useCreateCustomProduct();
 
     const [name, setName] = useState("");
-    const [category, setCategory] = useState("");
     const [priceStr, setPriceStr] = useState("R$ 0,00");
     const [costPriceStr, setCostPriceStr] = useState("R$ 0,00");
     const [quantityStr, setQuantityStr] = useState("0");
+    const [showDialog, setShowDialog] = useState(false);
+    const [dialogLoading, setDialogLoading] = useState(false);
 
     // 🔥 IMAGEM COMO URI (NÃO base64)
     const [imageUri, setImageUri] = useState<string | null>(null);
@@ -140,6 +146,14 @@ export default function CustomProductScreen() {
                     // router.back();
                 },
                 onError: (error: any) => {
+
+                    console.log(error)
+
+                    if (error.response?.status === 403) {
+                        setShowDialog(true);
+                        return;
+                    }
+
                     Alert.alert(
                         "Erro",
                         error.response?.data?.message || "Erro ao criar produto"
@@ -166,6 +180,7 @@ export default function CustomProductScreen() {
                     <Text
                         className="text-xl font-bold flex-1 ml-4"
                         style={{ color: colors.foreground }}
+                        allowFontScaling={false}
                     >
                         Novo produto
                     </Text>
@@ -180,12 +195,13 @@ export default function CustomProductScreen() {
                     >
                         {/* Nome */}
                         <View className="mb-4">
-                            <Text style={{ color: colors.foreground }}>
+                            <Text style={{ color: colors.foreground }} allowFontScaling={false} className="mb-1">
                                 Nome do produto
                             </Text>
                             <TextInput
                                 value={name}
                                 onChangeText={setName}
+                                allowFontScaling={false}
                                 placeholder="Ex: Kit presente"
                                 placeholderTextColor={colors.mutedForeground}
                                 style={{
@@ -199,11 +215,12 @@ export default function CustomProductScreen() {
 
                         {/* Preço */}
                         <View className="mb-4">
-                            <Text style={{ color: colors.foreground }}>
+                            <Text style={{ color: colors.foreground }} allowFontScaling={false} className="mb-1">
                                 Preço de venda
                             </Text>
                             <TextInput
                                 keyboardType="numeric"
+                                allowFontScaling={false}
                                 value={priceStr}
                                 onChangeText={(t) => setPriceStr(formatToBRL(t))}
                                 style={{
@@ -217,11 +234,12 @@ export default function CustomProductScreen() {
 
                         {/* Custo */}
                         <View className="mb-4">
-                            <Text style={{ color: colors.foreground }}>
+                            <Text style={{ color: colors.foreground }} allowFontScaling={false} className="mb-1">
                                 Preço de custo
                             </Text>
                             <TextInput
                                 keyboardType="numeric"
+                                allowFontScaling={false}
                                 value={costPriceStr}
                                 onChangeText={(t) => setCostPriceStr(formatToBRL(t))}
                                 style={{
@@ -235,11 +253,12 @@ export default function CustomProductScreen() {
 
                         {/* Quantidade */}
                         <View className="mb-4">
-                            <Text style={{ color: colors.foreground }}>
+                            <Text style={{ color: colors.foreground }} allowFontScaling={false} className="mb-1">
                                 Quantidade em estoque
                             </Text>
                             <TextInput
                                 keyboardType="numeric"
+                                allowFontScaling={false}
                                 value={quantityStr}
                                 onChangeText={(t) => setQuantityStr(t.replace(/\D/g, ""))}
                                 style={{
@@ -253,7 +272,7 @@ export default function CustomProductScreen() {
 
                         {/* Imagem */}
                         <View className="mb-6">
-                            <Text style={{ color: colors.foreground }}>
+                            <Text style={{ color: colors.foreground }} allowFontScaling={false} className="mb-2">
                                 Foto do produto
                             </Text>
 
@@ -272,27 +291,33 @@ export default function CustomProductScreen() {
                                         className="mt-2 py-2 rounded-lg items-center"
                                         style={{ backgroundColor: "#ef444415" }}
                                     >
-                                        <Text style={{ color: "#ef4444", fontWeight: "600" }}>
+                                        <Text style={{ color: "#ef4444", fontWeight: "600" }} allowFontScaling={false}>
                                             Remover foto
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
 
-                            <TouchableOpacity
-                                onPress={pickImage}
-                                className="py-3 rounded-lg border-2 items-center border-dashed"
-                                style={{ borderColor: colors.primary }}
-                            >
-                                <Ionicons
-                                    name="camera"
-                                    size={24}
-                                    color={colors.primary}
-                                />
-                                <Text style={{ color: colors.primary, marginTop: 6 }}>
-                                    Tirar foto ou escolher da galeria
-                                </Text>
-                            </TouchableOpacity>
+                            {
+                                imageUri != null ?
+
+                                    <></>
+                                    :
+                                    <TouchableOpacity
+                                        onPress={pickImage}
+                                        className="py-3 rounded-lg border-2 items-center border-dashed"
+                                        style={{ borderColor: colors.primary }}
+                                    >
+                                        <Ionicons
+                                            name="camera"
+                                            size={24}
+                                            color={colors.primary}
+                                        />
+                                        <Text style={{ color: colors.primary, marginTop: 6 }} allowFontScaling={false}>
+                                            Tirar foto ou escolher da galeria
+                                        </Text>
+                                    </TouchableOpacity>
+                            }
                         </View>
 
                         <Button
@@ -303,6 +328,29 @@ export default function CustomProductScreen() {
                     </ScrollView>
                 </KeyboardAvoidingView>
             </SafeAreaView>
+
+            <Dialog
+                visible={showDialog}
+                title="Limite atingido"
+                description="Você chegou ao limite de produtos do seu plano atual. Para continuar adicionando novos produtos, é só fazer um upgrade quando quiser."
+                onCancel={() => {
+                    if (!dialogLoading) setShowDialog(false);
+                }}
+                onConfirm={() => {
+                    setDialogLoading(true);
+                    setTimeout(() => {
+                        setDialogLoading(false);
+                        setShowDialog(false);
+                        router.push("/more/components/plans-screen");
+                        setTimeout(() => {
+                            onClose()
+                        }, 200);
+                    }, 500);
+                }}
+                cancelText='Voltar'
+                confirmText='Fazer Upgrade'
+                isLoading={dialogLoading}
+            />
         </View>
     );
 }
