@@ -5,9 +5,16 @@ import { Platform, View } from 'react-native';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
+
+  const tabBarHeight =
+    Platform.OS === 'ios'
+      ? 60 + insets.bottom
+      : 60 + insets.bottom + 10;
 
   return (
     <Tabs
@@ -16,8 +23,8 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          height: Platform.OS === 'ios' ? 88 : 65,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          height: tabBarHeight,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 25,
           paddingTop: 8,
         },
       }}>

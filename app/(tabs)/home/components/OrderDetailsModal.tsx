@@ -2,10 +2,14 @@ import { api } from '@/app/backend/api';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useDeleteSale } from '../hooks/useDeleteSale';
-import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Dialog } from '@/components/ui/Dialog';
+import { useRouter } from 'expo-router';
+import { set } from 'zod';
 
 interface OrderItem {
     id: string;
@@ -43,6 +47,7 @@ export function OrderDetailsModal({
     getStatusColor
 }: OrderDetailsModalProps) {
     const colors = useThemeColors();
+    const [showDialog, setShowDialog] = useState(false);
 
     const handleWhatsApp = () => {
         if (!order) return;
@@ -91,6 +96,8 @@ export function OrderDetailsModal({
     };
 
     const queryClient = useQueryClient();
+    const { user } = useAuth()
+    const router = useRouter()
 
     const handleDeleteSale = () => {
         if (!order) return;
@@ -153,12 +160,13 @@ export function OrderDetailsModal({
                             <View className="items-center pt-2 pb-6" style={{ backgroundColor: colors.primary }}>
                                 <View className="flex-row items-center justify-between w-full px-4 mb-2 mt-4">
                                     <View>
-                                        <Text className='uppercase' style={{ color: colors.primaryForeground + '90', fontSize: 12, fontWeight: '700' }}>
+                                        <Text className='uppercase' style={{ color: colors.primaryForeground + '90', fontSize: 12, fontWeight: '700' }} maxFontSizeMultiplier={1}>
                                             Informações da Venda
                                         </Text>
                                         <Text
                                             className="text-xl font-black mb-1"
                                             style={{ color: colors.primaryForeground }}
+                                            maxFontSizeMultiplier={1}
                                         >
                                             #{order?.orderNumber}
                                         </Text>
@@ -191,6 +199,7 @@ export function OrderDetailsModal({
                                                     style={{
                                                         color: getStatusColor(order?.status || '').text
                                                     }}
+                                                    maxFontSizeMultiplier={1}
                                                 >
                                                     {getStatusLabel(order?.status || '')}
                                                 </Text>
@@ -207,10 +216,10 @@ export function OrderDetailsModal({
                                                 <View className="flex-row items-center py-2">
                                                     <Ionicons name="person-outline" size={20} color={colors.mutedForeground} />
                                                     <View className="ml-3 flex-1">
-                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                             Cliente
                                                         </Text>
-                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                                             {order?.customerName}
                                                         </Text>
                                                     </View>
@@ -219,10 +228,10 @@ export function OrderDetailsModal({
                                                 <View className="flex-row items-center py-2">
                                                     <Ionicons name="call-outline" size={20} color={colors.mutedForeground} />
                                                     <View className="ml-3 flex-1">
-                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                             Telefone
                                                         </Text>
-                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                                             {order?.customerPhone ? order.customerPhone : 'Não informado'}
                                                         </Text>
                                                     </View>
@@ -233,10 +242,10 @@ export function OrderDetailsModal({
                                                 <View className="flex-row items-center py-2">
                                                     <Ionicons name="card-outline" size={20} color={colors.mutedForeground} />
                                                     <View className="ml-3 flex-1">
-                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                             Método de Pagamento
                                                         </Text>
-                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                                             {order?.paymentMethod}
                                                         </Text>
                                                     </View>
@@ -245,10 +254,10 @@ export function OrderDetailsModal({
                                                 <View className="flex-row items-center py-2">
                                                     <Ionicons name="calendar-outline" size={20} color={colors.mutedForeground} />
                                                     <View className="ml-3 flex-1">
-                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                        <Text className="text-xs" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                             Data da Venda
                                                         </Text>
-                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }}>
+                                                        <Text className="text-base font-semibold" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                                             {order?.createdAt ? formatDate(order.createdAt) : ''}
                                                         </Text>
                                                     </View>
@@ -261,7 +270,7 @@ export function OrderDetailsModal({
 
                                 {/* Produtos */}
                                 <View className="mb-6">
-                                    <Text className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: colors.mutedForeground }}>
+                                    <Text className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                         Produtos ({order?.items.length})
                                     </Text>
 
@@ -274,14 +283,14 @@ export function OrderDetailsModal({
                                                     style={{ backgroundColor: colors.muted }}
                                                 />
                                                 <View className="flex-1">
-                                                    <Text className="text-base font-semibold mb-1" style={{ color: colors.foreground }}>
+                                                    <Text className="text-base font-semibold mb-1" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                                         {item.name}
                                                     </Text>
-                                                    <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                    <Text className="text-sm" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                         {item.quantity}x {formatCurrency(item.price)}
                                                     </Text>
                                                 </View>
-                                                <Text className="text-lg font-bold" style={{ color: colors.foreground }}>
+                                                <Text className="text-lg font-bold" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                                     {formatCurrency(item.price * item.quantity)}
                                                 </Text>
                                             </View>
@@ -294,10 +303,10 @@ export function OrderDetailsModal({
                                     <View style={{ height: 1, backgroundColor: colors.border, marginTop: 16, marginBottom: 16 }} />
 
                                     <View className="flex-row items-center justify-between py-2">
-                                        <Text className="text-lg font-bold" style={{ color: colors.foreground }}>
+                                        <Text className="text-lg font-bold" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                                             Total
                                         </Text>
-                                        <Text className="text-3xl font-black" style={{ color: order?.status === 'approved' ? '#10b981' : '#f59e0b' }}>
+                                        <Text className="text-3xl font-black" style={{ color: order?.status === 'approved' ? '#10b981' : '#f59e0b' }} maxFontSizeMultiplier={1}>
                                             {formatCurrency(order?.total || 0)}
                                         </Text>
                                     </View>
@@ -323,7 +332,7 @@ export function OrderDetailsModal({
                                                 }}
                                             >
 
-                                                <Text className="text-white font-bold ">
+                                                <Text className="text-white font-bold " maxFontSizeMultiplier={1}>
                                                     Confirmar venda
                                                 </Text>
                                                 <Ionicons name="checkmark-circle" size={26} color="#fff" />
@@ -340,11 +349,31 @@ export function OrderDetailsModal({
                                                     shadowRadius: 4,
                                                     elevation: 3,
                                                 }}
-                                                onPress={handleWhatsApp}
+                                                onPress={
+                                                    user?.plan !== "Free" ? handleWhatsApp : () => setShowDialog(true)
+                                                }
                                             >
                                                 <Ionicons name="logo-whatsapp" size={28} color="#fff" />
                                             </TouchableOpacity>
+
+                                            <Dialog
+                                                visible={showDialog}
+                                                title="Funcionalidade indisponível"
+                                                description="Essa funcionalidade só está disponível apartir do plano Starter."
+                                                onCancel={() => setShowDialog(false)}
+                                                onConfirm={async () => {
+                                                    setShowDialog(false);
+                                                    setTimeout(() => {
+                                                        router.push('/more/components/plans-screen');
+                                                        setTimeout(onClose, 200); // fecha o modal principal depois de navegar
+                                                    }, 300);
+                                                }}
+                                                cancelText='Voltar'
+                                                confirmText='Fazer upgrade'
+                                            />
                                         </>
+
+
 
                                     )}
                                 </View>

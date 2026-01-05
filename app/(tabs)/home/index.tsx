@@ -19,6 +19,7 @@ import { NotificationsCenter } from './components/NotificationsCenter';
 import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { useDashboardMetrics } from './hooks/useDashboardMetrics';
 import { useRecentSales } from './hooks/useRecentSales';
+import { Dialog } from '@/components/ui/Dialog';
 
 type TabType = 'lucro' | 'vendas' | 'despesas';
 
@@ -115,14 +116,7 @@ export default function HomePage() {
                     backgroundColor: colors.background,
                     borderTopLeftRadius: 30,
                     borderTopRightRadius: 30,
-                    shadowColor: '#000',
-                    shadowOffset: {
-                        width: 0,
-                        height: -5,
-                    },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 10,
-                    elevation: 5,
+
                 }}
             />
 
@@ -142,7 +136,7 @@ export default function HomePage() {
                                     backgroundColor={colors.background}
                                     textColor={colors.foreground}
                                 />
-                                <Text className='text-primary-foreground font-bold text-xl'>
+                                <Text className='text-primary-foreground font-bold text-xl' maxFontSizeMultiplier={1}>
                                     Olá, {user?.name.split(' ')[0]}
                                 </Text>
                             </View>
@@ -154,7 +148,7 @@ export default function HomePage() {
                             <Ionicons name="notifications" size={20} color="#fff" />
                             {unreadCount > 0 && (
                                 <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center">
-                                    <Text className="text-white text-xs font-bold">
+                                    <Text className="text-white text-xs font-bold" maxFontSizeMultiplier={1}>
                                         {unreadCount > 9 ? '9+' : unreadCount}
                                     </Text>
                                 </View>
@@ -192,6 +186,7 @@ export default function HomePage() {
                                         color: selectedTab === 'vendas' ? colors.cardForeground : colors.mutedForeground,
                                         fontWeight: selectedTab === 'vendas' ? 'bold' : 'normal'
                                     }}
+                                    maxFontSizeMultiplier={1}
                                 >
                                     Vendas
                                 </Text>
@@ -207,6 +202,7 @@ export default function HomePage() {
                                         color: selectedTab === 'lucro' ? colors.cardForeground : colors.mutedForeground,
                                         fontWeight: selectedTab === 'lucro' ? 'bold' : 'normal'
                                     }}
+                                    maxFontSizeMultiplier={1}
                                 >
                                     Lucro
                                 </Text>
@@ -224,15 +220,15 @@ export default function HomePage() {
                                             <View className="flex-row items-start mb-2">
                                                 {isBalanceVisible ? (
                                                     <>
-                                                        <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                        <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }} maxFontSizeMultiplier={1}>
                                                             {formatCurrency(metrics?.estimatedProfit || 0).split(',')[0]}
                                                         </Text>
-                                                        <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                        <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }} maxFontSizeMultiplier={1}>
                                                             ,{formatCurrency(metrics?.estimatedProfit || 0).split(',')[1]}
                                                         </Text>
                                                     </>
                                                 ) : (
-                                                    <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                    <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }} maxFontSizeMultiplier={1}>
                                                         R$ ••••
                                                     </Text>
                                                 )}
@@ -253,7 +249,7 @@ export default function HomePage() {
                                                 className="flex-row items-center mb-4"
                                                 style={{ opacity: isBalanceVisible ? 1 : 0 }}
                                             >
-                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                     {(metrics?.percentageChange.profit ?? 0) > 0 ? 'Cresceu ' : 'Reduziu '}
                                                 </Text>
                                                 <Ionicons
@@ -267,11 +263,12 @@ export default function HomePage() {
                                                             ? 'text-green-600 text-sm font-semibold'
                                                             : 'text-red-600 text-sm font-semibold'
                                                     }
+                                                    maxFontSizeMultiplier={1}
                                                 >
                                                     {' '}
                                                     {formatCurrency(Math.abs(metrics?.percentageChange.profit || 0))}
                                                 </Text>
-                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                     {' '}
                                                     no último mês
                                                 </Text>
@@ -284,15 +281,15 @@ export default function HomePage() {
                                             <View className="flex-row items-start mb-2">
                                                 {isBalanceVisible ? (
                                                     <>
-                                                        <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                        <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }} maxFontSizeMultiplier={1}>
                                                             {formatCurrency(metrics?.totalRevenue || 0).split(',')[0]}
                                                         </Text>
-                                                        <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }}>
+                                                        <Text className="text-lg font-bold mt-1" style={{ color: colors.cardForeground }} maxFontSizeMultiplier={1}>
                                                             ,{formatCurrency(metrics?.totalRevenue || 0).split(',')[1]}
                                                         </Text>
                                                     </>
                                                 ) : (
-                                                    <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }}>
+                                                    <Text className="text-4xl font-bold" style={{ color: colors.cardForeground }} maxFontSizeMultiplier={1}>
                                                         R$ ••••
                                                     </Text>
                                                 )}
@@ -313,7 +310,7 @@ export default function HomePage() {
                                                 className="flex-row items-center mb-4"
                                                 style={{ opacity: isBalanceVisible ? 1 : 0 }}
                                             >
-                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                     {(metrics?.percentageChange.revenue ?? 0) > 0 ? 'Cresceu ' : 'Reduziu '}
                                                 </Text>
                                                 <Ionicons
@@ -327,11 +324,12 @@ export default function HomePage() {
                                                             ? 'text-green-600 text-sm font-semibold'
                                                             : 'text-red-600 text-sm font-semibold'
                                                     }
+                                                    maxFontSizeMultiplier={1}
                                                 >
                                                     {' '}
                                                     {formatCurrency(Math.abs(metrics?.percentageChange.revenue || 0))}
                                                 </Text>
-                                                <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+                                                <Text className="text-sm" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                     {' '}
                                                     no último mês
                                                 </Text>
@@ -349,11 +347,11 @@ export default function HomePage() {
 
                 <View className='px-4 mt-4 relative z-10'>
                     <View className="mb-4">
-                        <Text className="font-bold text-xl" style={{ color: colors.foreground }}>
+                        <Text className="font-bold text-xl" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                             Últimas vendas
                         </Text>
                         <TouchableOpacity className="flex-row items-center" onPress={() => router.push("/(tabs)/sales/sales")}>
-                            <Text className=" text-sm font-semibold mr-1" style={{ color: colors.primary }} >
+                            <Text className=" text-sm font-semibold mr-1" style={{ color: colors.primary }} maxFontSizeMultiplier={1}>
                                 Conferir todas
                             </Text>
                             <Ionicons name="chevron-forward" size={16} color={colors.primary} />
@@ -402,12 +400,14 @@ export default function HomePage() {
                                                         <Text
                                                             className="font-semibold text-base"
                                                             style={{ color: colors.foreground }}
+                                                            maxFontSizeMultiplier={1}
                                                         >
                                                             {sale.customerName}
                                                         </Text>
                                                         <Text
                                                             className="text-sm mb-2"
                                                             style={{ color: colors.mutedForeground }}
+                                                            maxFontSizeMultiplier={1}
                                                         >
                                                             {sale.paymentMethod}
                                                         </Text>
@@ -423,6 +423,7 @@ export default function HomePage() {
                                                                 style={{
                                                                     color: getStatusColor(sale.status).text
                                                                 }}
+                                                                maxFontSizeMultiplier={1}
                                                             >
                                                                 {getStatusLabel(sale.status)}
                                                             </Text>
@@ -432,12 +433,12 @@ export default function HomePage() {
                                             </View>
 
                                             <View className="items-end">
-                                                <Text className={sale.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"}>
+                                                <Text className={sale.status === 'approved' ? "text-green-600 font-bold text-lg" : "text-yellow-600 font-bold text-lg"} maxFontSizeMultiplier={1}>
                                                     {
-                                                        sale.status === 'approved' ? <Text>+{formatCurrency(sale.total)}</Text> : <Text>{formatCurrency(sale.total)}</Text>
+                                                        sale.status === 'approved' ? <Text maxFontSizeMultiplier={1}>+{formatCurrency(sale.total)}</Text> : <Text maxFontSizeMultiplier={1}>{formatCurrency(sale.total)}</Text>
                                                     }
                                                 </Text>
-                                                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                                                <Text className="text-xs" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                                     {formatDate(sale.createdAt)}
                                                 </Text>
                                             </View>
@@ -448,7 +449,7 @@ export default function HomePage() {
                         ) : (
                             <View className="rounded-xl p-8 items-center" style={{ backgroundColor: colors.card }}>
                                 <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} style={{ marginBottom: 12 }} />
-                                <Text className="text-base text-center" style={{ color: colors.mutedForeground }}>
+                                <Text className="text-base text-center" style={{ color: colors.mutedForeground }} maxFontSizeMultiplier={1}>
                                     Nenhuma venda recente
                                 </Text>
                             </View>
@@ -458,7 +459,7 @@ export default function HomePage() {
 
                 {/* Ações Rápidas - Estilo Mercado Pago */}
                 <View className="pt-6 pb-8 px-4" style={{ backgroundColor: colors.background }}>
-                    <Text className="font-bold text-xl mb-4" style={{ color: colors.foreground }}>
+                    <Text className="font-bold text-xl mb-4" style={{ color: colors.foreground }} maxFontSizeMultiplier={1}>
                         Ações rápidas
                     </Text>
 
@@ -481,7 +482,13 @@ export default function HomePage() {
                                     color={colors.primary}
                                     className='mb-6'
                                 />
-                                <Text className="font-medium" style={{ color: colors.foreground }}>
+                                <Text
+                                    className="font-medium"
+                                    style={{ color: colors.foreground }}
+                                    numberOfLines={2}
+                                    adjustsFontSizeToFit
+                                    maxFontSizeMultiplier={1}
+                                >
                                     {category.name}
                                 </Text>
                             </TouchableOpacity>

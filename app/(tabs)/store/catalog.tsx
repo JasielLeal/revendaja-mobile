@@ -149,7 +149,7 @@ export default function CatalogScreen() {
 
             <SafeAreaView style={{ flex: 1 }}>
                 {/* Header */}
-                <View className="px-5 pb-4 flex-row items-center justify-between">
+                <View className="px-5 pb-4 flex-row items-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
                         className="flex-row items-center"
@@ -166,6 +166,11 @@ export default function CatalogScreen() {
                     >
                         Catálogo
                     </Text>
+                    <TouchableOpacity onPress={() => router.push('/(tabs)/store/custom-product')}>
+                        <Text className="text-sm font-semibold" style={{ color: colors.primary }}>
+                            Adicone seu produto
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Input de Busca */}

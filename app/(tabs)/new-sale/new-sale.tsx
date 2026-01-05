@@ -2,11 +2,11 @@ import { api } from '@/app/backend/api';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useCreateSale } from './hooks/useCreateSale';
 
@@ -32,7 +32,7 @@ interface Product {
     name: string;
     price: number;
     barcode: string;
-    img: any; // Accept both require() and string
+    imgUrl: any; // Accept both require() and string
     quantity?: number; // Quantidade adicionada
 }
 
@@ -51,6 +51,39 @@ export default function NewSalePage() {
     const [permission, requestPermission] = useCameraPermissions();
     const lastScannedRef = useRef<string>('');
     const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    // Estados para FlatList paginada
+    const [showProductSelect, setShowProductSelect] = useState(false);
+    const [currentBarcode, setCurrentBarcode] = useState<string | null>(null);
+    const productSearchPageSize = 10;
+
+    // Infinite Query para produtos customizados
+    const {
+        data: foundProductsData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch: refetchProducts,
+    } = useInfiniteQuery({
+        queryKey: ['custom-products', currentBarcode],
+        enabled: !!currentBarcode && showProductSelect,
+        initialPageParam: 1,
+        queryFn: async ({ pageParam = 1 }) => {
+            const response = await api.get(`/store-product/barcode/${currentBarcode}?page=${pageParam}&pageSize=${productSearchPageSize}`);
+            return {
+                products: response.data.products,
+                nextPage: pageParam + 1,
+                total: response.data.pagination.total,
+                currentCount: response.data.products.length
+            };
+        },
+        getNextPageParam: (lastPage, allPages) => {
+            const loadedCount = allPages.reduce((sum, page) => sum + page.currentCount, 0);
+            if (loadedCount < lastPage.total) {
+                return lastPage.nextPage;
+            }
+            return undefined;
+        },
+    });
 
     const { mutate: createSale, isPending } = useCreateSale();
 
@@ -77,55 +110,63 @@ export default function NewSalePage() {
         { id: 'pix', label: 'PIX', icon: 'phone-portrait-outline' },
     ];
 
+
+
+    // Função para buscar produto por código de barras
     const searchProductByBarcode = async (barcodeValue: string) => {
         if (!barcodeValue) return;
-
         setIsLoadingProduct(true);
+        setBarcode('');
         try {
-            const response = await api.get(`/store-product/barcode/${barcodeValue}`);
-            const productData = response.data;
-
-            // Verificar se o produto tem estoque disponível
-            if (productData.quantity <= 0) {
-                Alert.alert('Produto sem estoque', `${productData.name} não tem unidades disponíveis`);
-                setBarcode('');
-                setIsLoadingProduct(false);
-                return;
+            const response = await api.get(`/store-product/barcode/${barcodeValue}?page=1&pageSize=${productSearchPageSize}`);
+            let productData = response.data.products;
+            // Se não existir 'products', pode ser objeto único direto
+            if (productData === undefined && response.data && typeof response.data === 'object') {
+                productData = response.data;
             }
 
-            const product: Product = {
-                id: productData.id,
-                name: productData.name,
-                price: productData.price,
-                barcode: barcodeValue,
-                img: productData.imgUrl,
-                quantity: 1
-            };
-
-            const existingProductIndex = products.findIndex(p => p.id === product.id);
-            if (existingProductIndex >= 0) {
-                // Produto já existe, aumentar quantidade
-                const currentQty = products[existingProductIndex].quantity || 1;
-                if (currentQty >= productData.quantity) {
-                    Alert.alert('Estoque insuficiente', `Apenas ${productData.quantity} unidades disponíveis`);
+            // Se for array, é customizado, abre modal
+            if (Array.isArray(productData)) {
+                setCurrentBarcode(barcodeValue);
+                setShowProductSelect(true);
+                await refetchProducts();
+            } else if (productData && typeof productData === 'object') {
+                // Produto normal, adiciona direto
+                if (productData.quantity <= 0) {
+                    Alert.alert('Produto sem estoque', `${productData.name} não tem unidades disponíveis`);
                 } else {
-                    const updatedProducts = [...products];
-                    updatedProducts[existingProductIndex].quantity = currentQty + 1;
-                    setProducts(updatedProducts);
-                    Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+                    const product = {
+                        id: productData.id,
+                        name: productData.name,
+                        price: productData.price,
+                        barcode: barcodeValue,
+                        imgUrl: productData.imgUrl,
+                        quantity: 1
+                    };
+                    setProducts(prev => {
+                        const existingIndex = prev.findIndex(p => p.id === product.id);
+                        if (existingIndex >= 0) {
+                            const currentQty = prev[existingIndex].quantity || 1;
+                            if (currentQty >= productData.quantity) {
+                                Alert.alert('Estoque insuficiente', `Apenas ${productData.quantity} unidades disponíveis`);
+                                return prev;
+                            } else {
+                                const updated = [...prev];
+                                updated[existingIndex].quantity = currentQty + 1;
+                                Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+                                return updated;
+                            }
+                        } else {
+                            Alert.alert('Sucesso', `${product.name} adicionado à venda`);
+                            return [...prev, product];
+                        }
+                    });
                 }
             } else {
-                // Novo produto, adicionar com quantidade 1
-                setProducts([...products, product]);
-                Alert.alert('Sucesso', `${product.name} adicionado à venda`);
-            }
-            setBarcode('');
-        } catch (error: any) {
-            if (error.response?.status === 404) {
                 Alert.alert('Produto não encontrado', 'Código de barras não cadastrado no sistema');
-            } else {
-                Alert.alert('Erro', 'Erro ao buscar produto. Tente novamente.');
             }
+        } catch (error) {
+            Alert.alert('Erro', 'Erro ao buscar produto. Tente novamente.');
             console.error('Error fetching product:', error);
         } finally {
             setIsLoadingProduct(false);
@@ -205,6 +246,10 @@ export default function NewSalePage() {
             }))
         };
 
+        console.log(saleData
+
+        )
+
         createSale(saleData, {
             onSuccess: () => {
                 // Invalida todas as queries relacionadas
@@ -242,8 +287,121 @@ export default function NewSalePage() {
         setSelectedDate(new Date());
     };
 
+    // Função para carregar mais produtos na FlatList (infinite scroll)
+    const handleLoadMoreProducts = () => {
+        if (!hasNextPage || isFetchingNextPage) return;
+        fetchNextPage();
+    };
+
+    // Função para adicionar produto escolhido do modal
+    const handleSelectProduct = (product: Product) => {
+        if ((product.quantity ?? 0) <= 0) {
+            Alert.alert('Produto sem estoque', `${product.name} não tem unidades disponíveis`);
+            setShowProductSelect(false);
+            setCurrentBarcode(null);
+            return;
+        }
+        const existingProductIndex = products.findIndex(p => p.id === product.id);
+        if (existingProductIndex >= 0) {
+            const currentQty = products[existingProductIndex].quantity || 1;
+            if (currentQty >= (product.quantity ?? 0)) {
+                Alert.alert('Estoque insuficiente', `Apenas ${(product.quantity ?? 0)} unidades disponíveis`);
+            } else {
+                const updatedProducts = [...products];
+                updatedProducts[existingProductIndex].quantity = currentQty + 1;
+                setProducts(updatedProducts);
+                Alert.alert('Sucesso', `Adicionada mais 1 unidade de ${product.name}`);
+            }
+        } else {
+            // Corrige para garantir que a imagem vá para a lista como 'img'
+            setProducts([
+                ...products,
+                {
+                    ...product,
+                    imgUrl: product.imgUrl || product.imgUrl || null,
+                    quantity: 1
+                }
+            ]);
+            Alert.alert('Sucesso', `${product.name} adicionado à venda`);
+        }
+        setShowProductSelect(false);
+        setCurrentBarcode(null);
+    };
+
     return (
         <View style={{ flex: 1 }}>
+            {/* Modal de seleção de produto customizado */}
+            <Modal
+                visible={showProductSelect}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => {
+                    setShowProductSelect(false);
+                    setCurrentBarcode(null);
+                    // setProductSearchPage(1);
+                    // setHasMoreProducts(true);
+                }}
+            >
+                <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
+                    <View className="rounded-2xl p-6 w-11/12 px-5" style={{ backgroundColor: colors.card }}>
+                        <Text className="text-lg font-bold mb-4 text-center" style={{ color: colors.foreground }}>Selecione o produto</Text>
+                        <FlatList
+                            data={foundProductsData ? foundProductsData.pages.flatMap(page => page.products) : []}
+                            keyExtractor={item => item.id}
+                            renderItem={({ item: product }) => {
+                                const semEstoque = !product.quantity || product.quantity <= 0;
+                                return (
+                                    <TouchableOpacity
+                                        key={product.id}
+                                        className="flex-row items-center p-3 mb-2 rounded-xl border"
+                                        style={{
+                                            borderColor: colors.background,
+                                            backgroundColor: semEstoque ? colors.muted + '30' : colors.background,
+                                            opacity: semEstoque ? 0.6 : 1
+                                        }}
+                                        onPress={() => handleSelectProduct(product)}
+                                        disabled={semEstoque}
+                                    >
+                                        {product.imgUrl ? (
+                                            <Image source={{ uri: product.imgUrl }} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12 }} />
+                                        ) : (
+                                            <View style={{ width: 40, height: 40, borderRadius: 8, marginRight: 12, backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Ionicons name="cube-outline" size={24} color="#bbb" />
+                                            </View>
+                                        )}
+                                        <View style={{ flex: 1 }}>
+                                            <Text className="font-semibold" numberOfLines={1} style={{ color: colors.foreground }}>{product.name}</Text>
+                                            <Text className="text-xs" style={{ color: colors.foreground }}>R$ {(product.price / 100).toFixed(2).replace('.', ',')}</Text>
+                                            {semEstoque && (
+                                                <Text className="text-xs mt-1" style={{ color: '#ef4444', fontWeight: 'bold' }}>Sem estoque</Text>
+                                            )}
+                                        </View>
+                                        <Ionicons name="chevron-forward" size={20} color="#bbb" />
+                                    </TouchableOpacity>
+                                );
+                            }}
+                            ListFooterComponent={
+                                isFetchingNextPage ? (
+                                    <ActivityIndicator size="small" color="#ff6b35" style={{ marginVertical: 10 }} />
+                                ) : null
+                            }
+                            onEndReached={handleLoadMoreProducts}
+                            onEndReachedThreshold={0.2}
+                            style={{ maxHeight: 350 }}
+                        />
+                        <TouchableOpacity
+                            className="mt-4 p-3 rounded-xl"
+                            style={{ backgroundColor: colors.muted }}
+                            onPress={() => {
+                                setShowProductSelect(false);
+                                setCurrentBarcode(null);
+                            }}
+                        >
+                            <Text className="text-center font-medium" style={{ color: colors.foreground }}>Cancelar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
             {/* Background principal */}
             <View className="absolute inset-0" style={{ backgroundColor: colors.background }} />
 
@@ -651,7 +809,7 @@ export default function NewSalePage() {
                                     <View className="flex-row items-center justify-between">
                                         <View className="flex-row items-center flex-1">
                                             <Image
-                                                source={product.img}
+                                                source={product.imgUrl}
                                                 style={{
                                                     width: 50,
                                                     height: 50,
@@ -796,7 +954,7 @@ export default function NewSalePage() {
                         <View className="flex justify-center items-center h-screen">
                             {/* Header com botão de fechar */}
                             <View className="absolute top-0 left-0 right-0  flex-row justify-between items-center z-10 mt-20 px-4">
-                               <Ionicons name="help-circle" size={24} color="white" />
+                                <Ionicons name="help-circle" size={24} color="white" />
                                 <Text className="text-white text-lg font-bold">Escanear Código de Barras</Text>
                                 <TouchableOpacity
                                     onPress={() => setShowCamera(false)}

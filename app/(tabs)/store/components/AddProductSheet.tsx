@@ -1,5 +1,9 @@
+import { Dialog } from '@/components/ui/Dialog';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
@@ -16,7 +20,6 @@ import {
 } from 'react-native';
 import { useAddProductToStore } from '../hooks/useAddProductToStore';
 import { CatalogProduct } from '../hooks/useInfiniteCatalogProducts';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface AddProductSheetProps {
     visible: boolean;
@@ -33,6 +36,13 @@ export const AddProductSheet = ({
 }: AddProductSheetProps) => {
     const colors = useThemeColors();
     const { mutate: addProduct, isPending } = useAddProductToStore();
+
+    const [showDialog, setShowDialog] = useState(false);
+    const [dialogLoading, setDialogLoading] = useState(false);
+
+    const handleCancelDialog = () => {
+        setShowDialog(false);
+    };
 
     const [formData, setFormData] = useState({
         price: '',
@@ -69,8 +79,6 @@ export const AddProductSheet = ({
             return;
         }
 
-
-
         addProduct(
             {
                 catalogId: product.id,
@@ -87,6 +95,18 @@ export const AddProductSheet = ({
                     onSuccess?.();
                 },
                 onError: (error) => {
+
+                    const err = error as AxiosError<{
+                        error: string;
+                        code?: string;
+                    }>;
+
+                    const code = err.response?.status;
+
+                    if (code === 403) {
+                        setShowDialog(true);
+                        return;
+                    }
                     Alert.alert(
                         'Erro',
                         'Não foi possível adicionar o produto. Tente novamente.'
@@ -141,6 +161,8 @@ export const AddProductSheet = ({
         }
         return '';
     };
+
+    const router = useRouter();
 
     return (
         <Modal
@@ -542,6 +564,28 @@ export const AddProductSheet = ({
                     </View>
                 </View>
             </KeyboardAvoidingView>
+            <Dialog
+                visible={showDialog}
+                title="Limite atingido"
+                description="Você chegou ao limite de produtos do seu plano atual. Para continuar adicionando novos produtos, é só fazer um upgrade quando quiser."
+                onCancel={() => {
+                    if (!dialogLoading) setShowDialog(false);
+                }}
+                onConfirm={() => {
+                    setDialogLoading(true);
+                    setTimeout(() => {
+                        setDialogLoading(false);
+                        setShowDialog(false);
+                        router.push("/more/components/plans-screen");
+                        setTimeout(() => {
+                            onClose();
+                        }, 200);
+                    }, 500);
+                }}
+                cancelText='Voltar'
+                confirmText='Fazer Upgrade'
+                isLoading={dialogLoading}
+            />
         </Modal>
     );
 };

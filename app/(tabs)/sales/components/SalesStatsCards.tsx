@@ -37,18 +37,9 @@ export function SalesStatsCards({ totalRevenue, totalOrders, selectedDateFilter 
                         >
                             <Ionicons name="trending-up" size={20} color={colors.primary} />
                         </View>
-                        <Text
-                            className="text-xs font-semibold px-2 py-1 rounded-full"
-                            style={{
-                                backgroundColor: '#10b981' + '20',
-                                color: '#10b981'
-                            }}
-                        >
-                            +12%
-                        </Text>
                     </View>
                     <Text
-                        className="text-2xl font-black"
+                        className="text-xl font-black"
                         style={{ color: colors.foreground }}
                     >
                         {formatCurrency(totalRevenue)}
@@ -93,7 +84,7 @@ export function SalesStatsCards({ totalRevenue, totalOrders, selectedDateFilter 
                         </Text>
                     </View>
                     <Text
-                        className="text-2xl font-black"
+                        className="text-xl font-black"
                         style={{ color: colors.foreground }}
                     >
                         {totalOrders}

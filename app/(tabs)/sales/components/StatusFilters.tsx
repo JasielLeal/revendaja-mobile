@@ -19,7 +19,7 @@ export function StatusFilters({ filters, selectedFilter, ordersByStatus, onFilte
 
     return (
         <View className="px-4 mb-6">
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between gap-2">
                 {filters.map((filter) => {
                     const isSelected = selectedFilter === filter;
                     const filterCount = filter === 'Todos'
@@ -31,7 +31,7 @@ export function StatusFilters({ filters, selectedFilter, ordersByStatus, onFilte
                     return (
                         <TouchableOpacity
                             key={filter}
-                            className="flex-row items-center px-4 py-2 rounded-2xl"
+                            className="flex-row items-center px-3 py-2 rounded-2xl"
                             style={{
                                 backgroundColor: isSelected ? colors.primary : colors.card,
                                 borderColor: isSelected ? colors.primary : colors.border,

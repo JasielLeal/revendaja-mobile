@@ -16,6 +16,12 @@ export default function StoreLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="custom-product"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }
