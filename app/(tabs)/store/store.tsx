@@ -9,6 +9,7 @@ import { ActivityIndicator, FlatList, Modal, Text, TextInput, TouchableOpacity, 
 import { EditProduct, productType } from './components/edit-product';
 import { useInfiniteStoreProducts } from './hooks/useInfiniteStoreProducts';
 import { useStoreSummary } from './hooks/useStoreSumary';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function StorePage() {
     const colors = useThemeColors();
@@ -57,6 +58,8 @@ export default function StorePage() {
 
         return true;
     });
+
+    const insets = useSafeAreaInsets();
 
     // Para os cards de estatísticas, usar todos os produtos
     const products = allProducts;
@@ -400,7 +403,13 @@ export default function StorePage() {
                     onPress={() => setShowFilterModal(false)}
                     style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
                 >
-                    <View className="rounded-t-2xl p-4" style={{ backgroundColor: colors.card }}>
+                    <View
+                        className="rounded-t-2xl p-4"
+                        style={{
+                            backgroundColor: colors.card,
+                            paddingBottom: insets.bottom + 12,
+                        }}
+                    >
                         <Text className="text-base font-semibold mb-3" style={{ color: colors.foreground }}>
                             Filtrar produtos
                         </Text>

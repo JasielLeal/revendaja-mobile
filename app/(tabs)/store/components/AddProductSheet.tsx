@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 import { useAddProductToStore } from '../hooks/useAddProductToStore';
 import { CatalogProduct } from '../hooks/useInfiniteCatalogProducts';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface AddProductSheetProps {
     visible: boolean;
@@ -27,6 +28,7 @@ interface AddProductSheetProps {
     onClose: () => void;
     onSuccess?: () => void;
 }
+
 
 export const AddProductSheet = ({
     visible,
@@ -91,6 +93,7 @@ export const AddProductSheet = ({
                 onSuccess: () => {
                     Alert.alert('Sucesso', 'Produto adicionado à sua loja!');
                     queryClient.invalidateQueries({ queryKey: ["store-products"] });
+                    queryClient.invalidateQueries({ queryKey: ["store-summary"] });
                     onClose();
                     onSuccess?.();
                 },
@@ -163,6 +166,8 @@ export const AddProductSheet = ({
     };
 
     const router = useRouter();
+
+    const insets = useSafeAreaInsets();
 
     return (
         <Modal
@@ -457,7 +462,7 @@ export const AddProductSheet = ({
                                         </Text>
                                         <View
                                             className="flex-row items-center rounded-xl px-4 bg-background"
-                                            style={{                                               
+                                            style={{
                                                 height: 48,
                                             }}
                                         >
@@ -494,7 +499,7 @@ export const AddProductSheet = ({
                                         </Text>
                                         <View
                                             className="flex-row items-center rounded-xl px-4 bg-background"
-                                            style={{                                               
+                                            style={{
                                                 height: 48,
                                             }}
                                         >
@@ -525,10 +530,12 @@ export const AddProductSheet = ({
 
                     {/* Bottom Actions */}
                     <View
-                        className="px-5 pb-8 pt-4 flex-row gap-3"
+                        className="px-5 pt-4 flex-row gap-3"
                         style={{
+                            paddingBottom: insets.bottom + 12,
                             borderTopWidth: 1,
                             borderTopColor: colors.border,
+                            backgroundColor: colors.card,
                         }}
                     >
                         <TouchableOpacity
@@ -540,7 +547,7 @@ export const AddProductSheet = ({
                         >
                             <Text
                                 className="text-base font-semibold"
-                                 allowFontScaling={false}
+                                allowFontScaling={false}
                                 style={{ color: colors.foreground }}
                             >
                                 Cancelar
@@ -572,7 +579,7 @@ export const AddProductSheet = ({
                             <Text
                                 className="text-base font-bold"
                                 style={{ color: colors.primaryForeground }}
-                                 allowFontScaling={false}
+                                allowFontScaling={false}
                             >
                                 {isPending ? 'Adicionando...' : 'Adicionar'}
                             </Text>

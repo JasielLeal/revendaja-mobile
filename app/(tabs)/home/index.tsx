@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Platform,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -389,11 +390,14 @@ export default function HomePage() {
                                                     <View>
                                                         <Ionicons
                                                             name="bag-check-outline"
-                                                            size={20}
+                                                            size={Platform.OS === 'ios' ? 30 : 25}
                                                             color={colors.primary}
-                                                            borderWidth={1}
-                                                            borderColor={colors.border}
-                                                            className={`border border-${colors.border} p-4 rounded-xl mr-3`}
+                                                            className={`bg-${colors.primary} rounded-2xl p-2 mr-3`}
+                                                            style={
+                                                                sale.status === 'approved'
+                                                                    ? { backgroundColor: colors.primary + '20' }
+                                                                    : { backgroundColor: colors.primary + '20' }
+                                                            }
                                                         />
                                                     </View>
                                                     <View className="flex-1">
@@ -411,23 +415,6 @@ export default function HomePage() {
                                                         >
                                                             {sale.paymentMethod}
                                                         </Text>
-                                                        <View
-                                                            className="rounded-full px-3 py-1"
-                                                            style={{
-                                                                backgroundColor: getStatusColor(sale.status).bg,
-                                                                alignSelf: 'flex-start'
-                                                            }}
-                                                        >
-                                                            <Text
-                                                                className="text-xs font-medium"
-                                                                style={{
-                                                                    color: getStatusColor(sale.status).text
-                                                                }}
-                                                                maxFontSizeMultiplier={1}
-                                                            >
-                                                                {getStatusLabel(sale.status)}
-                                                            </Text>
-                                                        </View>
                                                     </View>
                                                 </View>
                                             </View>

@@ -1,11 +1,13 @@
-import { api } from '@/app/backend/api';
+import { Dialog } from '@/components/ui/Dialog';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import React from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useConfirmSale } from '../hooks/useconfirmSale';
-import { useQueryClient } from '@tanstack/react-query';
+import { useOrderDelete } from '../hooks/useOrderDelete';
+import { set } from 'zod';
 
 interface OrderItem {
     id: string;
@@ -45,6 +47,7 @@ export function OrderDetailsModal({
     getStatusColor
 }: OrderDetailsModalProps) {
     const colors = useThemeColors();
+    const [showDialog, setShowDialog] = React.useState(false);
 
     const handleWhatsApp = () => {
         if (!order) return;
@@ -112,6 +115,8 @@ export function OrderDetailsModal({
         // );
     };
 
+    const orderDelete = useOrderDelete();
+
     const handleDeleteSale = () => {
         if (!order) return;
 
@@ -124,14 +129,19 @@ export function OrderDetailsModal({
                     text: 'Deletar',
                     style: 'destructive',
                     onPress: async () => {
-                        try {
-                            await api.delete(`/orders/${order.id}`);
-                            onClose();
-                            onRefresh();
-                            Alert.alert('Sucesso', 'Venda deletada com sucesso');
-                        } catch {
-                            Alert.alert('Erro', 'Erro ao deletar venda');
-                        }
+                        await orderDelete.mutateAsync(order.id, {
+                            onSuccess: () => {
+                                queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
+                                queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
+                                queryClient.invalidateQueries({ queryKey: ["sales"] });
+                                queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+                                onRefresh();
+                                onClose();
+                            },
+                            onError: () => {
+                                setShowDialog(true);
+                            }
+                        });
                     }
                 }
             ]
@@ -368,6 +378,14 @@ export function OrderDetailsModal({
                     </ScrollView>
                 </View>
             </View>
+
+            <Dialog
+                description='Error ao deletar a venda'
+                title='Error'
+                visible={showDialog}
+                onConfirm={() => setShowDialog(false)}
+                confirmText='Ok'
+            />
         </Modal>
     );
 }

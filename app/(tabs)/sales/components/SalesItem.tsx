@@ -2,7 +2,7 @@ import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, Platform } from 'react-native';
 
 interface Order {
     id: string;
@@ -28,7 +28,7 @@ export function SalesItem({ order, onPress, getStatusLabel, getStatusColor }: Sa
     return (
         <View className="px-4 mb-4">
             <TouchableOpacity
-                className="rounded-xl pb-4"
+                className="rounded-xl"
                 style={{ borderColor: colors.border }}
                 onPress={onPress}
             >
@@ -38,11 +38,14 @@ export function SalesItem({ order, onPress, getStatusLabel, getStatusColor }: Sa
                             <View>
                                 <Ionicons
                                     name="bag-check-outline"
-                                    size={20}
+                                    size={Platform.OS === 'ios' ? 30 : 25}
                                     color={colors.primary}
-                                    borderWidth={1}
-                                    borderColor={colors.border}
-                                    className={`border border-${colors.border} p-4 rounded-xl mr-3`}
+                                    className={`bg-${colors.primary} rounded-2xl p-2 mr-3`}
+                                    style={
+                                        order.status === 'approved'
+                                            ? { backgroundColor: colors.primary + '20'}
+                                            : { backgroundColor: colors.primary + '20' }
+                                    }
                                 />
                             </View>
                             <View className="flex-1">
@@ -60,23 +63,6 @@ export function SalesItem({ order, onPress, getStatusLabel, getStatusColor }: Sa
                                 >
                                     {order.paymentMethod}
                                 </Text>
-                                <View
-                                    className="rounded-full px-3 py-1"
-                                    style={{
-                                        backgroundColor: getStatusColor(order.status).bg,
-                                        alignSelf: 'flex-start'
-                                    }}
-                                >
-                                    <Text
-                                        className="text-xs font-medium"
-                                        allowFontScaling={false}
-                                        style={{
-                                            color: getStatusColor(order.status).text
-                                        }}
-                                    >
-                                        {getStatusLabel(order.status)}
-                                    </Text>
-                                </View>
                             </View>
                         </View>
                     </View>

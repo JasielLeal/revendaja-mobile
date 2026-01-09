@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "leal-perfumaria-mobile",
-    "slug": "leal-perfumaria-mobile",
+    "name": "Revendaja",
+    "slug": "revendaja",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "lealperfumariamobile",
+    "scheme": "revendaja",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.szreactioon.lealperfumariamobile"
+      "bundleIdentifier": "com.szreactioon.revendaja"
     },
     "android": {
       "adaptiveIcon": {
@@ -58,7 +58,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9614e26b-e018-45b7-b083-7880f7d69b4e"
+        "projectId": "0dddc372-db6b-41dd-8b10-ecfaac5cc4e3"
       }
     }
   }
