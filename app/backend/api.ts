@@ -3,8 +3,8 @@ import { router } from "expo-router";
 import { authService } from "../services/auth";
 
 export const api = axios.create({
-  baseURL: "https://revendaja-backend-beta-production.up.railway.app/api",
-  // baseURL: "http://192.168.100.153:3333/api",
+  // baseURL: "https://revendaja-backend-beta-production.up.railway.app/api",
+  baseURL: "http://192.168.100.153:3333/api",
   timeout: 10000,
 });
 

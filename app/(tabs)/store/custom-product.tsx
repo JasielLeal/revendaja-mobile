@@ -48,7 +48,7 @@ export default function CustomProductScreen({ onClose }: CustomProductDialogProp
     const [name, setName] = useState("");
     const [priceStr, setPriceStr] = useState("R$ 0,00");
     const [costPriceStr, setCostPriceStr] = useState("R$ 0,00");
-    const [quantityStr, setQuantityStr] = useState("0");
+    const [quantityStr, setQuantityStr] = useState("1");
     const [showDialog, setShowDialog] = useState(false);
     const [dialogLoading, setDialogLoading] = useState(false);
 

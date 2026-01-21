@@ -14,6 +14,7 @@ import {
     StatusFilters
 } from './components';
 import { useSalesPagination } from './hooks/useSalesPagination';
+import { formatCurrency } from '@/lib/formatters';
 
 interface OrderItem {
     id: string;
@@ -143,6 +144,60 @@ export default function SalesPage({ navigation }: SalesPageProps) {
     const allSalesForCounting = useMemo(() => {
         return allSalesData?.pages.flatMap(page => page.orders) ?? [];
     }, [allSalesData]);
+
+    // Agrupar pedidos por dia com valor total
+    const groupedByDay = useMemo(() => {
+        const groups: { [key: string]: { date: Date, total: number, orders: Order[] } } = {};
+
+        allOrders.forEach(order => {
+            const date = new Date(order.createdAt);
+            const dateKey = date.toISOString().split('T')[0];
+
+            if (!groups[dateKey]) {
+                groups[dateKey] = {
+                    date: date,
+                    total: 0,
+                    orders: []
+                };
+            }
+
+            groups[dateKey].total += order.total;
+            groups[dateKey].orders.push(order);
+        });
+
+        // Converter para array e ordenar por data (mais recente primeiro)
+        return Object.entries(groups)
+            .map(([key, value]) => ({
+                dateKey: key,
+                ...value
+            }))
+            .sort((a, b) => b.date.getTime() - a.date.getTime());
+    }, [allOrders]);
+
+    // Criar lista flat com separadores de data
+    const ordersWithSeparators = useMemo(() => {
+        const result: any[] = [];
+
+        groupedByDay.forEach(group => {
+            // Adicionar separador de data
+            result.push({
+                type: 'separator',
+                dateKey: group.dateKey,
+                date: group.date,
+                total: group.total
+            });
+
+            // Adicionar pedidos desse dia
+            group.orders.forEach(order => {
+                result.push({
+                    type: 'order',
+                    data: order
+                });
+            });
+        });
+
+        return result;
+    }, [groupedByDay]);
 
     // Estatísticas sempre sem filtro de status
     const stats = useMemo(() => {
@@ -384,8 +439,10 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                 </View>
             ) : (
                 <FlatList
-                    data={allOrders}
-                    keyExtractor={(item) => item.id}
+                    data={ordersWithSeparators}
+                    keyExtractor={(item, index) => 
+                        item.type === 'separator' ? `separator-${item.dateKey}` : `order-${item.data.id}`
+                    }
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ flexGrow: 1 }}
                     refreshControl={
@@ -452,17 +509,53 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                             </View>
                         )
                     )}
-                    renderItem={({ item: order }) => (
-                        <SalesItem
-                            order={order}
-                            onPress={() => {
-                                setSelectedOrder(order);
-                                setShowOrderDetails(true);
-                            }}
-                            getStatusLabel={getStatusLabel}
-                            getStatusColor={getStatusColor}
-                        />
-                    )}
+                    renderItem={({ item }) => {
+                        if (item.type === 'separator') {
+                            const formattedDate = item.date.toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit'
+                            });
+                            const formattedTotal = formatCurrency(item.total);
+
+                            return (
+                                <View 
+                                    className="px-4 py-3 flex-row items-center justify-between"
+                                    style={{ backgroundColor: colors.background }}
+                                >
+                                    <View className="flex-row items-center flex-1">
+                                        <Text 
+                                            className="text-sm font-bold"
+                                            style={{ color: colors.foreground }}
+                                        >
+                                            {formattedDate}
+                                        </Text>
+                                        <View 
+                                            className="flex-1 h-px mx-3"
+                                            style={{ backgroundColor: colors.border }}
+                                        />
+                                    </View>
+                                    <Text 
+                                        className="text-sm font-bold ml-2"
+                                        style={{ color: colors.foreground }}
+                                    >
+                                        {formattedTotal}
+                                    </Text>
+                                </View>
+                            );
+                        }
+
+                        return (
+                            <SalesItem
+                                order={item.data}
+                                onPress={() => {
+                                    setSelectedOrder(item.data);
+                                    setShowOrderDetails(true);
+                                }}
+                                getStatusLabel={getStatusLabel}
+                                getStatusColor={getStatusColor}
+                            />
+                        );
+                    }}
                 />
             )}
 
