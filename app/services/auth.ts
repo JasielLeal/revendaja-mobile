@@ -3,12 +3,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const TOKEN_KEY = "@revendaja:token";
 const USER_KEY = "@revendaja:user";
 
+interface StoreInformation {
+  name: string;
+  subdomain: string;
+  phone: string;
+  address: string;
+  primaryColor: string;
+}
+
 interface User {
   id: string;
-  email: string;
   name: string;
+  email: string;
   plan: string;
-  createdAt?: string;
+  createdAt: string;
+  firstAccess: boolean;
+  token: string;
+  store: boolean;
+  storeInformation?: StoreInformation;
 }
 
 export const authService = {

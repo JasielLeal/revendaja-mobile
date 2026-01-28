@@ -1,10 +1,10 @@
+import { Dialog } from '@/components/ui/Dialog';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     Linking,
     ScrollView,
     Text,
@@ -18,37 +18,71 @@ export default function PlanScreen() {
     const colors = useThemeColors();
     const router = useRouter();
     const { data: planData, isLoading, error, refetch } = usePlanUsage();
+    const [dialog, setDialog] = useState({
+        visible: false,
+        title: '',
+        description: '',
+        confirmText: 'OK',
+        cancelText: 'Cancelar',
+        showCancel: false,
+        onConfirm: () => setDialog((prev) => ({ ...prev, visible: false })),
+        onCancel: undefined as undefined | (() => void),
+    });
+
+    const showInfoDialog = (title: string, description: string) => {
+        setDialog({
+            visible: true,
+            title,
+            description,
+            confirmText: 'OK',
+            cancelText: 'Cancelar',
+            showCancel: false,
+            onConfirm: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onCancel: undefined,
+        });
+    };
+
+    const showConfirmDialog = (title: string, description: string, onConfirm: () => void) => {
+        setDialog({
+            visible: true,
+            title,
+            description,
+            confirmText: 'Continuar',
+            cancelText: 'Cancelar',
+            showCancel: true,
+            onCancel: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onConfirm: () => {
+                setDialog((prev) => ({ ...prev, visible: false }));
+                onConfirm();
+            },
+        });
+    };
 
     const handleUpgrade = () => {
-        Alert.alert(
+        showConfirmDialog(
             'Fazer Upgrade',
             'Você será redirecionado para escolher seu plano Premium.',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Continuar',
-                    onPress: () => {
-                        // TODO: Replace with actual upgrade URL
-                        Linking.openURL('https://revendaja.com/upgrade');
-                    },
-                },
-            ]
+            () => {
+                // TODO: Replace with actual upgrade URL
+                Linking.openURL('https://revendaja.com/upgrade');
+            }
         );
     };
 
     const handleDowngrade = () => {
-        Alert.alert(
-            'Downgrade',
-            'Deseja fazer downgrade para o plano gratuito?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Downgrade',
-                    style: 'destructive',
-                    onPress: () => Alert.alert('Confirmação', 'Em desenvolvimento'),
-                },
-            ]
-        );
+        setDialog({
+            visible: true,
+            title: 'Downgrade',
+            description: 'Deseja fazer downgrade para o plano gratuito?',
+            confirmText: 'Downgrade',
+            cancelText: 'Cancelar',
+            showCancel: true,
+            onCancel: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onConfirm: () => {
+                setDialog((prev) => ({ ...prev, visible: false }));
+                showInfoDialog('Confirmação', 'Em desenvolvimento');
+            },
+        });
     };
 
     const getUsagePercentage = (used: number, limit: number) => {
@@ -345,6 +379,16 @@ export default function PlanScreen() {
 
                     </View>
                 </ScrollView>
+                <Dialog
+                    visible={dialog.visible}
+                    title={dialog.title}
+                    description={dialog.description}
+                    confirmText={dialog.confirmText}
+                    cancelText={dialog.cancelText}
+                    onConfirm={dialog.onConfirm}
+                    onCancel={dialog.onCancel}
+                    showCancel={dialog.showCancel}
+                />
             </SafeAreaView>
         </View>
     );

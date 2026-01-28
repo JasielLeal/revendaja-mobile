@@ -22,6 +22,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLogin } from './hooks/useLogin';
 import { LoginFormData, loginSchema } from './schemas/schema';
+import { store } from 'expo-router/build/global-state/router-store';
 
 interface ApiErrorResponse {
     message?: string;
@@ -98,6 +99,13 @@ export default function LoginScreen() {
                     createdAt: response.createdAt,
                     firstAccess: response.firstAccess,
                     store: response.store,
+                    storeInformation: {
+                        name: response.store ? response['storeInformation']?.name || '' : '',
+                        subdomain: response.store ? response['storeInformation']?.subdomain || '' : '',
+                        phone: response.store ? response['storeInformation']?.phone || '' : '',
+                        address: response.store ? response['storeInformation']?.address || '' : '',
+                        primaryColor: response.store ? response['storeInformation']?.primaryColor || '' : '',
+                    }
                 };
                 await signIn(response.token, userData);
 

@@ -1,12 +1,12 @@
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Avatar } from '@/components/ui/avatar';
+import { Dialog } from '@/components/ui/Dialog';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatDateFull } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    Alert,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -19,6 +19,45 @@ export default function AccountScreen() {
     const colors = useThemeColors();
     const { user } = useAuth();
     const router = useRouter();
+    const [dialog, setDialog] = useState({
+        visible: false,
+        title: '',
+        description: '',
+        confirmText: 'OK',
+        cancelText: 'Cancelar',
+        showCancel: false,
+        onConfirm: () => setDialog((prev) => ({ ...prev, visible: false })),
+        onCancel: undefined as undefined | (() => void),
+    });
+
+    const showInfoDialog = (title: string, description: string) => {
+        setDialog({
+            visible: true,
+            title,
+            description,
+            confirmText: 'OK',
+            cancelText: 'Cancelar',
+            showCancel: false,
+            onConfirm: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onCancel: undefined,
+        });
+    };
+
+    const showConfirmDialog = (title: string, description: string, onConfirm: () => void) => {
+        setDialog({
+            visible: true,
+            title,
+            description,
+            confirmText: 'Confirmar',
+            cancelText: 'Cancelar',
+            showCancel: true,
+            onCancel: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onConfirm: () => {
+                setDialog((prev) => ({ ...prev, visible: false }));
+                onConfirm();
+            },
+        });
+    };
 
     return (
         <View style={{ flex: 1 }}>
@@ -72,7 +111,6 @@ export default function AccountScreen() {
                         <View className="mb-4">
                             <View
                                 className="rounded-xl overflow-hidden"
-
                             >
                                 {/* Nome */}
                                 <View className="p-4 border-b" style={{ borderBottomColor: colors.border + '30' }}>
@@ -167,7 +205,7 @@ export default function AccountScreen() {
                                 {/* Alterar Senha */}
                                 <TouchableOpacity
                                     className="flex-row items-center justify-between px-4 py-4"
-                                    onPress={() => Alert.alert('Alterar Senha', 'Em desenvolvimento')}
+                                    onPress={() => showInfoDialog('Alterar Senha', 'Em desenvolvimento')}
                                 >
                                     <View className="flex-row items-center gap-3">
 
@@ -198,18 +236,13 @@ export default function AccountScreen() {
                                 {/* Deletar Conta */}
                                 <TouchableOpacity
                                     className="flex-row items-center justify-between px-4 py-4"
-                                    onPress={() => Alert.alert(
-                                        'Deletar Conta',
-                                        'Essa ação é irreversível. Todos os seus dados serão permanentemente removidos.',
-                                        [
-                                            { text: 'Cancelar', style: 'cancel' },
-                                            {
-                                                text: 'Deletar',
-                                                style: 'destructive',
-                                                onPress: () => Alert.alert('Confirmação', 'Em desenvolvimento'),
-                                            },
-                                        ]
-                                    )}
+                                    onPress={() =>
+                                        showConfirmDialog(
+                                            'Deletar Conta',
+                                            'Essa ação é irreversível. Todos os seus dados serão permanentemente removidos.',
+                                            () => showInfoDialog('Confirmação', 'Em desenvolvimento')
+                                        )
+                                    }
                                 >
                                     <View className="flex-row items-center gap-3">
                                         <View>
@@ -264,6 +297,16 @@ export default function AccountScreen() {
 
 
                 </ScrollView>
+                <Dialog
+                    visible={dialog.visible}
+                    title={dialog.title}
+                    description={dialog.description}
+                    confirmText={dialog.confirmText}
+                    cancelText={dialog.cancelText}
+                    onConfirm={dialog.onConfirm}
+                    onCancel={dialog.onCancel}
+                    showCancel={dialog.showCancel}
+                />
             </SafeAreaView>
         </View>
     );

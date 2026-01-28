@@ -33,6 +33,7 @@ export function connectToStore(userId: string, queryClient?: any) {
         queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
         queryClient.invalidateQueries({ queryKey: ["sales"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+        queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
       }
 
       // Verificar permissão antes de enviar notificação

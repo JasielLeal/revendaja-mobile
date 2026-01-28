@@ -1,6 +1,8 @@
 import { SaleItemSkeleton } from '@/components/skeletons';
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { formatCurrency } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
 import {
@@ -14,7 +16,6 @@ import {
     StatusFilters
 } from './components';
 import { useSalesPagination } from './hooks/useSalesPagination';
-import { formatCurrency } from '@/lib/formatters';
 
 interface OrderItem {
     id: string;
@@ -36,6 +37,9 @@ interface Order {
     customerName: string;
     customerPhone: string;
     storeId: string;
+    isDelivery: boolean;
+    deliveryStreet: string;
+    deliveryNumber: string;
     createdAt: string;
     updatedAt: string;
     items: OrderItem[];
@@ -58,6 +62,17 @@ export default function SalesPage({ navigation }: SalesPageProps) {
     const [markedDates, setMarkedDates] = useState({});
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [showOrderDetails, setShowOrderDetails] = useState(false);
+    const [handledNotificationKey, setHandledNotificationKey] = useState<string | null>(null);
+    const [hasTriedRefetch, setHasTriedRefetch] = useState(false);
+
+    const { orderId, orderNumber } = useLocalSearchParams<{
+        orderId?: string;
+        orderNumber?: string;
+    }>();
+
+    const normalizedOrderId = Array.isArray(orderId) ? orderId[0] : orderId;
+    const normalizedOrderNumber = Array.isArray(orderNumber) ? orderNumber[0] : orderNumber;
+    const notificationKey = normalizedOrderId ?? normalizedOrderNumber ?? null;
 
     // Debounce para busca - aguarda 500ms após parar de digitar
     useEffect(() => {
@@ -67,6 +82,12 @@ export default function SalesPage({ navigation }: SalesPageProps) {
 
         return () => clearTimeout(timer);
     }, [searchQuery]);
+
+    useEffect(() => {
+        if (notificationKey && notificationKey !== handledNotificationKey) {
+            setHasTriedRefetch(false);
+        }
+    }, [notificationKey, handledNotificationKey]);
 
     // Calcular datas com base no filtro selecionado
     const dateRange = useMemo(() => {
@@ -198,6 +219,38 @@ export default function SalesPage({ navigation }: SalesPageProps) {
 
         return result;
     }, [groupedByDay]);
+
+    useEffect(() => {
+        if (!notificationKey || isLoading) return;
+        if (notificationKey === handledNotificationKey) return;
+
+        const foundOrder = allOrders.find((order) =>
+            (normalizedOrderId && order.id === normalizedOrderId)
+            || (normalizedOrderNumber && order.orderNumber === normalizedOrderNumber)
+        );
+
+        if (foundOrder) {
+            setSelectedOrder(foundOrder);
+            setShowOrderDetails(true);
+            setHandledNotificationKey(notificationKey);
+            return;
+        }
+
+        if (!isRefetching && !hasTriedRefetch) {
+            setHasTriedRefetch(true);
+            refetch();
+        }
+    }, [
+        notificationKey,
+        normalizedOrderId,
+        normalizedOrderNumber,
+        allOrders,
+        isLoading,
+        isRefetching,
+        hasTriedRefetch,
+        handledNotificationKey,
+        refetch,
+    ]);
 
     // Estatísticas sempre sem filtro de status
     const stats = useMemo(() => {
@@ -440,7 +493,7 @@ export default function SalesPage({ navigation }: SalesPageProps) {
             ) : (
                 <FlatList
                     data={ordersWithSeparators}
-                    keyExtractor={(item, index) => 
+                    keyExtractor={(item, index) =>
                         item.type === 'separator' ? `separator-${item.dateKey}` : `order-${item.data.id}`
                     }
                     showsVerticalScrollIndicator={false}
@@ -518,23 +571,23 @@ export default function SalesPage({ navigation }: SalesPageProps) {
                             const formattedTotal = formatCurrency(item.total);
 
                             return (
-                                <View 
+                                <View
                                     className="px-4 py-3 flex-row items-center justify-between"
                                     style={{ backgroundColor: colors.background }}
                                 >
                                     <View className="flex-row items-center flex-1">
-                                        <Text 
+                                        <Text
                                             className="text-sm font-bold"
                                             style={{ color: colors.foreground }}
                                         >
                                             {formattedDate}
                                         </Text>
-                                        <View 
+                                        <View
                                             className="flex-1 h-px mx-3"
                                             style={{ backgroundColor: colors.border }}
                                         />
                                     </View>
-                                    <Text 
+                                    <Text
                                         className="text-sm font-bold ml-2"
                                         style={{ color: colors.foreground }}
                                     >

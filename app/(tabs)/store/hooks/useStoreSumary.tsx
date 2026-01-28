@@ -7,8 +7,6 @@ export interface StoreSummaryResponse {
     lowStockProducts: number
 }
 
-
-
 export const useStoreSummary = () => {
     return useQuery({
         queryKey: ["store-summary"],

@@ -21,6 +21,9 @@ interface Order {
   customerName: string;
   customerPhone: string;
   storeId: string;
+  isDelivery: boolean;
+  deliveryStreet: string;
+  deliveryNumber: string;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];

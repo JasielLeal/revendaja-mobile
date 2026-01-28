@@ -156,7 +156,7 @@ export default function HomePage() {
                             )}
                         </TouchableOpacity>
                         {/* Botão temporário para testar expiração do token */}
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             className="bg-red-500 rounded-full p-2 ml-2"
                             onPress={async () => {
                                 await authService.saveToken('token_invalido_teste');
@@ -164,7 +164,7 @@ export default function HomePage() {
                             }}
                         >
                             <Ionicons name="bug" size={20} color="#fff" />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
 

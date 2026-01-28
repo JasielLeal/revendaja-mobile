@@ -29,7 +29,7 @@ export async function registerPushToken(storeId: string) {
     // Obter token de push
     const token = (
       await Notifications.getExpoPushTokenAsync({
-        projectId: 'f72c3ea6-e4d0-47b8-9ce5-ba720c38e40c',
+        projectId: '0dddc372-db6b-41dd-8b10-ecfaac5cc4e3',
       })
     ).data;
 

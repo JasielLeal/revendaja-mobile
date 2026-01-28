@@ -1,9 +1,9 @@
+import { Dialog } from '@/components/ui/Dialog';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
     Linking,
     ScrollView,
     Text,
@@ -58,6 +58,45 @@ export default function PlansScreen() {
     const colors = useThemeColors();
     const router = useRouter();
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+    const [dialog, setDialog] = useState({
+        visible: false,
+        title: '',
+        description: '',
+        confirmText: 'OK',
+        cancelText: 'Cancelar',
+        showCancel: false,
+        onConfirm: () => setDialog((prev) => ({ ...prev, visible: false })),
+        onCancel: undefined as undefined | (() => void),
+    });
+
+    const showInfoDialog = (title: string, description: string) => {
+        setDialog({
+            visible: true,
+            title,
+            description,
+            confirmText: 'OK',
+            cancelText: 'Cancelar',
+            showCancel: false,
+            onConfirm: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onCancel: undefined,
+        });
+    };
+
+    const showConfirmDialog = (title: string, description: string, onConfirm: () => void) => {
+        setDialog({
+            visible: true,
+            title,
+            description,
+            confirmText: 'Continuar',
+            cancelText: 'Cancelar',
+            showCancel: true,
+            onCancel: () => setDialog((prev) => ({ ...prev, visible: false })),
+            onConfirm: () => {
+                setDialog((prev) => ({ ...prev, visible: false }));
+                onConfirm();
+            },
+        });
+    };
 
     const handleSelectPlan = (planId: string) => {
         setSelectedPlan(planId);
@@ -65,30 +104,24 @@ export default function PlansScreen() {
 
     const handleSubscribe = () => {
         if (!selectedPlan) {
-            Alert.alert('Atenção', 'Selecione um plano para continuar');
+            showInfoDialog('Atenção', 'Selecione um plano para continuar');
             return;
         }
 
         const plan = plans.find(p => p.id === selectedPlan);
 
         if (plan?.id === 'free') {
-            Alert.alert('Plano Gratuito', 'Você já pode usar o plano gratuito!');
+            showInfoDialog('Plano Gratuito', 'Você já pode usar o plano gratuito!');
             return;
         }
 
-        Alert.alert(
+        showConfirmDialog(
             'Assinar Plano',
             `Você será redirecionado para assinar o plano ${plan?.name}.`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Continuar',
-                    onPress: () => {
-                        // TODO: Replace with actual subscription URL
-                        Linking.openURL(`https://revendaja.com/checkout?plan=${selectedPlan}`);
-                    },
-                },
-            ]
+            () => {
+                // TODO: Replace with actual subscription URL
+                Linking.openURL(`https://revendaja.com/checkout?plan=${selectedPlan}`);
+            }
         );
     };
 
@@ -103,7 +136,7 @@ export default function PlansScreen() {
                     {/* Header */}
                     <View className="px-5 pt-4 pb-6">
                         <TouchableOpacity
-                            onPress={() => router.back()}
+                            onPress={() => router.replace('/more/more')}
                             className="flex-row items-center mb-6"
                         >
                             <Ionicons
@@ -264,6 +297,16 @@ export default function PlansScreen() {
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
+                <Dialog
+                    visible={dialog.visible}
+                    title={dialog.title}
+                    description={dialog.description}
+                    confirmText={dialog.confirmText}
+                    cancelText={dialog.cancelText}
+                    onConfirm={dialog.onConfirm}
+                    onCancel={dialog.onCancel}
+                    showCancel={dialog.showCancel}
+                />
             </SafeAreaView>
         </View>
     );

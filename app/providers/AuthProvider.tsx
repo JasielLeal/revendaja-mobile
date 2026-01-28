@@ -6,12 +6,45 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import { api } from '../backend/api';
 import { authService } from '../services/auth';
 
+interface StoreInformation {
+    name: string;
+    subdomain: string;
+    phone: string;
+    address: string;
+    primaryColor: string;
+}
+
 interface User {
     id: string;
-    email: string;
     name: string;
+    email: string;
     plan: string;
-    createdAt?: string;
+    createdAt: string;
+    firstAccess: boolean;
+    token: string;
+    store: boolean;
+    storeInformation?: StoreInformation;
+}
+
+interface ValidateUserResponse {
+    valid: boolean;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        plan: string;
+        createdAt: string;
+        firstAccess: boolean;
+        token: string;
+        store: boolean;
+        storeInformation: {
+            name: string;
+            subdomain: string;
+            phone: string;
+            address: string;
+            primaryColor: string;
+        };
+    };
 }
 
 interface AuthContextData {
@@ -91,7 +124,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             const token = await authService.getToken();
             const savedUser = await authService.getUser();
-
+            
             console.log('Token carregado do storage:', token);
             console.log('User carregado do storage:', savedUser);
 
@@ -113,17 +146,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             try {
                 // Validar token e buscar dados do usuário
-                const response = await api.get<{
-                    valid: boolean;
-                    user: {
-                        id: string;
-                        email: string;
-                        name: string;
-                        role: string;
-                        plan: string;
-                        firstAccess: boolean;
-                    };
-                }>('/verify-token');
+                const response = await api.get<ValidateUserResponse>('/verify-token');
 
                 if (response.data.valid && response.data.user) {
                     const userData = response.data.user;

@@ -1,15 +1,14 @@
 import { api } from '@/app/backend/api';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Dialog } from '@/components/ui/Dialog';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { useDeleteSale } from '../hooks/useDeleteSale';
-import { useAuth } from '@/app/providers/AuthProvider';
-import { Dialog } from '@/components/ui/Dialog';
 import { useRouter } from 'expo-router';
-import { set } from 'zod';
+import React, { useState } from 'react';
+import { ActivityIndicator, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useDeleteSale } from '../hooks/useDeleteSale';
 
 interface OrderItem {
     id: string;
@@ -29,6 +28,9 @@ interface Order {
     customerPhone: string;
     createdAt: string;
     items: OrderItem[];
+    isDelivery: boolean;
+    deliveryStreet: string;
+    deliveryNumber: string;
 }
 
 interface OrderDetailsModalProps {
@@ -48,24 +50,63 @@ export function OrderDetailsModal({
 }: OrderDetailsModalProps) {
     const colors = useThemeColors();
     const [showDialog, setShowDialog] = useState(false);
+    const [alertDialog, setAlertDialog] = useState({
+        visible: false,
+        title: '',
+        description: '',
+        confirmText: 'OK',
+        cancelText: 'Cancelar',
+        showCancel: false,
+        onConfirm: () => {
+            setAlertDialog((prev) => ({ ...prev, visible: false }));
+        },
+        onCancel: undefined as undefined | (() => void),
+    });
+
+    const queryClient = useQueryClient();
+    const { user } = useAuth()
+    const router = useRouter()
 
     const handleWhatsApp = () => {
         if (!order) return;
 
         const phone = order.customerPhone.replace(/\D/g, '');
-        let message = `Olá ${order.customerName}! 👋\n\n`;
-        message += `Aqui está o resumo do seu pedido #${order.orderNumber}:\n\n`;
 
-        order.items.forEach((item, index) => {
-            message += `${index + 1}. ${item.name}\n`;
-            message += `   Qtd: ${item.quantity}x - ${formatCurrency(item.price * item.quantity)}\n`;
+        let message = `Olá *${order.customerName}*, tudo bem? 😊\n\n`;
+
+        message += `Aqui é a *${user?.storeInformation?.name}*,\n`;
+        message += `Recebemos seu pedido pelo nosso site e estou entrando em contato para dar continuidade ao atendimento.\n\n`;
+
+        message += `━━━━━━━━━━━━━━\n`;
+        message += `🛍️ *ITENS DO PEDIDO*\n`;
+        message += `━━━━━━━━━━━━━━\n`;
+
+        order.items.forEach((item) => {
+            message += `• *${item.name}*\n`;
+            message += `  Quantidade: *${item.quantity}x*\n`;
+            message += `  Subtotal: *${formatCurrency(item.price * item.quantity)}*\n\n`;
         });
 
-        message += `\n💰 *Total: ${formatCurrency(order.total)}*\n`;
-        message += `💳 Pagamento: ${order.paymentMethod}\n`;
-        message += `📅 Data: ${formatDate(order.createdAt)}\n\n`;
-        message += `Status: ${getStatusLabel(order.status)}\n\n`;
-        message += `Obrigado pela preferência! 🎉`;
+        message += `━━━━━━━━━━━━━━\n`;
+        message += `💰 *TOTAL:* ${formatCurrency(order.total)}\n`;
+        message += `💳 *FORMA DE PAGAMENTO:* ${order.paymentMethod}\n`;
+        message += `━━━━━━━━━━━━━━\n\n`;
+
+        if (order.isDelivery) {
+            message += `🚚 *ENTREGA*\n`;
+            message += `${order.deliveryStreet}, ${order.deliveryNumber}\n\n`;
+        } else {
+            message += `🏪 *RETIRADA NA LOJA*\n\n`;
+        }
+
+        if (order.paymentMethod.toLowerCase() === 'pix') {
+            message += `📲 *PAGAMENTO VIA PIX*\n`;
+            message += `Chave PIX: *123.456.789-00*\n\n`;
+            message += `Assim que realizar o pagamento, me envie o comprovante para darmos sequência ao pedido 😉✨`;
+        } else {
+            message += `Já já vamos providenciar seu pedido!\n`;
+            message += `Qualquer dúvida, estou à disposição 😊`;
+        }
 
         const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
         Linking.openURL(url);
@@ -74,60 +115,94 @@ export function OrderDetailsModal({
     const handleConfirmSale = async () => {
         if (!order) return;
 
-        Alert.alert(
-            'Confirmar Venda',
-            'Deseja confirmar esta venda?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Confirmar',
-                    onPress: async () => {
-                        try {
-                            await api.patch(`/orders/${order.id}/status`, { status: 'approved' });
-                            onClose();
-                            Alert.alert('Sucesso', 'Venda confirmada!');
-                        } catch {
-                            Alert.alert('Erro', 'Erro ao confirmar venda');
-                        }
-                    }
+        setAlertDialog({
+            visible: true,
+            title: 'Confirmar Venda',
+            description: 'Deseja confirmar esta venda?',
+            confirmText: 'Confirmar',
+            cancelText: 'Cancelar',
+            showCancel: true,
+            onCancel: () => setAlertDialog((prev) => ({ ...prev, visible: false })),
+            onConfirm: async () => {
+                setAlertDialog((prev) => ({ ...prev, visible: false }));
+
+                try {
+                    await api.patch(`/orders/${order.id}/status`, { status: 'approved' });
+                    onClose();
+                    setAlertDialog({
+                        visible: true,
+                        title: 'Sucesso',
+                        description: 'Venda confirmada!',
+                        confirmText: 'OK',
+                        cancelText: 'Cancelar',
+                        showCancel: false,
+                        onConfirm: () => setAlertDialog((prev) => ({ ...prev, visible: false })),
+                        onCancel: undefined,
+                    });
+                } catch {
+                    setAlertDialog({
+                        visible: true,
+                        title: 'Erro',
+                        description: 'Erro ao confirmar venda',
+                        confirmText: 'OK',
+                        cancelText: 'Cancelar',
+                        showCancel: false,
+                        onConfirm: () => setAlertDialog((prev) => ({ ...prev, visible: false })),
+                        onCancel: undefined,
+                    });
                 }
-            ]
-        );
+            },
+        });
     };
 
-    const queryClient = useQueryClient();
-    const { user } = useAuth()
-    const router = useRouter()
 
     const handleDeleteSale = () => {
         if (!order) return;
 
-        Alert.alert(
-            'Deletar Venda',
-            'Tem certeza que deseja deletar esta venda? Esta ação não pode ser desfeita.',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Deletar',
-                    style: 'destructive',
-                    onPress: async () => {
-                        deleteSale(order.id, {
-                            onSuccess: () => {
-                                queryClient.invalidateQueries({ queryKey: ["orders"] });
-                                queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
-                                queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
-                                queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
-                                onClose();
-                                Alert.alert('Sucesso', 'Venda deletada!');
-                            },
-                            onError: () => {
-                                Alert.alert('Erro', 'Erro ao deletar venda');
-                            }
+        setAlertDialog({
+            visible: true,
+            title: 'Deletar Venda',
+            description: 'Tem certeza que deseja deletar esta venda? Esta ação não pode ser desfeita.',
+            confirmText: 'Deletar',
+            cancelText: 'Cancelar',
+            showCancel: true,
+            onCancel: () => setAlertDialog((prev) => ({ ...prev, visible: false })),
+            onConfirm: () => {
+                setAlertDialog((prev) => ({ ...prev, visible: false }));
+
+                deleteSale(order.id, {
+                    onSuccess: () => {
+                        queryClient.invalidateQueries({ queryKey: ["orders"] });
+                        queryClient.invalidateQueries({ queryKey: ["sales-pagination"] });
+                        queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+                        queryClient.invalidateQueries({ queryKey: ["recent-sales"] });
+                        onClose();
+                        setAlertDialog({
+                            visible: true,
+                            title: 'Sucesso',
+                            description: 'Venda deletada!',
+                            confirmText: 'OK',
+                            cancelText: 'Cancelar',
+                            showCancel: false,
+                            onConfirm: () => setAlertDialog((prev) => ({ ...prev, visible: false })),
+                            onCancel: undefined,
+                        });
+                    },
+                    onError: () => {
+                        setAlertDialog({
+                            visible: true,
+                            title: 'Erro',
+                            description: 'Erro ao deletar venda',
+                            confirmText: 'OK',
+                            cancelText: 'Cancelar',
+                            showCancel: false,
+                            onConfirm: () => setAlertDialog((prev) => ({ ...prev, visible: false })),
+                            onCancel: undefined,
                         });
                     }
-                }
-            ]
-        );
+                });
+            },
+        });
     };
 
     const { mutate: deleteSale, isPending } = useDeleteSale()
@@ -370,6 +445,16 @@ export function OrderDetailsModal({
                                                 }}
                                                 cancelText='Voltar'
                                                 confirmText='Fazer upgrade'
+                                            />
+                                            <Dialog
+                                                visible={alertDialog.visible}
+                                                title={alertDialog.title}
+                                                description={alertDialog.description}
+                                                confirmText={alertDialog.confirmText}
+                                                cancelText={alertDialog.cancelText}
+                                                onConfirm={alertDialog.onConfirm}
+                                                onCancel={alertDialog.onCancel}
+                                                showCancel={alertDialog.showCancel}
                                             />
                                         </>
 

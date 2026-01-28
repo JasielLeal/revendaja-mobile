@@ -7,7 +7,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Image, Linking, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useConfirmSale } from '../hooks/useconfirmSale';
 import { useOrderDelete } from '../hooks/useOrderDelete';
-import { set } from 'zod';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface OrderItem {
     id: string;
@@ -26,6 +26,9 @@ interface Order {
     customerName: string;
     customerPhone: string;
     createdAt: string;
+    isDelivery: boolean;
+    deliveryStreet: string;
+    deliveryNumber: string;
     items: OrderItem[];
 }
 
@@ -49,27 +52,54 @@ export function OrderDetailsModal({
     const colors = useThemeColors();
     const [showDialog, setShowDialog] = React.useState(false);
 
+    const { user } = useAuth()
+    console.log(user)
+
     const handleWhatsApp = () => {
         if (!order) return;
 
         const phone = order.customerPhone.replace(/\D/g, '');
-        let message = `Olá ${order.customerName}! 👋\n\n`;
-        message += `Aqui está o resumo do seu pedido #${order.orderNumber}:\n\n`;
 
-        order.items.forEach((item, index) => {
-            message += `${index + 1}. ${item.name}\n`;
-            message += `   Qtd: ${item.quantity}x - ${formatCurrency(item.price * item.quantity)}\n`;
+        let message = `Olá *${order.customerName}*, tudo bem? 😊\n\n`;
+
+        message += `Aqui é a *${user?.storeInformation?.name}*,\n`;
+        message += `Recebemos seu pedido pelo nosso site e estou entrando em contato para dar continuidade ao atendimento.\n\n`;
+
+        message += `━━━━━━━━━━━━━━\n`;
+        message += `🛍️ *ITENS DO PEDIDO*\n`;
+        message += `━━━━━━━━━━━━━━\n`;
+
+        order.items.forEach((item) => {
+            message += `• *${item.name}*\n`;
+            message += `  Quantidade: *${item.quantity}x*\n`;
+            message += `  Subtotal: *${formatCurrency(item.price * item.quantity)}*\n\n`;
         });
 
-        message += `\n💰 *Total: ${formatCurrency(order.total)}*\n`;
-        message += `💳 Pagamento: ${order.paymentMethod}\n`;
-        message += `📅 Data: ${formatDate(order.createdAt)}\n\n`;
-        message += `Status: ${getStatusLabel(order.status)}\n\n`;
-        message += `Obrigado pela preferência! 🎉`;
+        message += `━━━━━━━━━━━━━━\n`;
+        message += `💰 *TOTAL:* ${formatCurrency(order.total)}\n`;
+        message += `💳 *FORMA DE PAGAMENTO:* ${order.paymentMethod}\n`;
+        message += `━━━━━━━━━━━━━━\n\n`;
+
+        if (order.isDelivery) {
+            message += `🚚 *ENTREGA*\n`;
+            message += `${order.deliveryStreet}, ${order.deliveryNumber}\n\n`;
+        } else {
+            message += `🏪 *RETIRADA NA LOJA*\n\n`;
+        }
+
+        if (order.paymentMethod.toLowerCase() === 'pix') {
+            message += `📲 *PAGAMENTO VIA PIX*\n`;
+            message += `Chave PIX: *123.456.789-00*\n\n`;
+            message += `Assim que realizar o pagamento, me envie o comprovante para darmos sequência ao pedido 😉✨`;
+        } else {
+            message += `Já já vamos providenciar seu pedido!\n`;
+            message += `Qualquer dúvida, estou à disposição 😊`;
+        }
 
         const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
         Linking.openURL(url);
     };
+
 
     const mutationConfirmSale = useConfirmSale()
     const queryClient = useQueryClient();
@@ -273,6 +303,27 @@ export function OrderDetailsModal({
 
                             </View>
                         </View>
+
+                        {/* Informações de Entrega */}
+                        {order?.isDelivery && (
+                            <View className="mb-6">
+                                <Text allowFontScaling={false} className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: colors.mutedForeground }}>
+                                    Endereço de Entrega
+                                </Text>
+                                <View
+                                    className="rounded-2xl"
+                                >
+                                    <View className="flex-row items-start">
+                                        <Ionicons name="location-outline" size={20} color={colors.mutedForeground} />
+                                        <View className="ml-3 flex-1">
+                                            <Text allowFontScaling={false} className="text-base font-semibold mb-1" style={{ color: colors.foreground }}>
+                                                {order.deliveryStreet}, {order.deliveryNumber}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        )}
 
                         {/* Produtos */}
                         <View className="mb-6">
