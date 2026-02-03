@@ -1,12 +1,10 @@
 import { useAuth } from '@/app/providers/AuthProvider';
-import logo from "@/assets/logo.png";
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -22,7 +20,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLogin } from './hooks/useLogin';
 import { LoginFormData, loginSchema } from './schemas/schema';
-import { store } from 'expo-router/build/global-state/router-store';
 
 interface ApiErrorResponse {
     message?: string;
@@ -98,6 +95,7 @@ export default function LoginScreen() {
                     plan: response.plan,
                     createdAt: response.createdAt,
                     firstAccess: response.firstAccess,
+                    token: response.token,
                     store: response.store,
                     storeInformation: {
                         name: response.store ? response['storeInformation']?.name || '' : '',
@@ -127,17 +125,21 @@ export default function LoginScreen() {
             >
                 <ScrollView
                     className="px-6"
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Logo */}
-                    <View className="items-center mb-8">
-                        <Image
-                            source={logo}
-                            style={{ width: 150, height: 50 }}
-                            contentFit="contain"
-                        />
+
+                    <View className="mb-6 flex flex-row items-center justify-between gap-4" >
+                        <TouchableOpacity style={{ marginBottom: 20, borderRadius: 15, padding: 6, borderColor: colors.border, borderWidth: 1 }}>
+                            <Text className='text-white' onPress={() => router.push("/onboarding")}>
+                                <Ionicons name="chevron-back" size={24} color={colors.foreground} />
+                            </Text>
+                        </TouchableOpacity>
+
+                        <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>Acesse sua conta</Text>
+
+                        <View style={{ width: 40, height: 40 }} />
                     </View>
 
                     {/* Erro da API */}
@@ -242,6 +244,20 @@ export default function LoginScreen() {
                             <Text style={{ color: colors.primary, fontWeight: '600' }}>
                                 Cadastre-se
                             </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Text className="text-center my-8" style={{ color: colors.mutedForeground }}>Ou</Text>
+
+                    <View className='flex flex-row items-center justify-center gap-4 mb-8'>
+                        <TouchableOpacity  style={{borderColor: colors.border,   borderWidth: 1, padding: 10, borderRadius: 10}}>
+                            <Ionicons name="logo-google" size={32} color={colors.primary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity  style={{borderColor: colors.border, borderWidth: 1, padding: 10, borderRadius: 10}}>
+                            <Ionicons name="logo-facebook" size={32} color={colors.primary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity  style={{borderColor: colors.border, borderWidth: 1, padding: 10, borderRadius: 10}}>
+                            <Ionicons name="logo-apple" size={32} color={colors.primary} />
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

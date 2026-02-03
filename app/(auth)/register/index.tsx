@@ -57,13 +57,18 @@ export default function RegisterNameScreen() {
                 className="flex-1"
             >
                 {/* Header com botão voltar */}
-                <View className="px-4 py-2">
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        className="w-10 h-10 items-center justify-center"
-                    >
-                        <Ionicons name="arrow-back" size={24} color={colors.foreground} />
+                <View className="mb-6 px-4 flex flex-row items-center justify-between gap-4" >
+                    <TouchableOpacity style={{ marginBottom: 20, borderRadius: 15, padding: 6, borderColor: colors.border, borderWidth: 1 }}>
+                        <Text className='text-white' onPress={() => router.back()}>
+                            <Ionicons name="chevron-back" size={24} color={colors.foreground} />
+                        </Text>
                     </TouchableOpacity>
+
+                    <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>
+                        Crie sua conta
+                    </Text>
+
+                    <View style={{ width: 40, height: 40 }} />
                 </View>
 
                 <ScrollView
@@ -72,26 +77,18 @@ export default function RegisterNameScreen() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Logo */}
-                    <View className="items-center mb-6">
-                        <Image
-                            source={logo}
-                            style={{ width: 120, height: 40 }}
-                            contentFit="contain"
-                        />
-                    </View>
 
                     {/* Título */}
                     <View className="mb-8">
                         <Text
                             style={{ color: colors.foreground }}
-                            className="text-2xl font-bold text-center"
+                            className="text-2xl font-bold"
                         >
                             Qual é o seu nome?
                         </Text>
                         <Text
                             style={{ color: colors.mutedForeground }}
-                            className="text-base text-center mt-2"
+                            className="text-base mt-2"
                         >
                             Digite seu nome completo para começar
                         </Text>
@@ -103,7 +100,6 @@ export default function RegisterNameScreen() {
                         name="name"
                         render={({ field: { onChange, onBlur, value } }) => (
                             <Input
-                                label="Nome Completo"
                                 placeholder="Seu nome completo"
                                 value={value}
                                 onChangeText={onChange}
@@ -125,20 +121,6 @@ export default function RegisterNameScreen() {
                             disabled={!isValid}
                             onPress={handleSubmit(onSubmit)}
                         />
-
-                        {/* Link para Login */}
-                        <View className='flex flex-row items-center mt-5 justify-center'>
-                            <Text style={{ color: colors.mutedForeground }}>
-                                Não tem conta?{' '}
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => router.push('/(auth)/register')}
-                            >
-                                <Text style={{ color: colors.primary, fontWeight: '600' }}>
-                                    Cadastre-se
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>

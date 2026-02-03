@@ -296,10 +296,10 @@ export default function OTPScreen() {
                     >
                         <TouchableOpacity
                             onPress={() => router.back()}
-                            className="mb-4 w-10 h-10 rounded-full items-center justify-center"
+                            className="mb-4 w-10 h-10 rounded-2xl items-center justify-center"
                             style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
                         >
-                            <Ionicons name="arrow-back" size={22} color="#fff" />
+                            <Ionicons name="chevron-back" size={22} color="#fff" />
                         </TouchableOpacity>
 
                         <Animated.View
@@ -453,39 +453,8 @@ export default function OTPScreen() {
                                     </TouchableOpacity>
                                 )}
                             </View>
-
-                            {/* Info de segurança */}
-                            <View
-                                className="rounded-xl p-4 flex-row mt-6"
-                                style={{ backgroundColor: colors.muted }}
-                            >
-                                <Ionicons
-                                    name="information-circle-outline"
-                                    size={18}
-                                    color={colors.primary}
-                                    style={{ marginRight: 8, marginTop: 2 }}
-                                />
-                                <Text
-                                    className="flex-1 text-xs"
-                                    style={{ color: colors.mutedForeground }}
-                                >
-                                    O código expira em 10 minutos. Verifique também a pasta de spam.
-                                </Text>
-                            </View>
                         </View>
 
-                        {/* Voltar para login */}
-                        <TouchableOpacity
-                            className="mt-6 mb-10 items-center"
-                            onPress={() => router.replace('/(auth)/login')}
-                        >
-                            <Text style={{ color: colors.mutedForeground }}>
-                                Já verificou?{' '}
-                                <Text style={{ color: colors.primary, fontWeight: 'bold' }}>
-                                    Fazer login
-                                </Text>
-                            </Text>
-                        </TouchableOpacity>
                     </Animated.View>
                 </ScrollView>
             </KeyboardAvoidingView>

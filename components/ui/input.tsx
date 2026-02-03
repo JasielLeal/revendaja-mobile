@@ -40,12 +40,11 @@ export default function Input({
             )}
 
             <View
-                className="rounded-xl px-4 py-4 justify-center flex-row items-center "
+                className="w-full rounded-2xl px-4 py-4 justify-center flex-row items-center"
                 style={{
-                    borderWidth: 1.5,
-                    borderColor: error ? '#ef4444' : colors.border,
-                    backgroundColor: colors.background,
-                    gap: 10,
+                    
+                    backgroundColor: colors.card,
+                    gap: 8,
                 }}
             >
                 {leftIcon && (

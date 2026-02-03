@@ -33,10 +33,8 @@ const passwordSchema = z
     .object({
         password: z
             .string()
-            .min(8, "Mínimo 8 caracteres")
-            .regex(/[a-z]/, "Deve ter letra minúscula")
-            .regex(/[A-Z]/, "Deve ter letra maiúscula")
-            .regex(/[0-9]/, "Deve ter número"),
+            .min(6, "Mínimo 6 caracteres"),
+
         confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
@@ -46,25 +44,6 @@ const passwordSchema = z
 
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
-// Componente de validação de senha em tempo real
-function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
-    const colors = useThemeColors();
-    return (
-        <View className="flex-row items-center mb-2">
-            <Ionicons
-                name={met ? "checkmark-circle" : "ellipse-outline"}
-                size={18}
-                color={met ? "#22c55e" : colors.mutedForeground}
-            />
-            <Text
-                className="ml-2 text-sm"
-                style={{ color: met ? "#22c55e" : colors.mutedForeground }}
-            >
-                {text}
-            </Text>
-        </View>
-    );
-}
 
 export default function RegisterPasswordScreen() {
     const colors = useThemeColors();
@@ -88,13 +67,6 @@ export default function RegisterPasswordScreen() {
     });
 
     const password = watch('password');
-
-    // Validações em tempo real
-    const hasMinLength = password.length >= 8;
-    const hasLowercase = /[a-z]/.test(password);
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const allValid = hasMinLength && hasLowercase && hasUppercase && hasNumber;
 
     // Animação de loading
     React.useEffect(() => {
@@ -155,13 +127,18 @@ export default function RegisterPasswordScreen() {
                 className="flex-1"
             >
                 {/* Header com botão voltar */}
-                <View className="px-4 py-2">
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        className="w-10 h-10 items-center justify-center"
-                    >
-                        <Ionicons name="arrow-back" size={24} color={colors.foreground} />
+                <View className="mb-6 px-4 flex flex-row items-center justify-between gap-4" >
+                    <TouchableOpacity style={{ marginBottom: 20, borderRadius: 15, padding: 6, borderColor: colors.border, borderWidth: 1 }}>
+                        <Text className='text-white' onPress={() => router.back()}>
+                            <Ionicons name="chevron-back" size={24} color={colors.foreground} />
+                        </Text>
                     </TouchableOpacity>
+
+                    <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>
+                        Crie sua conta
+                    </Text>
+
+                    <View style={{ width: 40, height: 40 }} />
                 </View>
 
                 <ScrollView
@@ -170,26 +147,17 @@ export default function RegisterPasswordScreen() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Logo */}
-                    <View className="items-center mb-6">
-                        <Image
-                            source={logo}
-                            style={{ width: 120, height: 40 }}
-                            contentFit="contain"
-                        />
-                    </View>
-
                     {/* Título */}
                     <View className="mb-8">
                         <Text
                             style={{ color: colors.foreground }}
-                            className="text-2xl font-bold text-center"
+                            className="text-2xl font-bold"
                         >
                             Crie sua senha
                         </Text>
                         <Text
                             style={{ color: colors.mutedForeground }}
-                            className="text-base text-center mt-2"
+                            className="text-base mt-2"
                         >
                             Crie uma senha segura para sua conta
                         </Text>
@@ -228,14 +196,6 @@ export default function RegisterPasswordScreen() {
                         )}
                     />
 
-                    {/* Requisitos de senha */}
-                    <View className="mb-4">
-                        <PasswordRequirement met={hasMinLength} text="Mínimo 8 caracteres" />
-                        <PasswordRequirement met={hasLowercase} text="1 letra minúscula" />
-                        <PasswordRequirement met={hasUppercase} text="1 letra maiúscula" />
-                        <PasswordRequirement met={hasNumber} text="1 número" />
-                    </View>
-
                     {/* Campo Confirmar Senha */}
                     <Controller
                         control={control}
@@ -271,7 +231,6 @@ export default function RegisterPasswordScreen() {
                                     "Criar conta"
                                 )
                             }
-                            disabled={!allValid || registerMutation.isPending}
                             onPress={handleSubmit(onSubmit)}
                         />
                     </View>

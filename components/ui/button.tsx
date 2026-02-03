@@ -74,7 +74,7 @@ export default function Button({ name, disabled, onPress, variant = 'primary' }:
                 gap: 8,
                 ...getBorderStyle(),
             }}
-            className="w-full flex-row items-center justify-center py-4 rounded-full mt-4"
+            className="w-full flex-row items-center justify-center py-4 rounded-2xl mt-4"
             disabled={disabled}
             onPress={onPress}
             activeOpacity={0.8}
