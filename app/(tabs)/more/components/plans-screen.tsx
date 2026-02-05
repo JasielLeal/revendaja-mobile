@@ -136,7 +136,7 @@ export default function PlansScreen() {
                     {/* Header */}
                     <View className="px-5 pt-4 pb-6">
                         <TouchableOpacity
-                            onPress={() => router.replace('/more/more')}
+                            onPress={() => router.back()}
                             className="flex-row items-center mb-6"
                         >
                             <Ionicons

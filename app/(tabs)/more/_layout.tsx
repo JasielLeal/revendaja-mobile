@@ -28,6 +28,38 @@ export default function MoreLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="components/store-screen"
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="components/configurations"
+                options={{
+                    headerShown: false,
+                }}
+            />
+
+            <Stack.Screen
+                name="components/store-info"
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="components/store-pix"
+                options={{
+                    headerShown: false,
+                }}
+            />
+            <Stack.Screen
+                name="components/store-appearance"
+                options={{
+                    headerShown: false,
+                }}
+            />
+            
         </Stack>
     );
 }

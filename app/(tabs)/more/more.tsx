@@ -3,13 +3,30 @@ import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 
 export default function MorePage() {
     const colors = useThemeColors();
     const router = useRouter();
+    const { user } = useAuth();
 
     const { signOut } = useAuth()
+
+    const storeUrl = user?.storeInformation?.subdomain
+        ? `https://${user.storeInformation.subdomain}.revendaja.com`
+        : undefined;
+
+    const handleShareStore = async () => {
+        if (!storeUrl) return;
+        try {
+            await Share.share({
+                message: storeUrl,
+                title: 'Compartilhar loja',
+            });
+        } catch {
+            // ignore
+        }
+    };
 
     const handleLogout = () => {
         signOut();
@@ -38,38 +55,36 @@ export default function MorePage() {
                     backgroundColor: colors.background,
                     borderTopLeftRadius: 30,
                     borderTopRightRadius: 30,
-                  
+
                 }}
             />
+
+            {/* Header fixo */}
+            <View className="px-4 pt-10 pb-6 relative z-10">
+                <View className="flex-row items-center justify-between mb-6 mt-5">
+                    <View className="flex-1">
+                        <Text
+                            className="text-lg font-medium mb-1"
+                            style={{ color: colors.primaryForeground + '80' }}
+                            allowFontScaling={false}
+                        >
+                            Menu
+                        </Text>
+                        <Text
+                            className="text-3xl font-black tracking-tight"
+                            style={{ color: colors.primaryForeground }}
+                            allowFontScaling={false}
+                        >
+                            Mais opções
+                        </Text>
+                    </View>
+                </View>
+            </View>
 
             <ScrollView
                 className="flex-1 relative z-10"
                 contentContainerStyle={{ paddingBottom: 30 }}
             >
-
-                {/* Header */}
-                <View className="px-4 pt-10 pb-6">
-                    <View className="flex-row items-center justify-between mb-6 mt-5">
-                        <View className="flex-1">
-                            <Text
-                                className="text-lg font-medium mb-1"
-                                style={{ color: colors.primaryForeground + '80' }}
-                                allowFontScaling={false}
-                            >
-                                Menu
-                            </Text>
-                            <Text
-                                className="text-3xl font-black tracking-tight"
-                                style={{ color: colors.primaryForeground }}
-                                allowFontScaling={false}
-                            >
-                                Mais opções
-                            </Text>
-                        </View>
-
-
-                    </View>
-                </View>
 
 
                 {/* Seção Adicional */}
@@ -84,11 +99,11 @@ export default function MorePage() {
 
                     <View
                         className="rounded-xl overflow-hidden"
-                            style={{
-                                backgroundColor: colors.card,
-                                borderColor: colors.border + '20',
-                                borderWidth: 1,
-                            }}
+                        style={{
+                            backgroundColor: colors.card,
+                            borderColor: colors.border + '20',
+                            borderWidth: 1,
+                        }}
                     >
                         <TouchableOpacity
                             className="flex-row items-center justify-between px-4 py-4"
@@ -211,6 +226,159 @@ export default function MorePage() {
                                         }}
                                     >
                                         Conheça todos os planos
+                                    </Text>
+                                </View>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={colors.mutedForeground}
+                            />
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+
+                {/* Seção Adicional */}
+                <View className="px-5 mb-6">
+                    <Text
+                        className="text-sm font-semibold mb-3"
+                        style={{ color: colors.mutedForeground }}
+                        allowFontScaling={false}
+                    >
+                        LOJA
+                    </Text>
+
+                    <View
+                        className="rounded-xl overflow-hidden"
+                        style={{
+                            backgroundColor: colors.card,
+                            borderColor: colors.border + '20',
+                            borderWidth: 1,
+                        }}
+                    >
+                        <TouchableOpacity
+                            className="flex-row items-center justify-between px-4 py-4"
+                            style={{
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.border + '30',
+                            }}
+                            onPress={() => router.push("/(tabs)/more/components/configurations")}
+                        >
+                            <View className="flex-row items-center gap-3">
+                                <View
+                                    className="w-10 h-10 rounded-full items-center justify-center"
+                                    style={{
+                                        backgroundColor: colors.primary + '15',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="settings-outline"
+                                        size={20}
+                                        color={colors.primary}
+                                    />
+                                </View>
+                                <View>
+                                    <Text
+                                        className="font-semibold text-base"
+                                        style={{ color: colors.foreground }}
+                                    >
+                                        Configurações
+                                    </Text>
+                                    <Text
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                            color: colors.mutedForeground,
+                                        }}
+                                    >
+                                        Ajuste as principais opções da sua loja
+                                    </Text>
+                                </View>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={colors.mutedForeground}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-row items-center justify-between px-4 py-4"
+                            style={{
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.border + '30',
+                            }}
+                            onPress={() => Linking.openURL(`https://${user?.storeInformation?.subdomain}.revendaja.com`)
+                            }
+                        >
+                            <View className="flex-row items-center gap-3">
+                                <View
+                                    className="w-10 h-10 rounded-full items-center justify-center"
+                                    style={{
+                                        backgroundColor: colors.primary + '15',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="storefront-outline"
+                                        size={20}
+                                        color={colors.primary}
+                                    />
+                                </View>
+                                <View>
+                                    <Text
+                                        className="font-semibold text-base"
+                                        style={{ color: colors.foreground }}
+                                    >
+                                        Visualizar loja
+                                    </Text>
+                                    <Text
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                            color: colors.mutedForeground,
+                                        }}
+                                    >
+                                        Veja sua loja como seus clientes
+                                    </Text>
+                                </View>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={colors.mutedForeground}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-row items-center justify-between px-4 py-4"
+                            onPress={handleShareStore}
+                        >
+                            <View className="flex-row items-center gap-3">
+                                <View
+                                    className="w-10 h-10 rounded-full items-center justify-center"
+                                    style={{
+                                        backgroundColor: '#F59E0B' + '15',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="share-social-outline"
+                                        size={20}
+                                        color={colors.primary}
+                                    />
+                                </View>
+                                <View>
+                                    <Text
+                                        className="font-semibold text-base"
+                                        style={{ color: colors.foreground }}
+                                    >
+                                        Compartilhar loja
+                                    </Text>
+                                    <Text
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                            color: colors.mutedForeground,
+                                        }}
+                                    >
+                                        Divulgue sua loja para mais clientes
                                     </Text>
                                 </View>
                             </View>

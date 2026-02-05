@@ -131,10 +131,17 @@ export default function LoginScreen() {
                 >
 
                     <View className="mb-6 flex flex-row items-center justify-between gap-4" >
-                        <TouchableOpacity style={{ marginBottom: 20, borderRadius: 15, padding: 6, borderColor: colors.border, borderWidth: 1 }}>
-                            <Text className='text-white' onPress={() => router.push("/onboarding")}>
-                                <Ionicons name="chevron-back" size={24} color={colors.foreground} />
-                            </Text>
+                        <TouchableOpacity
+                            style={{ marginBottom: 20, borderRadius: 15, padding: 6, borderColor: colors.border, borderWidth: 1 }}
+                            onPress={() => {
+                                if (router.canGoBack()) {
+                                    router.back();
+                                } else {
+                                    router.replace('/(auth)/onboarding' as any);
+                                }
+                            }}
+                        >
+                            <Ionicons name="chevron-back" size={24} color={colors.foreground} />
                         </TouchableOpacity>
 
                         <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>Acesse sua conta</Text>

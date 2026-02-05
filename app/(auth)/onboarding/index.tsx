@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import backgroundImage from "../../../assets/background.jpg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "@/components/ui/button";
@@ -19,31 +19,30 @@ export default function OnboardingPage() {
             imageStyle={styles.image}
         >
             <LinearGradient
-                colors={["rgba(0,0,0,0.68)", "rgba(0,0,0,0.35)"]}
+                colors={["rgba(0,0,0,0.98)", "rgba(0,0,0,0.35)"]}
                 start={{ x: 0.5, y: 1 }}
                 end={{ x: 0.5, y: 0 }}
                 style={styles.gradient}
             />
-            <SafeAreaView style={styles.container} className="justify-end px-5">
-                <Text className="text-white text-3xl font-bold mb-4">
-                    Seja bem-vindo ao Revendaja
-                </Text>
-                <Text className="text-white text-base mb-8">
-                    Leve seu negócio ao próximo nível com uma gestão profissional feita para facilitar sua rotina e aumentar seus resultados.
-                </Text>
-                <Button name="Começar agora" onPress={()=> router.push("/(auth)/register")}/>
-                <View className='flex flex-row items-center mt-5 justify-center'>
-                    <Text className="text-white">
-                        Já tem conta?{' '}
+            <SafeAreaView style={styles.container} className="justify-end px-5 flex-1">
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    className="flex-1 justify-end mb-10"
+                >
+                    <Text className="text-white text-3xl font-bold">
+                        Seja bem-vindo ao
                     </Text>
-                    <TouchableOpacity
-                        onPress={() => router.push('/(auth)/login')}
-                    >
-                        <Text style={{ color: colors.primary, fontWeight: '600' }}>
-                            Fazer login
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                    <Text className="text-4xl font-bold mb-6" style={{ color: colors.primary }}>
+                        Revendaja
+                    </Text>
+                    <Text className="text-white text-base mb-8">
+                        Leve seu negócio ao próximo nível com uma gestão profissional feita para facilitar sua rotina e aumentar seus resultados.
+                    </Text>
+                    <Button name="Entrar" onPress={() => router.push("/(auth)/login")} />
+                    <Button name="Criar nova conta" variant="outline" onPress={() => router.push("/(auth)/register")} />
+
+                </KeyboardAvoidingView>
+
             </SafeAreaView>
         </ImageBackground>
     )
