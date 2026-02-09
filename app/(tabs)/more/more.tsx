@@ -1,3 +1,4 @@
+import { useStoreMe } from '@/app/(tabs)/more/hooks/useStoreMe';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,13 +9,13 @@ import { Linking, ScrollView, Share, Text, TouchableOpacity, View } from 'react-
 export default function MorePage() {
     const colors = useThemeColors();
     const router = useRouter();
-    const { user } = useAuth();
 
     const { signOut } = useAuth()
 
-    const storeUrl = user?.storeInformation?.subdomain
-        ? `https://${user.storeInformation.subdomain}.revendaja.com`
-        : undefined;
+    const { data: store } = useStoreMe();
+
+    const subdomain = store?.subdomain
+    const storeUrl = subdomain ? `https://${subdomain}.revendaja.com` : undefined;
 
     const handleShareStore = async () => {
         if (!storeUrl) return;
@@ -308,7 +309,52 @@ export default function MorePage() {
                                 borderBottomWidth: 1,
                                 borderBottomColor: colors.border + '30',
                             }}
-                            onPress={() => Linking.openURL(`https://${user?.storeInformation?.subdomain}.revendaja.com`)
+                            onPress={() => router.push("/(tabs)/more/components/financial")}
+                        >
+                            <View className="flex-row items-center gap-3">
+                                <View
+                                    className="w-10 h-10 rounded-full items-center justify-center"
+                                    style={{
+                                        backgroundColor: colors.primary + '15',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="bar-chart-outline"
+                                        size={20}
+                                        color={colors.primary}
+                                    />
+                                </View>
+                                <View>
+                                    <Text
+                                        className="font-semibold text-base"
+                                        style={{ color: colors.foreground }}
+                                    >
+                                        Financeiro
+                                    </Text>
+                                    <Text
+                                        className="text-xs mt-0.5"
+                                        style={{
+                                            color: colors.mutedForeground,
+                                        }}
+                                    >
+                                        Acompanhe o desempenho financeiro
+                                    </Text>
+                                </View>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={colors.mutedForeground}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            className="flex-row items-center justify-between px-4 py-4"
+                            style={{
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.border + '30',
+                            }}
+                            onPress={() => Linking.openURL(`https://${subdomain}.revendaja.com`)
                             }
                         >
                             <View className="flex-row items-center gap-3">

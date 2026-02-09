@@ -1,10 +1,17 @@
-import { SaleItemSkeleton } from '@/components/skeletons';
-import { useThemeColors } from '@/hooks/use-theme-colors';
-import { formatCurrency } from '@/lib/formatters';
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native';
+import { SaleItemSkeleton } from "@/components/skeletons";
+import { useThemeColors } from "@/hooks/use-theme-colors";
+import { formatCurrency } from "@/lib/formatters";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import {
     CustomDatePicker,
     DateFilterDropdown,
@@ -13,613 +20,660 @@ import {
     SalesItem,
     SalesStatsCards,
     SearchBar,
-    StatusFilters
-} from './components';
-import { useSalesPagination } from './hooks/useSalesPagination';
+    StatusFilters,
+} from "./components";
+import { useSalesPagination } from "./hooks/useSalesPagination";
 
 interface OrderItem {
-    id: string;
-    name: string;
-    quantity: number;
-    imgUrl: string;
-    price: number;
-    storeProductId: string;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  name: string;
+  quantity: number;
+  imgUrl: string;
+  price: number;
+  storeProductId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Order {
-    id: string;
-    orderNumber: string;
-    status: string;
-    total: number;
-    paymentMethod: string;
-    customerName: string;
-    customerPhone: string;
-    storeId: string;
-    isDelivery: boolean;
-    deliveryStreet: string;
-    deliveryNumber: string;
-    createdAt: string;
-    updatedAt: string;
-    items: OrderItem[];
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: number;
+  paymentMethod: string;
+  customerName: string;
+  customerPhone: string;
+  storeId: string;
+  isDelivery: boolean;
+  deliveryStreet: string;
+  deliveryNumber: string;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItem[];
 }
 
 interface SalesPageProps {
-    navigation?: any;
+  navigation?: any;
 }
 
 export default function SalesPage({ navigation }: SalesPageProps) {
-    const colors = useThemeColors();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [selectedFilter, setSelectedFilter] = useState('Todos');
-    const [selectedDateFilter, setSelectedDateFilter] = useState('Este mês');
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showCalendar, setShowCalendar] = useState(false);
-    const [selectedStartDate, setSelectedStartDate] = useState('');
-    const [selectedEndDate, setSelectedEndDate] = useState('');
-    const [markedDates, setMarkedDates] = useState({});
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [showOrderDetails, setShowOrderDetails] = useState(false);
-    const [handledNotificationKey, setHandledNotificationKey] = useState<string | null>(null);
-    const [hasTriedRefetch, setHasTriedRefetch] = useState(false);
+  const colors = useThemeColors();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("Todos");
+  const [selectedDateFilter, setSelectedDateFilter] = useState("Este mês");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState("");
+  const [selectedEndDate, setSelectedEndDate] = useState("");
+  const [markedDates, setMarkedDates] = useState({});
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [handledNotificationKey, setHandledNotificationKey] = useState<
+    string | null
+  >(null);
+  const [hasTriedRefetch, setHasTriedRefetch] = useState(false);
 
-    const { orderId, orderNumber } = useLocalSearchParams<{
-        orderId?: string;
-        orderNumber?: string;
-    }>();
+  const { orderId, orderNumber } = useLocalSearchParams<{
+    orderId?: string;
+    orderNumber?: string;
+  }>();
 
-    const normalizedOrderId = Array.isArray(orderId) ? orderId[0] : orderId;
-    const normalizedOrderNumber = Array.isArray(orderNumber) ? orderNumber[0] : orderNumber;
-    const notificationKey = normalizedOrderId ?? normalizedOrderNumber ?? null;
+  const normalizedOrderId = Array.isArray(orderId) ? orderId[0] : orderId;
+  const normalizedOrderNumber = Array.isArray(orderNumber)
+    ? orderNumber[0]
+    : orderNumber;
+  const notificationKey = normalizedOrderId ?? normalizedOrderNumber ?? null;
 
-    // Debounce para busca - aguarda 500ms após parar de digitar
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchQuery);
-        }, 500);
+  // Debounce para busca - aguarda 500ms após parar de digitar
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
 
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-    useEffect(() => {
-        if (notificationKey && notificationKey !== handledNotificationKey) {
-            setHasTriedRefetch(false);
-        }
-    }, [notificationKey, handledNotificationKey]);
+  useEffect(() => {
+    if (notificationKey && notificationKey !== handledNotificationKey) {
+      setHasTriedRefetch(false);
+    }
+  }, [notificationKey, handledNotificationKey]);
 
-    // Calcular datas com base no filtro selecionado
-    const dateRange = useMemo(() => {
-        const now = new Date();
-        let from = '';
-        let to = '';
+  function formatLocalDateKey(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
 
-        switch (selectedDateFilter) {
-            case 'Todos':
-                from = '';
-                to = '';
-                break;
-            case 'Hoje':
-                from = now.toISOString().split('T')[0];
-                to = from;
-                break;
-            case 'Esta semana':
-                const startOfWeek = new Date(now);
-                startOfWeek.setDate(now.getDate() - now.getDay());
-                from = startOfWeek.toISOString().split('T')[0];
-                to = now.toISOString().split('T')[0];
-                break;
-            case 'Este mês':
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                from = startOfMonth.toISOString().split('T')[0];
-                to = now.toISOString().split('T')[0];
-                break;
-            default:
-                // Personalizado
-                if (selectedStartDate && selectedEndDate) {
-                    from = selectedStartDate;
-                    to = selectedEndDate;
-                } else if (selectedStartDate) {
-                    from = selectedStartDate;
-                    to = selectedStartDate;
-                }
-                break;
-        }
+  // Calcular datas com base no filtro selecionado
+  const dateRange = useMemo(() => {
+    const now = new Date();
+    let from = "";
+    let to = "";
 
-        return { from, to };
-    }, [selectedDateFilter, selectedStartDate, selectedEndDate]);
-
-    // Hook de paginação com filtros (incluindo status)
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        isLoading,
-        refetch,
-        isRefetching
-    } = useSalesPagination({
-        from: dateRange.from,
-        to: dateRange.to,
-        search: debouncedSearch,
-        status: selectedFilter === 'Todos' ? undefined : selectedFilter,
-        limit: 20
-    });
-
-    // Uma única requisição para obter todas as vendas e fazer contagens
-    const { data: allSalesData } = useSalesPagination({
-        from: dateRange.from,
-        to: dateRange.to,
-        search: '',
-        status: undefined,
-        limit: 9999
-    });
-
-    // Combinar todas as páginas em uma lista única
-    const allOrders = useMemo(() => {
-        return data?.pages.flatMap(page => page.orders) ?? [];
-    }, [data]);
-
-    // Pega todas as vendas para fazer as contagens
-    const allSalesForCounting = useMemo(() => {
-        return allSalesData?.pages.flatMap(page => page.orders) ?? [];
-    }, [allSalesData]);
-
-    // Agrupar pedidos por dia com valor total
-    const groupedByDay = useMemo(() => {
-        const groups: { [key: string]: { date: Date, total: number, orders: Order[] } } = {};
-
-        allOrders.forEach(order => {
-            const date = new Date(order.createdAt);
-            const dateKey = date.toISOString().split('T')[0];
-
-            if (!groups[dateKey]) {
-                groups[dateKey] = {
-                    date: date,
-                    total: 0,
-                    orders: []
-                };
-            }
-
-            groups[dateKey].total += order.total;
-            groups[dateKey].orders.push(order);
-        });
-
-        // Converter para array e ordenar por data (mais recente primeiro)
-        return Object.entries(groups)
-            .map(([key, value]) => ({
-                dateKey: key,
-                ...value
-            }))
-            .sort((a, b) => b.date.getTime() - a.date.getTime());
-    }, [allOrders]);
-
-    // Criar lista flat com separadores de data
-    const ordersWithSeparators = useMemo(() => {
-        const result: any[] = [];
-
-        groupedByDay.forEach(group => {
-            // Adicionar separador de data
-            result.push({
-                type: 'separator',
-                dateKey: group.dateKey,
-                date: group.date,
-                total: group.total
-            });
-
-            // Adicionar pedidos desse dia
-            group.orders.forEach(order => {
-                result.push({
-                    type: 'order',
-                    data: order
-                });
-            });
-        });
-
-        return result;
-    }, [groupedByDay]);
-
-    useEffect(() => {
-        if (!notificationKey || isLoading) return;
-        if (notificationKey === handledNotificationKey) return;
-
-        const foundOrder = allOrders.find((order) =>
-            (normalizedOrderId && order.id === normalizedOrderId)
-            || (normalizedOrderNumber && order.orderNumber === normalizedOrderNumber)
-        );
-
-        if (foundOrder) {
-            setSelectedOrder(foundOrder);
-            setShowOrderDetails(true);
-            setHandledNotificationKey(notificationKey);
-            return;
-        }
-
-        if (!isRefetching && !hasTriedRefetch) {
-            setHasTriedRefetch(true);
-            refetch();
-        }
-    }, [
-        notificationKey,
-        normalizedOrderId,
-        normalizedOrderNumber,
-        allOrders,
-        isLoading,
-        isRefetching,
-        hasTriedRefetch,
-        handledNotificationKey,
-        refetch,
-    ]);
-
-    // Estatísticas sempre sem filtro de status
-    const stats = useMemo(() => {
-        if (!allSalesData?.pages[0]) return { totalOrders: 0, totalRevenue: 0, estimatedProfit: 0 };
-        return {
-            totalOrders: allSalesData.pages[0].totalOrders,
-            totalRevenue: allSalesData.pages[0].totalRevenue,
-            estimatedProfit: allSalesData.pages[0].estimatedProfit
-        };
-    }, [allSalesData]);
-
-    // Contar vendas por status baseado nas vendas carregadas
-    const ordersByStatus = useMemo(() => {
-        const approved = allSalesForCounting.filter(order => order.status === 'approved').length;
-        const pending = allSalesForCounting.filter(order => order.status === 'pending').length;
-
-        return {
-            total: allSalesForCounting.length,
-            approved,
-            pending
-        };
-    }, [allSalesForCounting]);
-
-    // Função para lidar com seleção de datas no calendário
-    const onDayPress = (day: any) => {
-        const dateString = day.dateString;
-
-        if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
-            setSelectedStartDate(dateString);
-            setSelectedEndDate('');
-            setMarkedDates({
-                [dateString]: {
-                    selected: true,
-                    startingDay: true,
-                    color: '#3b82f6',
-                    textColor: 'white'
-                }
-            });
-        } else if (selectedStartDate && !selectedEndDate) {
-            const start = new Date(selectedStartDate);
-            const end = new Date(dateString);
-
-            if (end < start) {
-                setSelectedStartDate(dateString);
-                setSelectedEndDate(selectedStartDate);
-            } else {
-                setSelectedEndDate(dateString);
-            }
-
-            // Marcar intervalo
-            const newMarkedDates: any = {};
-            const startDate = end < start ? end : start;
-            const endDate = end < start ? start : end;
-
-            const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
-                const currentDateString = currentDate.toISOString().split('T')[0];
-
-                if (currentDate.getTime() === startDate.getTime()) {
-                    newMarkedDates[currentDateString] = {
-                        selected: true,
-                        startingDay: true,
-                        color: '#3b82f6',
-                        textColor: 'white'
-                    };
-                } else if (currentDate.getTime() === endDate.getTime()) {
-                    newMarkedDates[currentDateString] = {
-                        selected: true,
-                        endingDay: true,
-                        color: '#3b82f6',
-                        textColor: 'white'
-                    };
-                } else {
-                    newMarkedDates[currentDateString] = {
-                        selected: true,
-                        color: '#3b82f620',
-                        textColor: '#3b82f6'
-                    };
-                }
-
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            setMarkedDates(newMarkedDates);
-        }
-    };
-
-    // Função para confirmar seleção de datas
-    const confirmDateRange = () => {
+    switch (selectedDateFilter) {
+      case "Todos":
+        from = "";
+        to = "";
+        break;
+      case "Hoje":
+        from = formatLocalDateKey(now);
+        to = from;
+        break;
+      case "Esta semana":
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        from = formatLocalDateKey(startOfWeek);
+        to = formatLocalDateKey(now);
+        break;
+      case "Este mês":
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        from = formatLocalDateKey(startOfMonth);
+        to = formatLocalDateKey(now);
+        break;
+      default:
+        // Personalizado
         if (selectedStartDate && selectedEndDate) {
-            const startDate = new Date(selectedStartDate);
-            const endDate = new Date(selectedEndDate);
-
-            const formatDateLabel = (date: Date) => {
-                return date.toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: 'short'
-                }).replace('.', '');
-            };
-
-            const finalStart = startDate < endDate ? startDate : endDate;
-            const finalEnd = startDate < endDate ? endDate : startDate;
-
-            setSelectedDateFilter(`${formatDateLabel(finalStart)} - ${formatDateLabel(finalEnd)}`);
+          from = selectedStartDate;
+          to = selectedEndDate;
         } else if (selectedStartDate) {
-            const date = new Date(selectedStartDate);
-            const formattedDate = date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: 'short'
-            }).replace('.', '');
-            setSelectedDateFilter(formattedDate);
+          from = selectedStartDate;
+          to = selectedStartDate;
         }
-        setShowCalendar(false);
-    };
+        break;
+    }
 
-    const cancelDateSelection = () => {
-        setShowCalendar(false);
-        setSelectedStartDate('');
-        setSelectedEndDate('');
-        setMarkedDates({});
-    };
+    return { from, to };
+  }, [selectedDateFilter, selectedStartDate, selectedEndDate]);
 
-    const filters = ['Todos', 'approved', 'pending'];
-    const dateFilters = ['Todos', 'Hoje', 'Esta semana', 'Este mês', 'Personalizado'];
+  // Hook de paginação com filtros (incluindo status)
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useSalesPagination({
+    from: dateRange.from,
+    to: dateRange.to,
+    search: debouncedSearch,
+    status: selectedFilter === "Todos" ? undefined : selectedFilter,
+    limit: 20,
+  });
 
-    // Funções helper
-    const getStatusLabel = (status: string) => {
-        const statusMap: { [key: string]: string } = {
-            'approved': 'Aprovados',
-            'pending': 'Pendentes',
-            'Todos': 'Todos'
+  // Uma única requisição para obter todas as vendas e fazer contagens
+  const { data: allSalesData } = useSalesPagination({
+    from: dateRange.from,
+    to: dateRange.to,
+    search: "",
+    status: undefined,
+    limit: 9999,
+  });
+
+  // Combinar todas as páginas em uma lista única
+  const allOrders = useMemo(() => {
+    return data?.pages.flatMap((page) => page.orders) ?? [];
+  }, [data]);
+
+  // Pega todas as vendas para fazer as contagens
+  const allSalesForCounting = useMemo(() => {
+    return allSalesData?.pages.flatMap((page) => page.orders) ?? [];
+  }, [allSalesData]);
+
+  // Agrupar pedidos por dia com valor total
+  const groupedByDay = useMemo(() => {
+    const groups: {
+      [key: string]: { date: Date; total: number; orders: Order[] };
+    } = {};
+
+    allOrders.forEach((order) => {
+      const date = new Date(order.createdAt);
+      const dateKey = formatLocalDateKey(date);
+
+      if (!groups[dateKey]) {
+        groups[dateKey] = {
+          date: date,
+          total: 0,
+          orders: [],
         };
-        return statusMap[status] || status;
-    };
+      }
 
-    const getStatusColor = (status: string) => {
-        const colorMap: { [key: string]: { bg: string, text: string } } = {
-            'approved': {
-                bg: colors.isDark ? '#166534' : '#dcfce7',
-                text: colors.isDark ? '#4ade80' : '#166534'
-            },
-            'pending': {
-                bg: colors.isDark ? '#854d0e' : '#fef3c7',
-                text: colors.isDark ? '#fbbf24' : '#854d0e'
+      groups[dateKey].total += order.total;
+      groups[dateKey].orders.push(order);
+    });
+
+    // Converter para array e ordenar por data (mais recente primeiro)
+    return Object.entries(groups)
+      .map(([key, value]) => ({
+        dateKey: key,
+        ...value,
+      }))
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [allOrders]);
+
+  // Criar lista flat com separadores de data
+  const ordersWithSeparators = useMemo(() => {
+    const result: any[] = [];
+
+    groupedByDay.forEach((group) => {
+      // Adicionar separador de data
+      result.push({
+        type: "separator",
+        dateKey: group.dateKey,
+        date: group.date,
+        total: group.total,
+      });
+
+      // Adicionar pedidos desse dia
+      group.orders.forEach((order) => {
+        result.push({
+          type: "order",
+          data: order,
+        });
+      });
+    });
+
+    return result;
+  }, [groupedByDay]);
+
+  useEffect(() => {
+    if (!notificationKey || isLoading) return;
+    if (notificationKey === handledNotificationKey) return;
+
+    const foundOrder = allOrders.find(
+      (order) =>
+        (normalizedOrderId && order.id === normalizedOrderId) ||
+        (normalizedOrderNumber && order.orderNumber === normalizedOrderNumber),
+    );
+
+    if (foundOrder) {
+      setSelectedOrder(foundOrder);
+      setShowOrderDetails(true);
+      setHandledNotificationKey(notificationKey);
+      return;
+    }
+
+    if (!isRefetching && !hasTriedRefetch) {
+      setHasTriedRefetch(true);
+      refetch();
+    }
+  }, [
+    notificationKey,
+    normalizedOrderId,
+    normalizedOrderNumber,
+    allOrders,
+    isLoading,
+    isRefetching,
+    hasTriedRefetch,
+    handledNotificationKey,
+    refetch,
+  ]);
+
+  // Estatísticas sempre sem filtro de status
+  const stats = useMemo(() => {
+    if (!allSalesData?.pages[0])
+      return { totalOrders: 0, totalRevenue: 0, estimatedProfit: 0 };
+    return {
+      totalOrders: allSalesData.pages[0].totalOrders,
+      totalRevenue: allSalesData.pages[0].totalRevenue,
+      estimatedProfit: allSalesData.pages[0].estimatedProfit,
+    };
+  }, [allSalesData]);
+
+  // Contar vendas por status baseado nas vendas carregadas
+  const ordersByStatus = useMemo(() => {
+    const approved = allSalesForCounting.filter(
+      (order) => order.status === "approved",
+    ).length;
+    const pending = allSalesForCounting.filter(
+      (order) => order.status === "pending",
+    ).length;
+
+    return {
+      total: allSalesForCounting.length,
+      approved,
+      pending,
+    };
+  }, [allSalesForCounting]);
+
+  // Função para lidar com seleção de datas no calendário
+  const onDayPress = (day: any) => {
+    const dateString = day.dateString;
+
+    if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+      setSelectedStartDate(dateString);
+      setSelectedEndDate("");
+      setMarkedDates({
+        [dateString]: {
+          selected: true,
+          startingDay: true,
+          color: "#3b82f6",
+          textColor: "white",
+        },
+      });
+    } else if (selectedStartDate && !selectedEndDate) {
+      const start = new Date(selectedStartDate);
+      const end = new Date(dateString);
+
+      if (end < start) {
+        setSelectedStartDate(dateString);
+        setSelectedEndDate(selectedStartDate);
+      } else {
+        setSelectedEndDate(dateString);
+      }
+
+      // Marcar intervalo
+      const newMarkedDates: any = {};
+      const startDate = end < start ? end : start;
+      const endDate = end < start ? start : end;
+
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const currentDateString = currentDate.toISOString().split("T")[0];
+
+        if (currentDate.getTime() === startDate.getTime()) {
+          newMarkedDates[currentDateString] = {
+            selected: true,
+            startingDay: true,
+            color: "#3b82f6",
+            textColor: "white",
+          };
+        } else if (currentDate.getTime() === endDate.getTime()) {
+          newMarkedDates[currentDateString] = {
+            selected: true,
+            endingDay: true,
+            color: "#3b82f6",
+            textColor: "white",
+          };
+        } else {
+          newMarkedDates[currentDateString] = {
+            selected: true,
+            color: "#3b82f620",
+            textColor: "#3b82f6",
+          };
+        }
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      setMarkedDates(newMarkedDates);
+    }
+  };
+
+  // Função para confirmar seleção de datas
+  const confirmDateRange = () => {
+    if (selectedStartDate && selectedEndDate) {
+      const startDate = new Date(selectedStartDate);
+      const endDate = new Date(selectedEndDate);
+
+      const formatDateLabel = (date: Date) => {
+        return date
+          .toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "short",
+          })
+          .replace(".", "");
+      };
+
+      const finalStart = startDate < endDate ? startDate : endDate;
+      const finalEnd = startDate < endDate ? endDate : startDate;
+
+      setSelectedDateFilter(
+        `${formatDateLabel(finalStart)} - ${formatDateLabel(finalEnd)}`,
+      );
+    } else if (selectedStartDate) {
+      const date = new Date(selectedStartDate);
+      const formattedDate = date
+        .toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "short",
+        })
+        .replace(".", "");
+      setSelectedDateFilter(formattedDate);
+    }
+    setShowCalendar(false);
+  };
+
+  const cancelDateSelection = () => {
+    setShowCalendar(false);
+    setSelectedStartDate("");
+    setSelectedEndDate("");
+    setMarkedDates({});
+  };
+
+  const filters = ["Todos", "approved", "pending"];
+  const dateFilters = [
+    "Todos",
+    "Hoje",
+    "Esta semana",
+    "Este mês",
+    "Personalizado",
+  ];
+
+  // Funções helper
+  const getStatusLabel = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      approved: "Aprovados",
+      pending: "Pendentes",
+      Todos: "Todos",
+    };
+    return statusMap[status] || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    const colorMap: { [key: string]: { bg: string; text: string } } = {
+      approved: {
+        bg: colors.isDark ? "#166534" : "#dcfce7",
+        text: colors.isDark ? "#4ade80" : "#166534",
+      },
+      pending: {
+        bg: colors.isDark ? "#854d0e" : "#fef3c7",
+        text: colors.isDark ? "#fbbf24" : "#854d0e",
+      },
+    };
+    return colorMap[status] || colorMap["approved"];
+  };
+
+  return (
+    <View className="flex-1">
+      {/* Background principal */}
+      <View
+        className="absolute inset-0"
+        style={{ backgroundColor: colors.background }}
+      />
+
+      {/* Background primário que vai até metade do card */}
+      <View
+        className="absolute top-0 left-0 right-0"
+        style={{ height: 200, backgroundColor: colors.primary }}
+      />
+
+      {/* Ondinha de transição com shadow */}
+      <View
+        className="absolute"
+        style={{
+          top: 160,
+          left: 0,
+          right: 0,
+          height: 50,
+          backgroundColor: colors.background,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -5 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          elevation: 5,
+        }}
+      />
+
+      {/* Conteúdo fixo (header, cards, search, filters) */}
+      <View>
+        <SalesHeader
+          selectedDateFilter={selectedDateFilter}
+          showDatePicker={showDatePicker}
+          onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
+        />
+
+        <SalesStatsCards
+          totalRevenue={stats.totalRevenue}
+          totalOrders={stats.totalOrders}
+          selectedDateFilter={selectedDateFilter}
+        />
+
+        <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+
+        <StatusFilters
+          filters={filters}
+          selectedFilter={selectedFilter}
+          ordersByStatus={ordersByStatus}
+          onFilterSelect={setSelectedFilter}
+          getStatusLabel={getStatusLabel}
+        />
+      </View>
+
+      <DateFilterDropdown
+        visible={showDatePicker}
+        dateFilters={dateFilters}
+        selectedDateFilter={selectedDateFilter}
+        onClose={() => setShowDatePicker(false)}
+        onFilterSelect={(filter) => {
+          setSelectedDateFilter(filter);
+          setShowDatePicker(false);
+        }}
+        onCustomDatePress={() => {
+          setShowCalendar(true);
+          setShowDatePicker(false);
+        }}
+      />
+
+      <CustomDatePicker
+        visible={showCalendar}
+        selectedStartDate={selectedStartDate}
+        selectedEndDate={selectedEndDate}
+        markedDates={markedDates}
+        onDayPress={onDayPress}
+        onConfirm={confirmDateRange}
+        onCancel={cancelDateSelection}
+      />
+
+      {/* Lista de vendas - SOMENTE isso scrolla */}
+      {isLoading ? (
+        <View className="px-4 gap-3 mt-4">
+          {[...Array(5)].map((_, index) => (
+            <SaleItemSkeleton key={index} />
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          data={ordersWithSeparators}
+          keyExtractor={(item, index) =>
+            item.type === "separator"
+              ? `separator-${item.dateKey}`
+              : `order-${item.data.id}`
+          }
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+              progressBackgroundColor={colors.background}
+            />
+          }
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
             }
-        };
-        return colorMap[status] || colorMap['approved'];
-    };
-
-    return (
-        <View className="flex-1">
-            {/* Background principal */}
-            <View className="absolute inset-0" style={{ backgroundColor: colors.background }} />
-
-            {/* Background primário que vai até metade do card */}
-            <View
-                className="absolute top-0 left-0 right-0"
-                style={{ height: 200, backgroundColor: colors.primary }}
-            />
-
-            {/* Ondinha de transição com shadow */}
-            <View
-                className="absolute"
-                style={{
-                    top: 160,
-                    left: 0,
-                    right: 0,
-                    height: 50,
-                    backgroundColor: colors.background,
-                    borderTopLeftRadius: 30,
-                    borderTopRightRadius: 30,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: -5 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 10,
-                    elevation: 5,
-                }}
-            />
-
-            {/* Conteúdo fixo (header, cards, search, filters) */}
-            <View>
-                <SalesHeader
-                    selectedDateFilter={selectedDateFilter}
-                    showDatePicker={showDatePicker}
-                    onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
-                />
-
-                <SalesStatsCards
-                    totalRevenue={stats.totalRevenue}
-                    totalOrders={stats.totalOrders}
-                    selectedDateFilter={selectedDateFilter}
-                />
-
-                <SearchBar
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                />
-
-                <StatusFilters
-                    filters={filters}
-                    selectedFilter={selectedFilter}
-                    ordersByStatus={ordersByStatus}
-                    onFilterSelect={setSelectedFilter}
-                    getStatusLabel={getStatusLabel}
-                />
-            </View>
-
-            <DateFilterDropdown
-                visible={showDatePicker}
-                dateFilters={dateFilters}
-                selectedDateFilter={selectedDateFilter}
-                onClose={() => setShowDatePicker(false)}
-                onFilterSelect={(filter) => {
-                    setSelectedDateFilter(filter);
-                    setShowDatePicker(false);
-                }}
-                onCustomDatePress={() => {
-                    setShowCalendar(true);
-                    setShowDatePicker(false);
-                }}
-            />
-
-            <CustomDatePicker
-                visible={showCalendar}
-                selectedStartDate={selectedStartDate}
-                selectedEndDate={selectedEndDate}
-                markedDates={markedDates}
-                onDayPress={onDayPress}
-                onConfirm={confirmDateRange}
-                onCancel={cancelDateSelection}
-            />
-
-            {/* Lista de vendas - SOMENTE isso scrolla */}
-            {isLoading ? (
-                <View className="px-4 gap-3 mt-4">
-                    {[...Array(5)].map((_, index) => (
-                        <SaleItemSkeleton key={index} />
-                    ))}
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={() =>
+            isFetchingNextPage ? (
+              <View className="py-4">
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : null
+          }
+          ListEmptyComponent={() =>
+            !isLoading &&
+            allOrders.length === 0 && (
+              <View className="px-4 py-16 items-center">
+                <View
+                  className="w-24 h-24 rounded-full items-center justify-center mb-6"
+                  style={{ backgroundColor: colors.muted + "40" }}
+                >
+                  <Ionicons
+                    name="receipt-outline"
+                    size={48}
+                    color={colors.mutedForeground}
+                  />
                 </View>
-            ) : (
-                <FlatList
-                    data={ordersWithSeparators}
-                    keyExtractor={(item, index) =>
-                        item.type === 'separator' ? `separator-${item.dateKey}` : `order-${item.data.id}`
-                    }
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefetching}
-                            onRefresh={() => refetch()}
-                            colors={[colors.primary]}
-                            tintColor={colors.primary}
-                            progressBackgroundColor={colors.background}
-                        />
-                    }
-                    onEndReached={() => {
-                        if (hasNextPage && !isFetchingNextPage) {
-                            fetchNextPage();
-                        }
+                <Text
+                  className="text-xl font-bold mb-2 text-center"
+                  style={{ color: colors.foreground }}
+                >
+                  Nenhuma venda encontrada
+                </Text>
+                <Text
+                  className="text-base text-center mb-6 px-8"
+                  style={{ color: colors.mutedForeground }}
+                >
+                  {searchQuery
+                    ? "Tente ajustar os filtros ou termo de busca"
+                    : "Que tal começar registrando sua primeira venda?"}
+                </Text>
+                {!searchQuery && (
+                  <TouchableOpacity
+                    className="flex-row items-center px-6 py-3 rounded-2xl"
+                    style={{
+                      backgroundColor: colors.primary + "20",
+                      borderColor: colors.primary,
+                      borderWidth: 1,
                     }}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={() => (
-                        isFetchingNextPage ? (
-                            <View className="py-4">
-                                <ActivityIndicator size="small" color={colors.primary} />
-                            </View>
-                        ) : null
-                    )}
-                    ListEmptyComponent={() => (
-                        !isLoading && allOrders.length === 0 && (
-                            <View className="px-4 py-16 items-center">
-                                <View
-                                    className="w-24 h-24 rounded-full items-center justify-center mb-6"
-                                    style={{ backgroundColor: colors.muted + '40' }}
-                                >
-                                    <Ionicons name="receipt-outline" size={48} color={colors.mutedForeground} />
-                                </View>
-                                <Text
-                                    className="text-xl font-bold mb-2 text-center"
-                                    style={{ color: colors.foreground }}
-                                >
-                                    Nenhuma venda encontrada
-                                </Text>
-                                <Text
-                                    className="text-base text-center mb-6 px-8"
-                                    style={{ color: colors.mutedForeground }}
-                                >
-                                    {searchQuery
-                                        ? "Tente ajustar os filtros ou termo de busca"
-                                        : "Que tal começar registrando sua primeira venda?"
-                                    }
-                                </Text>
-                                {!searchQuery && (
-                                    <TouchableOpacity
-                                        className="flex-row items-center px-6 py-3 rounded-2xl"
-                                        style={{ backgroundColor: colors.primary + '20', borderColor: colors.primary, borderWidth: 1 }}
-                                        onPress={() => {/* Navegar para nova venda */ }}
-                                    >
-                                        <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-                                        <Text
-                                            className="ml-2 font-semibold"
-                                            style={{ color: colors.primary }}
-                                        >
-                                            Criar primeira venda
-                                        </Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        )
-                    )}
-                    renderItem={({ item }) => {
-                        if (item.type === 'separator') {
-                            const formattedDate = item.date.toLocaleDateString('pt-BR', {
-                                day: '2-digit',
-                                month: '2-digit'
-                            });
-                            const formattedTotal = formatCurrency(item.total);
-
-                            return (
-                                <View
-                                    className="px-4 py-3 flex-row items-center justify-between"
-                                    style={{ backgroundColor: colors.background }}
-                                >
-                                    <View className="flex-row items-center flex-1">
-                                        <Text
-                                            className="text-sm font-bold"
-                                            style={{ color: colors.foreground }}
-                                        >
-                                            {formattedDate}
-                                        </Text>
-                                        <View
-                                            className="flex-1 h-px mx-3"
-                                            style={{ backgroundColor: colors.border }}
-                                        />
-                                    </View>
-                                    <Text
-                                        className="text-sm font-bold ml-2"
-                                        style={{ color: colors.foreground }}
-                                    >
-                                        {formattedTotal}
-                                    </Text>
-                                </View>
-                            );
-                        }
-
-                        return (
-                            <SalesItem
-                                order={item.data}
-                                onPress={() => {
-                                    setSelectedOrder(item.data);
-                                    setShowOrderDetails(true);
-                                }}
-                                getStatusLabel={getStatusLabel}
-                                getStatusColor={getStatusColor}
-                            />
-                        );
+                    onPress={() => {
+                      /* Navegar para nova venda */
                     }}
-                />
-            )}
+                  >
+                    <Ionicons
+                      name="add-circle-outline"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <Text
+                      className="ml-2 font-semibold"
+                      style={{ color: colors.primary }}
+                    >
+                      Criar primeira venda
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )
+          }
+          renderItem={({ item }) => {
+            if (item.type === "separator") {
+              const formattedDate = item.date.toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              });
+              const formattedTotal = formatCurrency(item.total);
 
-            <OrderDetailsModal
-                visible={showOrderDetails}
-                order={selectedOrder}
-                onClose={() => setShowOrderDetails(false)}
-                onRefresh={refetch}
+              return (
+                <View
+                  className="px-4 py-3 flex-row items-center justify-between"
+                  style={{ backgroundColor: colors.background }}
+                >
+                  <View className="flex-row items-center flex-1">
+                    <Text
+                      className="text-sm font-bold"
+                      style={{ color: colors.foreground }}
+                    >
+                      {formattedDate}
+                    </Text>
+                    <View
+                      className="flex-1 h-px mx-3"
+                      style={{ backgroundColor: colors.border }}
+                    />
+                  </View>
+                  <Text
+                    className="text-sm font-bold ml-2"
+                    style={{ color: colors.foreground }}
+                  >
+                    {formattedTotal}
+                  </Text>
+                </View>
+              );
+            }
+
+            return (
+              <SalesItem
+                order={item.data}
+                onPress={() => {
+                  setSelectedOrder(item.data);
+                  setShowOrderDetails(true);
+                }}
                 getStatusLabel={getStatusLabel}
                 getStatusColor={getStatusColor}
-            />
-        </View>
-    );
+              />
+            );
+          }}
+        />
+      )}
+
+      <OrderDetailsModal
+        visible={showOrderDetails}
+        order={selectedOrder}
+        onClose={() => setShowOrderDetails(false)}
+        onRefresh={refetch}
+        getStatusLabel={getStatusLabel}
+        getStatusColor={getStatusColor}
+      />
+    </View>
+  );
 }

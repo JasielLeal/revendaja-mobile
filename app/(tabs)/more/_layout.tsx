@@ -59,6 +59,13 @@ export default function MoreLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="components/financial"
+                options={{
+                    headerShown: false,
+                }}
+            />
+            
             
         </Stack>
     );

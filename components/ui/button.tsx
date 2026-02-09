@@ -50,7 +50,7 @@ export default function Button({ name, disabled, onPress, variant = 'primary' }:
                 return colors.background;
             case 'outline':
             case 'ghost':
-                return colors.foreground;
+                return colors.muted;
             default:
                 return '#ffffff';
         }

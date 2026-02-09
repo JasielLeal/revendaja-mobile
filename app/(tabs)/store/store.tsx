@@ -118,10 +118,11 @@ export default function StorePage() {
 
                     <View className="flex-row space-x-2">
                         <TouchableOpacity
-                            className="bg-white/20 rounded-2xl px-4 py-3"
+                            className="bg-white/20 rounded-2xl px-4 py-3 flex flex-row items-center space-x-2"
                             onPress={() => router.push('/(tabs)/store/catalog')}
                         >
-                            <Ionicons name="add" size={24} color={colors.primaryForeground} />
+                           
+                            <Text style={{ color: colors.primaryForeground }} className='font-semibold'>Ver catálogo</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
